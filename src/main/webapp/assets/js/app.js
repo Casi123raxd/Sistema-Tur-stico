@@ -16,6 +16,7 @@ const AppState = {
     recomendaciones: [],
     filtroEspecie: 'todos',
     busquedaEspecie: '',
+    filtroServicio: 'todas',
     filtroServicioCat: 'todas',
     filtroServicioCom: 'todas',
     mapaIniciado: false,
@@ -750,14 +751,13 @@ async function initApp() {
 
     renderizarTodo();
     actualizarTextosInterfaz();
-    iniciarCompromisos();
 
     // Intentar conectar con la API REST (Supabase / Tomcat) de manera asíncrona
     await cargarDatos();
 }
 
 // ==============================================================================
-// GESTIÓN DE NAVEGACIÓN Y VISTAS
+// GESTIÓN DE NAVEGACIÓN Y VISTAS (SMOOTH SCROLLING & SCROLLSPY)
 // ==============================================================================
 function setupNavigation() {
     const navLinks = document.querySelectorAll('[data-section]');
@@ -777,20 +777,56 @@ function setupNavigation() {
             mobileNav.classList.toggle('open');
         });
     }
+
+    // ScrollSpy automático con IntersectionObserver para sincronizar el enlace activo al hacer scroll
+    setupScrollSpy();
+}
+
+function setupScrollSpy() {
+    if (!('IntersectionObserver' in window)) return;
+
+    const sections = document.querySelectorAll('.hero-section, .section-block');
+    const navLinks = document.querySelectorAll('.nav-link[data-section]');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                let id = entry.target.id;
+                if (!id && entry.target.classList.contains('hero-section')) {
+                    id = 'inicio';
+                } else if (id && id.startsWith('sec-')) {
+                    id = id.replace('sec-', '');
+                }
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('data-section') === id) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+        });
+    }, {
+        root: null,
+        rootMargin: '-20% 0px -65% 0px',
+        threshold: 0
+    });
+
+    sections.forEach(sec => observer.observe(sec));
 }
 
 function navegarA(seccionId) {
     detenerAudios();
     AppState.seccionActual = seccionId;
 
-    document.querySelectorAll('.section-block').forEach(sec => {
-        sec.classList.remove('active');
-    });
-
-    const targetSec = document.getElementById(`sec-${seccionId}`);
-    if (targetSec) {
-        targetSec.classList.add('active');
+    if (seccionId === 'inicio') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        const targetSec = document.getElementById(`sec-${seccionId}`) || document.getElementById(seccionId);
+        if (targetSec) {
+            targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     document.querySelectorAll('.nav-link').forEach(link => {
@@ -802,7 +838,7 @@ function navegarA(seccionId) {
     });
 
     if (seccionId === 'mapa') {
-        setTimeout(iniciarMapaSiEsNecesario, 200);
+        setTimeout(iniciarMapaSiEsNecesario, 250);
     }
 }
 
@@ -1242,13 +1278,14 @@ function renderizarServicios() {
     if (!container) return;
     container.innerHTML = '';
 
-    const catFiltro = AppState.filtroServicioCat;
-    const comFiltro = AppState.filtroServicioCom;
+    const filtro = (AppState.filtroServicio || 'todas').toLowerCase();
 
     const filtrados = AppState.servicios.filter(s => {
-        const pasaCat = (catFiltro === 'todas' || s.categoria === catFiltro);
-        const pasaCom = (comFiltro === 'todas' || s.comunidad.toLowerCase() === comFiltro.toLowerCase());
-        return pasaCat && pasaCom;
+        if (filtro === 'todas') return true;
+        if (filtro === 'comunidad') {
+            return Boolean(s.comunidad && s.comunidad.trim().length > 0);
+        }
+        return s.comunidad && s.comunidad.toLowerCase() === filtro;
     });
 
     filtrados.forEach(s => {
@@ -1276,17 +1313,20 @@ function renderizarServicios() {
     });
 }
 
-function setFiltroServicioCat(cat, btnEl) {
-    AppState.filtroServicioCat = cat;
-    document.querySelectorAll('#pills-serv-cat .filter-pill').forEach(b => b.classList.remove('active'));
+function setFiltroServicio(filtro, btnEl) {
+    AppState.filtroServicio = filtro;
+    document.querySelectorAll('#pills-servicios .filter-pill').forEach(b => b.classList.remove('active'));
     if (btnEl) btnEl.classList.add('active');
     renderizarServicios();
 }
 
+function setFiltroServicioCat(cat, btnEl) {
+    AppState.filtroServicioCat = cat;
+    renderizarServicios();
+}
+
 function setFiltroServicioCom(com, btnEl) {
-    AppState.filtroServicioCom = com;
-    document.querySelectorAll('#pills-serv-com .filter-pill').forEach(b => b.classList.remove('active'));
-    if (btnEl) btnEl.classList.add('active');
+    AppState.filtroServicio = com;
     renderizarServicios();
 }
 
@@ -1432,6 +1472,7 @@ function renderizarRecomendaciones() {
 
 function iniciarCompromisos() {
     const chips = document.querySelectorAll('.commit-chip');
+    if (!chips || chips.length === 0) return;
     chips.forEach(chip => {
         const id = chip.getAttribute('data-commit');
         if (localStorage.getItem(`commit_${id}`) === 'true') {

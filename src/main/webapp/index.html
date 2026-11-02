@@ -47,16 +47,12 @@
                 <a href="#rutas" class="nav-link" data-section="rutas" data-i18n="navRutas">Rutas</a>
                 <a href="#mapa" class="nav-link" data-section="mapa" data-i18n="navMapa">Mapa</a>
                 <a href="#recomendaciones" class="nav-link" data-section="recomendaciones" data-i18n="navRecomendaciones">Recomendaciones</a>
-                <a href="#proyecto" class="nav-link" data-section="proyecto" data-i18n="navProyecto">El Proyecto</a>
             </nav>
 
-            <!-- Acciones: Idioma y Acceso Administrativo -->
+            <!-- Acciones: Idioma y Menú Móvil -->
             <div class="header-actions">
                 <button class="lang-btn active" data-lang="es" onclick="cambiarIdioma('es')">ES</button>
                 <button class="lang-btn" data-lang="en" onclick="cambiarIdioma('en')">EN</button>
-                <button class="btn-admin-header" id="btn-admin-header" onclick="abrirModalAdmin()">
-                    🔐 <span data-i18n="navAdmin">Admin</span>
-                </button>
                 <button class="mobile-menu-toggle" id="mobile-toggle" aria-label="Abrir Menú">☰</button>
             </div>
         </div>
@@ -70,10 +66,6 @@
             <a href="#rutas" class="nav-link" data-section="rutas" data-i18n="navRutas">Rutas y Senderos</a>
             <a href="#mapa" class="nav-link" data-section="mapa" data-i18n="navMapa">Mapa Cartográfico</a>
             <a href="#recomendaciones" class="nav-link" data-section="recomendaciones" data-i18n="navRecomendaciones">Recomendaciones</a>
-            <a href="#proyecto" class="nav-link" data-section="proyecto" data-i18n="navProyecto">Acerca del Proyecto</a>
-            <button class="btn-primary" style="margin-top:1rem; width:100%;" onclick="abrirModalAdmin(); cerrarMenuMovil();">
-                🔐 Acceder al Panel Administrativo
-            </button>
         </div>
     </header>
 
@@ -228,23 +220,14 @@
                 💡 <strong>Aviso ético:</strong> Información validada voluntariamente por comunarios de Chairo, Sandillani y valles yungueños. Sin intermediarios comerciales ni comisiones.
             </div>
 
-            <!-- Filtros de Categoría y Comunidad -->
+            <!-- Filtros de Servicios por Ubicación y Comunidad -->
             <div class="controls-bar">
-                <div style="font-size:0.8rem; font-weight:700; color:var(--primary);" data-i18n="filtroCatLabel">Categoría:</div>
-                <div class="pills-container" id="pills-serv-cat">
-                    <button class="filter-pill active" onclick="setFiltroServicioCat('todas', this)">Todas</button>
-                    <button class="filter-pill" onclick="setFiltroServicioCat('alojamiento', this)">🏡 Alojamiento</button>
-                    <button class="filter-pill" onclick="setFiltroServicioCat('alimentacion', this)">🍲 Alimentación</button>
-                    <button class="filter-pill" onclick="setFiltroServicioCat('guiado', this)">🥾 Guías Locales</button>
-                    <button class="filter-pill" onclick="setFiltroServicioCat('experiencias', this)">🌿 Experiencias</button>
-                </div>
-
-                <div style="font-size:0.8rem; font-weight:700; color:var(--primary); margin-top:0.4rem;" data-i18n="filtroComLabel">Comunidad:</div>
-                <div class="pills-container" id="pills-serv-com">
-                    <button class="filter-pill active" onclick="setFiltroServicioCom('todas', this)">Todas</button>
-                    <button class="filter-pill" onclick="setFiltroServicioCom('Chairo', this)">Chairo</button>
-                    <button class="filter-pill" onclick="setFiltroServicioCom('Sandillani', this)">Sandillani</button>
-                    <button class="filter-pill" onclick="setFiltroServicioCom('Pacollo', this)">Pacollo</button>
+                <div class="pills-container" id="pills-servicios">
+                    <button class="filter-pill active" onclick="setFiltroServicio('todas', this)">Todas</button>
+                    <button class="filter-pill" onclick="setFiltroServicio('comunidad', this)">Comunidad</button>
+                    <button class="filter-pill" onclick="setFiltroServicio('Chairo', this)">Chairo</button>
+                    <button class="filter-pill" onclick="setFiltroServicio('Sandillani', this)">Sandillani</button>
+                    <button class="filter-pill" onclick="setFiltroServicio('Pacollo', this)">Pacollo</button>
                 </div>
             </div>
 
@@ -320,73 +303,6 @@
 
             <div class="rules-grid" id="grid-recomendaciones">
                 <!-- Se inyecta dinámicamente con JavaScript -->
-            </div>
-
-            <!-- Panel de Compromisos Personales -->
-            <div class="commitments-panel">
-                <h3 style="font-size:1.15rem; font-weight:700;" data-i18n="compromisosTitulo">Mis Compromisos Ambientales</h3>
-                <p style="font-size:0.82rem; opacity:0.9;" data-i18n="compromisosSub">
-                    Toca cada principio para asumirlo durante tu visita a Cotapata:
-                </p>
-                <div class="commitments-grid">
-                    <div class="commit-chip" data-commit="basura">
-                        <span class="emoji">♻️</span>
-                        <span class="label">Zero Basura</span>
-                        <span class="check">○ Tocar para asumir</span>
-                    </div>
-                    <div class="commit-chip" data-commit="flora">
-                        <span class="emoji">🌿</span>
-                        <span class="label">No Cortar Flora</span>
-                        <span class="check">○ Tocar para asumir</span>
-                    </div>
-                    <div class="commit-chip" data-commit="fauna">
-                        <span class="emoji">🐾</span>
-                        <span class="label">Respetar Fauna</span>
-                        <span class="check">○ Tocar para asumir</span>
-                    </div>
-                    <div class="commit-chip" data-commit="fuego">
-                        <span class="emoji">🔥</span>
-                        <span class="label">Sin Fogatas</span>
-                        <span class="check">○ Tocar para asumir</span>
-                    </div>
-                    <div class="commit-chip" data-commit="sendero">
-                        <span class="emoji">🥾</span>
-                        <span class="label">En el Sendero</span>
-                        <span class="check">○ Tocar para asumir</span>
-                    </div>
-                    <div class="commit-chip" data-commit="comunidad">
-                        <span class="emoji">🤝</span>
-                        <span class="label">Respeto Comunitario</span>
-                        <span class="check">○ Tocar para asumir</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 8. SECCIÓN: ACERCA DEL PROYECTO & ENFOQUE ÉTICO -->
-        <section id="sec-proyecto" class="section-block">
-            <div class="section-header">
-                <h2 class="section-title">🎓 <span data-i18n="proyTitulo">Acerca del Proyecto Académico y Enfoque Ético</span></h2>
-                <p class="section-subtitle" data-i18n="proySub">
-                    Universidad Salesiana de Bolivia · Ingeniería de Sistemas · La Paz, 2026
-                </p>
-            </div>
-
-            <div style="background:#ffffff; border-radius:var(--radius-lg); padding:1.8rem; border:1px solid var(--border-color); box-shadow:var(--shadow-sm); line-height:1.7; font-size:0.88rem;">
-                <h3 style="color:var(--primary); font-size:1.15rem; margin-bottom:0.6rem;">Integración Interdisciplinaria de Asignaturas</h3>
-                <p style="margin-bottom:1rem;">
-                    El <strong>Sistema Integrado de Información Turística Comunitaria de Cotapata</strong> articula tres asignaturas fundamentales de la formación universitaria:
-                </p>
-                <ul style="padding-left:1.5rem; margin-bottom:1.5rem;">
-                    <li><strong>Análisis y Diseño de Sistemas:</strong> Levantamiento de necesidades con comunarios locales, identificación de actores (comunarios, visitantes, administradores), y definición rigurosa de requisitos funcionales y no funcionales comprobables.</li>
-                    <li><strong>Sistemas Digitales I:</strong> Representación digital normalizada de la información (estructuras relacionales en 3FN), diseño lógico de flujos de consulta y actualización, y tablas de verdad para la autorización y publicación segura de datos.</li>
-                    <li><strong>Sacramentos y Espiritualidad (Justificación Salesiana):</strong> Enfoque de servicio solidario, respeto irrestricto por la dignidad humana de los comunarios, consentimiento informado previo para la difusión de información y custodia responsable de la Creación y el patrimonio biocultural.</li>
-                </ul>
-
-                <h3 style="color:var(--primary); font-size:1.15rem; margin-bottom:0.6rem;">Equipo de Desarrollo (Estudiantes de Ingeniería de Sistemas)</h3>
-                <p style="margin-bottom:1rem; color:var(--text-muted);">
-                    Alba Lopez Pablo Alejandro · Casilla Callancho Eddy · Chipana Mamani Andrea Marilyn · Huanca Chambi Ruddy Ariel · Mujica Capquique Freddy Fernando · Nina Villca Juan Gabriel · Riveros Gamboa Fabiana Eliana · Vargas Choque Boris Rodrigo · Valle Calderon Carlos Ernesto.
-                </p>
             </div>
         </section>
 
