@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Cotapata Explora — Sistema Integrado de Información Turística Comunitaria</title>
+    
+    <!-- Meta SEO & PWA -->
+    <meta name="description" content="Plataforma de información turística comunitaria para el Parque Nacional y ANMI Cotapata. Biodiversidad, servicios comunitarios, rutas y senderos ancestrales.">
+    <meta name="theme-color" content="#235030">
+    
+    <!-- Tipografía Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS Local -->
+    <link rel="stylesheet" href="assets/leaflet/leaflet.css">
+    
+    <!-- Hoja de Estilos Principal (Antigravity Responsive) -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <!-- ==============================================================================
+         HEADER PRINCIPAL RESPONSIVO (UNIFICADO MÓVIL Y ESCRITORIO)
+         ============================================================================== -->
+    <header class="main-header">
+        <div class="header-container">
+            <a href="#" class="brand-wrapper" data-section="inicio" title="Cotapata Explora — Universidad Salesiana de Bolivia">
+                <img src="assets/img/LOGOO.png" alt="Cotapata Explora" class="brand-logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>'">
+                <div class="brand-divider" aria-hidden="true"></div>
+                <img src="assets/img/Logo universidad USB.png" alt="Universidad Salesiana de Bolivia (USB)" class="brand-logo-usb" onerror="this.src='assets/img/logo-usb.png'">
+                <div class="brand-text">
+                    <h1>COTAPATA EXPLORA</h1>
+                    <p data-i18n="brandSubtitle">Sistema Integrado de Información Turística Comunitaria</p>
+                    <span class="brand-badge-usb">Universidad Salesiana de Bolivia · USB</span>
+                </div>
+            </a>
+
+            <!-- Menú de Navegación Escritorio -->
+            <nav class="nav-menu">
+                <a href="#inicio" class="nav-link active" data-section="inicio" data-i18n="navInicio">Inicio</a>
+                <a href="#biodiversidad" class="nav-link" data-section="biodiversidad" data-i18n="navBiodiversidad">Biodiversidad</a>
+                <a href="#servicios" class="nav-link" data-section="servicios" data-i18n="navServicios">Servicios</a>
+                <a href="#atractivos" class="nav-link" data-section="atractivos" data-i18n="navAtractivos">Atractivos</a>
+                <a href="#rutas" class="nav-link" data-section="rutas" data-i18n="navRutas">Rutas</a>
+                <a href="#mapa" class="nav-link" data-section="mapa" data-i18n="navMapa">Mapa</a>
+                <a href="#recomendaciones" class="nav-link" data-section="recomendaciones" data-i18n="navRecomendaciones">Recomendaciones</a>
+                <a href="#proyecto" class="nav-link" data-section="proyecto" data-i18n="navProyecto">El Proyecto</a>
+            </nav>
+
+            <!-- Acciones: Idioma y Acceso Administrativo -->
+            <div class="header-actions">
+                <button class="lang-btn active" data-lang="es" onclick="cambiarIdioma('es')">ES</button>
+                <button class="lang-btn" data-lang="en" onclick="cambiarIdioma('en')">EN</button>
+                <button class="btn-admin-header" id="btn-admin-header" onclick="abrirModalAdmin()">
+                    🔐 <span data-i18n="navAdmin">Admin</span>
+                </button>
+                <button class="mobile-menu-toggle" id="mobile-toggle" aria-label="Abrir Menú">☰</button>
+            </div>
+        </div>
+
+        <!-- Menú Móvil Desplegable -->
+        <div class="mobile-nav" id="mobile-nav">
+            <a href="#inicio" class="nav-link active" data-section="inicio" data-i18n="navInicio">Inicio</a>
+            <a href="#biodiversidad" class="nav-link" data-section="biodiversidad" data-i18n="navBiodiversidad">Biodiversidad</a>
+            <a href="#servicios" class="nav-link" data-section="servicios" data-i18n="navServicios">Servicios Comunitarios</a>
+            <a href="#atractivos" class="nav-link" data-section="atractivos" data-i18n="navAtractivos">Atractivos Turísticos</a>
+            <a href="#rutas" class="nav-link" data-section="rutas" data-i18n="navRutas">Rutas y Senderos</a>
+            <a href="#mapa" class="nav-link" data-section="mapa" data-i18n="navMapa">Mapa Cartográfico</a>
+            <a href="#recomendaciones" class="nav-link" data-section="recomendaciones" data-i18n="navRecomendaciones">Recomendaciones</a>
+            <a href="#proyecto" class="nav-link" data-section="proyecto" data-i18n="navProyecto">Acerca del Proyecto</a>
+            <button class="btn-primary" style="margin-top:1rem; width:100%;" onclick="abrirModalAdmin(); cerrarMenuMovil();">
+                🔐 Acceder al Panel Administrativo
+            </button>
+        </div>
+    </header>
+
+    <!-- ==============================================================================
+         BANNER HERO
+         ============================================================================== -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <span class="hero-badge" data-i18n="heroBadge">Parque Nacional y ANMI Cotapata · La Paz, Bolivia</span>
+            <h2 class="hero-title" data-i18n="heroTitle">Descubre la Riqueza Natural y Comunitaria de Cotapata</h2>
+            <p class="hero-subtitle" data-i18n="heroSubtitle">
+                Plataforma comunitaria de información sobre biodiversidad, senderos ancestrales, servicios locales y conservación ambiental.
+            </p>
+            <div class="hero-actions">
+                <button class="btn-primary" onclick="navegarA('biodiversidad')" data-i18n="btnExplorar">Explorar Biodiversidad</button>
+                <button class="btn-outline" onclick="navegarA('servicios')" data-i18n="btnServicios">Servicios Comunitarios</button>
+                <button class="btn-outline" onclick="navegarA('mapa')" data-i18n="btnMapa">Ver Mapa Interactivo</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==============================================================================
+         BARRA DE ESTADÍSTICAS RÁPIDAS
+         ============================================================================== -->
+    <section class="stats-strip">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-num">580 km²</span>
+                <span class="stat-desc" data-i18n="statArea">Área Protegida</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">1,100 – 5,400 m</span>
+                <span class="stat-desc" data-i18n="statAltitud">Rango Altitudinal</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">27</span>
+                <span class="stat-desc" data-i18n="statComunidades">Comunidades SERNAP</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num">El Choro</span>
+                <span class="stat-desc" data-i18n="statRuta">Ruta Precolombina</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==============================================================================
+         CONTENEDOR PRINCIPAL DE CONTENIDOS (SECCIONES INTERACTIVAS)
+         ============================================================================== -->
+    <main class="main-content">
+
+        <!-- 1. SECCIÓN: INICIO (HOME OVERVIEW) -->
+        <section id="sec-inicio" class="section-block active">
+            <div class="section-header">
+                <h2 class="section-title">🏞️ Bienvenidos al PN-ANMI Cotapata</h2>
+                <p class="section-subtitle">
+                    Ubicado en la Cordillera Real de los Andes, en el departamento de La Paz, el Parque Nacional Cotapata protege uno de los gradientes ecológicos más pronunciados del mundo.
+                </p>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:2rem;">
+                <div class="card-item" onclick="navegarA('biodiversidad')">
+                    <div class="card-media">
+                        <img src="assets/img/jungle_banner.jpg" alt="Biodiversidad" loading="lazy">
+                        <span class="card-badge flora">40 Especies Documentadas</span>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Flora y Fauna Autóctona</h3>
+                        <p class="card-text">
+                            Desde el majestuoso Oso Andino (Jucumari) y el felino Tilcayo en el bosque nublado, hasta las queñuas milenarias y bofedales en la alta montaña. Con audios reales de fauna nativa.
+                        </p>
+                        <span style="color:var(--primary); font-weight:700; font-size:0.8rem;">Explorar especies →</span>
+                    </div>
+                </div>
+
+                <div class="card-item" onclick="navegarA('servicios')">
+                    <div class="card-media">
+                        <img src="assets/img/tilcayo1.jpg" alt="Servicios Comunitarios" loading="lazy">
+                        <span class="card-badge">Emprendimientos Locales</span>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Turismo Comunitario</h3>
+                        <p class="card-text">
+                            Hospedajes rústicos, albergues ecológicos, alimentación tradicional y guías comunitarios en localidades como Chairo, Sandillani y Pacollo.
+                        </p>
+                        <span style="color:var(--primary); font-weight:700; font-size:0.8rem;">Ver oferta comunitaria →</span>
+                    </div>
+                </div>
+
+                <div class="card-item" onclick="navegarA('rutas')">
+                    <div class="card-media">
+                        <img src="assets/img/cotapata_aerial.jpg" alt="Rutas de Trekking" loading="lazy">
+                        <span class="card-badge fauna">Senderismo Histórico</span>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">El Camino Precolombino del Choro</h3>
+                        <p class="card-text">
+                            La travesía peatonal más famosa de Bolivia: desciende más de 3,500 metros desde la gélida cumbre andina hasta los cálidos valles subtropicales de Yungas.
+                        </p>
+                        <span style="color:var(--primary); font-weight:700; font-size:0.8rem;">Consultar rutas y seguridad →</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SECCIÓN: BIODIVERSIDAD (FLORA Y FAUNA CON FILTROS Y BÚSQUEDA) -->
+        <section id="sec-biodiversidad" class="section-block">
+            <div class="section-header">
+                <h2 class="section-title">🐾 <span data-i18n="bioTitulo">Catálogo de Biodiversidad Nativa</span></h2>
+                <p class="section-subtitle" data-i18n="bioSub">
+                    40 especies documentadas con registros fotográficos, nombres científicos, descripciones bilingües y audios de fauna.
+                </p>
+            </div>
+
+            <!-- Barra de Controles: Búsqueda y Píldoras de Filtro -->
+            <div class="controls-bar">
+                <div class="search-input-wrap">
+                    <span class="search-icon-inside">🔍</span>
+                    <input type="text" id="search-especies" class="search-input" 
+                           placeholder="Buscar por nombre común o científico..." 
+                           oninput="filtrarEspeciesPorTexto(this.value)">
+                </div>
+
+                <div class="pills-container" id="pills-especies">
+                    <button class="filter-pill active" onclick="setFiltroEspecie('todos', this)" data-i18n="pillTodos">Todos</button>
+                    <button class="filter-pill" onclick="setFiltroEspecie('fauna', this)" data-i18n="pillFauna">🐾 Fauna</button>
+                    <button class="filter-pill" onclick="setFiltroEspecie('flora', this)" data-i18n="pillFlora">🌿 Flora</button>
+                    <button class="filter-pill" onclick="setFiltroEspecie('mamifero', this)" data-i18n="pillMamiferos">Mamíferos</button>
+                    <button class="filter-pill" onclick="setFiltroEspecie('ave', this)" data-i18n="pillAves">Aves</button>
+                    <button class="filter-pill" onclick="setFiltroEspecie('roedor', this)" data-i18n="pillRoedores">Roedores</button>
+                </div>
+            </div>
+
+            <!-- Grilla de Especies -->
+            <div class="cards-grid four-cols" id="grid-especies">
+                <!-- Se inyecta dinámicamente con JavaScript -->
+            </div>
+            <div id="sin-especies" style="display:none; text-align:center; padding:3rem 1rem; color:var(--text-muted);" data-i18n="sinResultados">
+                No se encontraron especies que coincidan con la búsqueda.
+            </div>
+        </section>
+
+        <!-- 3. SECCIÓN: SERVICIOS COMUNITARIOS -->
+        <section id="sec-servicios" class="section-block">
+            <div class="section-header">
+                <h2 class="section-title">🏡 <span data-i18n="servTitulo">Servicios Turísticos Comunitarios</span></h2>
+                <p class="section-subtitle" data-i18n="servSub">
+                    Iniciativas y emprendimientos locales con autorización y consentimiento informado de las comunidades.
+                </p>
+            </div>
+
+            <div class="rule-tip" style="margin-bottom:1.5rem; background:#ffffff; border:1px solid var(--border-color); border-left:4px solid var(--success);" data-i18n="servNotice">
+                💡 <strong>Aviso ético:</strong> Información validada voluntariamente por comunarios de Chairo, Sandillani y valles yungueños. Sin intermediarios comerciales ni comisiones.
+            </div>
+
+            <!-- Filtros de Categoría y Comunidad -->
+            <div class="controls-bar">
+                <div style="font-size:0.8rem; font-weight:700; color:var(--primary);" data-i18n="filtroCatLabel">Categoría:</div>
+                <div class="pills-container" id="pills-serv-cat">
+                    <button class="filter-pill active" onclick="setFiltroServicioCat('todas', this)">Todas</button>
+                    <button class="filter-pill" onclick="setFiltroServicioCat('alojamiento', this)">🏡 Alojamiento</button>
+                    <button class="filter-pill" onclick="setFiltroServicioCat('alimentacion', this)">🍲 Alimentación</button>
+                    <button class="filter-pill" onclick="setFiltroServicioCat('guiado', this)">🥾 Guías Locales</button>
+                    <button class="filter-pill" onclick="setFiltroServicioCat('experiencias', this)">🌿 Experiencias</button>
+                </div>
+
+                <div style="font-size:0.8rem; font-weight:700; color:var(--primary); margin-top:0.4rem;" data-i18n="filtroComLabel">Comunidad:</div>
+                <div class="pills-container" id="pills-serv-com">
+                    <button class="filter-pill active" onclick="setFiltroServicioCom('todas', this)">Todas</button>
+                    <button class="filter-pill" onclick="setFiltroServicioCom('Chairo', this)">Chairo</button>
+                    <button class="filter-pill" onclick="setFiltroServicioCom('Sandillani', this)">Sandillani</button>
+                    <button class="filter-pill" onclick="setFiltroServicioCom('Pacollo', this)">Pacollo</button>
+                </div>
+            </div>
+
+            <div class="cards-grid" id="grid-servicios">
+                <!-- Se inyecta dinámicamente con JavaScript -->
+            </div>
+        </section>
+
+        <!-- 4. SECCIÓN: ATRACTIVOS TURÍSTICOS -->
+        <section id="sec-atractivos" class="section-block">
+            <div class="section-header">
+                <h2 class="section-title">🏞️ <span data-i18n="atrTitulo">Atractivos Turísticos y Culturales</span></h2>
+                <p class="section-subtitle" data-i18n="atrSub">
+                    Puntos de interés natural, cascadas, miradores y vestigios del Camino del Choro.
+                </p>
+            </div>
+
+            <div class="cards-grid" id="grid-atractivos">
+                <!-- Se inyecta dinámicamente con JavaScript -->
+            </div>
+        </section>
+
+        <!-- 5. SECCIÓN: RUTAS Y SENDEROS -->
+        <section id="sec-rutas" class="section-block">
+            <div class="section-header">
+                <h2 class="section-title">🥾 <span data-i18n="rutasTitulo">Rutas y Senderos de Cotapata</span></h2>
+                <p class="section-subtitle" data-i18n="rutasSub">
+                    Información técnica verificada: distancias, desniveles, dificultades y recomendaciones de seguridad.
+                </p>
+            </div>
+
+            <div class="cards-grid" id="grid-rutas">
+                <!-- Se inyecta dinámicamente con JavaScript -->
+            </div>
+        </section>
+
+        <!-- 6. SECCIÓN: MAPA INTERACTIVO -->
+        <section id="sec-mapa" class="section-block">
+            <div class="section-header">
+                <h2 class="section-title">📍 <span data-i18n="mapaTitulo">Geolocalización y Cartografía de Cotapata</span></h2>
+                <p class="section-subtitle" data-i18n="mapaSub">
+                    Mosaicos cartográficos del Parque Nacional Cotapata con atractivos, comunidades y senderos.
+                </p>
+            </div>
+
+            <div class="map-card-wrapper">
+                <div id="leaflet-map"></div>
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <span class="legend-marker" style="background:#27ae60;"></span>
+                        <span>Atractivos Naturales y Arqueológicos</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-marker" style="background:#2980b9;"></span>
+                        <span>Comunidades Anfitrionas y Servicios</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-marker" style="background:#e74c3c;"></span>
+                        <span>Puestos de Control SERNAP</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. SECCIÓN: RECOMENDACIONES (CÓDIGO DEL VIAJERO) -->
+        <section id="sec-recomendaciones" class="section-block">
+            <div class="section-header">
+                <h2 class="section-title">🌱 <span data-i18n="recTitulo">Recomendaciones para una Visita Responsable</span></h2>
+                <p class="section-subtitle" data-i18n="recSub">
+                    Código ético de conservación para proteger los ecosistemas andinos y respetar a las comunidades.
+                </p>
+            </div>
+
+            <div class="rules-grid" id="grid-recomendaciones">
+                <!-- Se inyecta dinámicamente con JavaScript -->
+            </div>
+
+            <!-- Panel de Compromisos Personales -->
+            <div class="commitments-panel">
+                <h3 style="font-size:1.15rem; font-weight:700;" data-i18n="compromisosTitulo">Mis Compromisos Ambientales</h3>
+                <p style="font-size:0.82rem; opacity:0.9;" data-i18n="compromisosSub">
+                    Toca cada principio para asumirlo durante tu visita a Cotapata:
+                </p>
+                <div class="commitments-grid">
+                    <div class="commit-chip" data-commit="basura">
+                        <span class="emoji">♻️</span>
+                        <span class="label">Zero Basura</span>
+                        <span class="check">○ Tocar para asumir</span>
+                    </div>
+                    <div class="commit-chip" data-commit="flora">
+                        <span class="emoji">🌿</span>
+                        <span class="label">No Cortar Flora</span>
+                        <span class="check">○ Tocar para asumir</span>
+                    </div>
+                    <div class="commit-chip" data-commit="fauna">
+                        <span class="emoji">🐾</span>
+                        <span class="label">Respetar Fauna</span>
+                        <span class="check">○ Tocar para asumir</span>
+                    </div>
+                    <div class="commit-chip" data-commit="fuego">
+                        <span class="emoji">🔥</span>
+                        <span class="label">Sin Fogatas</span>
+                        <span class="check">○ Tocar para asumir</span>
+                    </div>
+                    <div class="commit-chip" data-commit="sendero">
+                        <span class="emoji">🥾</span>
+                        <span class="label">En el Sendero</span>
+                        <span class="check">○ Tocar para asumir</span>
+                    </div>
+                    <div class="commit-chip" data-commit="comunidad">
+                        <span class="emoji">🤝</span>
+                        <span class="label">Respeto Comunitario</span>
+                        <span class="check">○ Tocar para asumir</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. SECCIÓN: ACERCA DEL PROYECTO & ENFOQUE ÉTICO -->
+        <section id="sec-proyecto" class="section-block">
+            <div class="section-header">
+                <h2 class="section-title">🎓 <span data-i18n="proyTitulo">Acerca del Proyecto Académico y Enfoque Ético</span></h2>
+                <p class="section-subtitle" data-i18n="proySub">
+                    Universidad Salesiana de Bolivia · Ingeniería de Sistemas · La Paz, 2026
+                </p>
+            </div>
+
+            <div style="background:#ffffff; border-radius:var(--radius-lg); padding:1.8rem; border:1px solid var(--border-color); box-shadow:var(--shadow-sm); line-height:1.7; font-size:0.88rem;">
+                <h3 style="color:var(--primary); font-size:1.15rem; margin-bottom:0.6rem;">Integración Interdisciplinaria de Asignaturas</h3>
+                <p style="margin-bottom:1rem;">
+                    El <strong>Sistema Integrado de Información Turística Comunitaria de Cotapata</strong> articula tres asignaturas fundamentales de la formación universitaria:
+                </p>
+                <ul style="padding-left:1.5rem; margin-bottom:1.5rem;">
+                    <li><strong>Análisis y Diseño de Sistemas:</strong> Levantamiento de necesidades con comunarios locales, identificación de actores (comunarios, visitantes, administradores), y definición rigurosa de requisitos funcionales y no funcionales comprobables.</li>
+                    <li><strong>Sistemas Digitales I:</strong> Representación digital normalizada de la información (estructuras relacionales en 3FN), diseño lógico de flujos de consulta y actualización, y tablas de verdad para la autorización y publicación segura de datos.</li>
+                    <li><strong>Sacramentos y Espiritualidad (Justificación Salesiana):</strong> Enfoque de servicio solidario, respeto irrestricto por la dignidad humana de los comunarios, consentimiento informado previo para la difusión de información y custodia responsable de la Creación y el patrimonio biocultural.</li>
+                </ul>
+
+                <h3 style="color:var(--primary); font-size:1.15rem; margin-bottom:0.6rem;">Equipo de Desarrollo (Estudiantes de Ingeniería de Sistemas)</h3>
+                <p style="margin-bottom:1rem; color:var(--text-muted);">
+                    Alba Lopez Pablo Alejandro · Casilla Callancho Eddy · Chipana Mamani Andrea Marilyn · Huanca Chambi Ruddy Ariel · Mujica Capquique Freddy Fernando · Nina Villca Juan Gabriel · Riveros Gamboa Fabiana Eliana · Vargas Choque Boris Rodrigo · Valle Calderon Carlos Ernesto.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==============================================================================
+         MODAL DE DETALLE DE ESPECIE
+         ============================================================================== -->
+    <div class="modal-backdrop" id="modal-detalle">
+        <div class="modal-sheet">
+            <button class="modal-close-btn" onclick="cerrarModal()" aria-label="Cerrar">×</button>
+            <div class="modal-image-wrap">
+                <img id="modal-img" src="" alt="Especie">
+            </div>
+            <div class="modal-body">
+                <span id="modal-badge" class="meta-chip fauna">FAUNA</span>
+                <h2 id="modal-title" style="font-size:1.4rem; color:var(--primary); margin:0.3rem 0 0.1rem;"></h2>
+                <p id="modal-cientifico" style="font-style:italic; color:var(--text-muted); font-size:0.9rem; margin-bottom:0.6rem;"></p>
+
+                <!-- Ficha Técnica Modal: Hábitat, Dieta y Estado de Conservación -->
+                <div id="modal-specs" style="display:none; margin: 0.6rem 0 1rem; font-size: 0.84rem;">
+                    <div style="background:#f4f8f5; border-left:3.5px solid var(--secondary); padding:0.6rem 0.8rem; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:0.4rem; color:#223628;">
+                        <div id="modal-habitat-row">🏞️ <strong>Hábitat:</strong> <span id="modal-habitat"></span></div>
+                        <div id="modal-dieta-row">🍃 <strong>Dieta:</strong> <span id="modal-dieta"></span></div>
+                        <div id="modal-conservacion-row">🛡️ <strong>Conservación:</strong> <span id="modal-conservacion"></span></div>
+                    </div>
+                </div>
+
+                <!-- Caja de Control de Audio -->
+                <div class="modal-audio-box" id="modal-audio-box">
+                    <span style="font-size:0.75rem; font-weight:700; color:var(--primary-dark);">🔊 RECURSOS SONOROS DE LA ESPECIE:</span>
+                    <div class="audio-buttons-row">
+                        <button class="btn-audio-ctrl" id="btn-play-animal" onclick="reproducirAudioAnimal()">
+                            <span>🔊</span> <span data-i18n="btnEscucharAudio">Sonido Animal</span>
+                        </button>
+                        <button class="btn-audio-ctrl tts" onclick="reproducirVozTTS()">
+                            <span>🗣️</span> <span data-i18n="btnEscucharTTS">Narración Guiada</span>
+                        </button>
+                        <button class="btn-audio-ctrl" style="background:#5a6e60; flex:0 0 auto;" onclick="detenerAudios()">
+                            <span>⏸️</span>
+                        </button>
+                    </div>
+                    <audio id="modal-native-player" controls preload="none" style="width:100%; margin-top:0.6rem; display:none; border-radius:20px; accent-color:var(--primary);"></audio>
+                </div>
+
+                <p id="modal-desc" style="font-size:0.9rem; line-height:1.6; margin-bottom:1rem;"></p>
+
+                <div class="rule-tip" id="modal-fact-box" style="display:none; font-size:0.85rem;">
+                    💡 <strong>Dato Curioso / Fun Fact:</strong> <span id="modal-fact"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================================
+         MODAL DE INICIO DE SESIÓN ADMINISTRATIVO
+         ============================================================================== -->
+    <div class="modal-backdrop" id="modal-login">
+        <div class="modal-sheet" style="max-width:400px; padding:2rem;">
+            <button class="modal-close-btn" onclick="cerrarModalAdmin()" aria-label="Cerrar">×</button>
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <span style="font-size:2.5rem;">🔐</span>
+                <h3 style="color:var(--primary); font-size:1.3rem;">Acceso Administrativo</h3>
+                <p style="font-size:0.78rem; color:var(--text-muted);">Sistema Cotapata Explora · Panel Seguro</p>
+            </div>
+
+            <form onsubmit="ejecutarLogin(event)">
+                <div class="form-group">
+                    <label class="form-label" for="login-username">Usuario</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="admin" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="••••••••••••" required>
+                </div>
+                <div id="login-error" style="display:none; color:var(--danger); font-size:0.8rem; margin-bottom:0.8rem; font-weight:600;"></div>
+                <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">Iniciar Sesión</button>
+            </form>
+            <p style="font-size:0.7rem; color:var(--text-muted); text-align:center; margin-top:1rem;">
+                Protegido mediante sesiones de servidor y algoritmo PBKDF2WithHmacSHA256.
+            </p>
+        </div>
+    </div>
+
+    <!-- ==============================================================================
+         MODAL DEL PANEL DE ADMINISTRACIÓN COMPLETO (CRUD SEGURO)
+         ============================================================================== -->
+    <div class="modal-backdrop" id="modal-admin-panel">
+        <div class="modal-sheet admin-modal-sheet">
+            <div class="admin-header-bar">
+                <div>
+                    <h3 style="font-size:1.15rem; font-weight:700;">⚙️ Panel Administrativo — Cotapata Explora</h3>
+                    <span id="adm-user-name" style="font-size:0.75rem; opacity:0.85;">Administrador</span>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center;">
+                    <button class="btn-admin-header" style="border-color:rgba(255,255,255,0.4);" onclick="ejecutarLogout()">Cerrar Sesión</button>
+                    <button class="modal-close-btn" style="position:static;" onclick="cerrarModalAdmin()">×</button>
+                </div>
+            </div>
+
+            <!-- Navegación de Pestañas Admin -->
+            <div class="admin-nav-tabs">
+                <button class="admin-tab active" onclick="setPestañaAdmin('tab-adm-especies', this)">Especies</button>
+                <button class="admin-tab" onclick="setPestañaAdmin('tab-adm-servicios', this)">Servicios</button>
+                <button class="admin-tab" onclick="setPestañaAdmin('tab-adm-autorizaciones', this)">Autorizaciones</button>
+                <button class="admin-tab" onclick="setPestañaAdmin('tab-adm-metricas', this)">Métricas de Uso</button>
+            </div>
+
+            <!-- Pestaña 1: Especies Admin -->
+            <div id="tab-adm-especies" class="admin-tab-pane active">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <h4 style="color:var(--primary);">Gestión de Especies (40 Registradas)</h4>
+                    <button class="btn-primary" style="font-size:0.78rem; padding:0.4rem 0.8rem;" onclick="abrirFormularioEspecie()">+ Nueva Especie</button>
+                </div>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tipo</th>
+                                <th>Nombre Común</th>
+                                <th>Nombre Científico</th>
+                                <th>Estado Publicación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-adm-especies">
+                            <!-- Inyectado por admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pestaña 2: Servicios Admin -->
+            <div id="tab-adm-servicios" class="admin-tab-pane">
+                <h4 style="color:var(--primary); margin-bottom:0.8rem;">Servicios Turísticos Comunitarios</h4>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Servicio</th>
+                                <th>Comunidad</th>
+                                <th>Categoría</th>
+                                <th>Estado</th>
+                                <th>Autorización</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-adm-servicios">
+                            <!-- Inyectado por admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pestaña 3: Autorizaciones Admin -->
+            <div id="tab-adm-autorizaciones" class="admin-tab-pane">
+                <h4 style="color:var(--primary); margin-bottom:0.8rem;">Registro de Autorizaciones y Consentimientos Informados</h4>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Tipo Entidad</th>
+                                <th>Otorgado Por</th>
+                                <th>Comunidad</th>
+                                <th>Fecha</th>
+                                <th>Vigencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-adm-autorizaciones">
+                            <!-- Inyectado por admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pestaña 4: Métricas Admin -->
+            <div id="tab-adm-metricas" class="admin-tab-pane">
+                <h4 style="color:var(--primary); margin-bottom:0.8rem;">Indicadores y Estadísticas Agregadas de Consulta</h4>
+                <div id="adm-metricas-content">
+                    <!-- Inyectado por admin.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================================
+         MODAL FORMULARIO DE EDICIÓN / ALTA DE ESPECIE
+         ============================================================================== -->
+    <div class="modal-backdrop" id="modal-form-especie">
+        <div class="modal-sheet" style="max-width:550px; padding:1.5rem;">
+            <button class="modal-close-btn" onclick="document.getElementById('modal-form-especie').classList.remove('active')">×</button>
+            <h3 style="color:var(--primary); font-size:1.2rem; margin-bottom:1rem;">📝 Ficha de Especie</h3>
+
+            <form onsubmit="guardarEspecieAdmin(event)">
+                <input type="hidden" id="form-esp-id" value="0">
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.8rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="form-esp-tipo">Tipo</label>
+                        <select id="form-esp-tipo" class="form-control">
+                            <option value="FAUNA">FAUNA</option>
+                            <option value="FLORA">FLORA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="form-esp-cat-fauna">Categoría Fauna</label>
+                        <select id="form-esp-cat-fauna" class="form-control">
+                            <option value="mamifero">Mamífero</option>
+                            <option value="ave">Ave</option>
+                            <option value="roedor">Roedor</option>
+                            <option value="no_aplica">No aplica (Flora)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="form-esp-nombre-es">Nombre Común (Español) *</label>
+                    <input type="text" id="form-esp-nombre-es" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="form-esp-nombre-en">Common Name (English)</label>
+                    <input type="text" id="form-esp-nombre-en" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="form-esp-cientifico">Nombre Científico *</label>
+                    <input type="text" id="form-esp-cientifico" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="form-esp-desc-es">Descripción (Español)</label>
+                    <textarea id="form-esp-desc-es" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="form-esp-desc-en">Description (English)</label>
+                    <textarea id="form-esp-desc-en" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="form-esp-curioso-es">Dato Curioso (Español)</label>
+                    <input type="text" id="form-esp-curioso-es" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="form-esp-curioso-en">Fun Fact (English)</label>
+                    <input type="text" id="form-esp-curioso-en" class="form-control">
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.8rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="form-esp-imagen">Archivo Imagen</label>
+                        <input type="text" id="form-esp-imagen" class="form-control" value="LOGOO.png">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="form-esp-audio">Archivo Audio (.mp3)</label>
+                        <input type="text" id="form-esp-audio" class="form-control" placeholder="Sonido animal...">
+                    </div>
+                </div>
+
+                <div class="form-group" style="flex-direction:row; align-items:center; gap:0.5rem; margin-top:0.5rem;">
+                    <input type="checkbox" id="form-esp-endemica">
+                    <label class="form-label" for="form-esp-endemica" style="margin-bottom:0;">¿Es especie endémica de Cotapata / Bolivia?</label>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.8rem; margin-top:1.2rem;">
+                    <button type="button" class="btn-outline" style="color:var(--text-dark); border-color:var(--border-color);" onclick="document.getElementById('modal-form-especie').classList.remove('active')">Cancelar</button>
+                    <button type="submit" class="btn-primary">💾 Guardar en Base de Datos</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================================
+         FOOTER INSTITUCIONAL Y ACADÉMICO
+         ============================================================================== -->
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h3>COTAPATA EXPLORA</h3>
+                <p>
+                    Sistema Integrado de Información Turística Comunitaria desarrollado para el Parque Nacional y Área Natural de Manejo Integrado Cotapata (SERNAP). Promoviendo la preservación biocultural y el ecoturismo responsable.
+                </p>
+                <p style="margin-top:0.8rem; font-size:0.75rem; color:var(--secondary-light);">
+                    Universidad Salesiana de Bolivia · Carrera de Ingeniería de Sistemas · La Paz, Bolivia.
+                </p>
+            </div>
+            <div class="footer-col">
+                <h3>Navegación Rápida</h3>
+                <ul style="list-style:none; font-size:0.82rem; line-height:2;">
+                    <li><a href="#inicio" onclick="navegarA('inicio')" style="color:inherit; text-decoration:none;">Inicio</a></li>
+                    <li><a href="#biodiversidad" onclick="navegarA('biodiversidad')" style="color:inherit; text-decoration:none;">Catálogo de Flora y Fauna</a></li>
+                    <li><a href="#servicios" onclick="navegarA('servicios')" style="color:inherit; text-decoration:none;">Servicios Comunitarios</a></li>
+                    <li><a href="#rutas" onclick="navegarA('rutas')" style="color:inherit; text-decoration:none;">Rutas y Senderismo</a></li>
+                    <li><a href="#mapa" onclick="navegarA('mapa')" style="color:inherit; text-decoration:none;">Mapa y Geolocalización</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Contactos Oficiales</h3>
+                <p style="font-size:0.8rem; line-height:1.7;">
+                    🌲 SERNAP Cotapata: +591 2 2443060<br>
+                    🚑 Emergencias Médicas: 118<br>
+                    👮 Policía Rural y Fronteriza: 110<br>
+                    📍 La Cumbre · Unduavi · Chairo
+                </p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span>© 2026 COTAPATA EXPLORA — Proyecto Académico Interdisciplinario · Universidad Salesiana de Bolivia (USB). Todos los derechos reservados.</span>
+            <span>Desarrollo con Arquitectura MVC · Jakarta Servlets · JDBC Puro · PostgreSQL / Supabase Cloud</span>
+        </div>
+    </footer>
+
+    <!-- Scripts de la Aplicación -->
+    <script src="assets/leaflet/leaflet.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>
