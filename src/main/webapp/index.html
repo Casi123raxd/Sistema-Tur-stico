@@ -57,24 +57,30 @@
             </div>
         </div>
 
-        <!-- Menú Móvil Desplegable -->
+        <!-- Menú Móvil Desplegable (Rediseñado) -->
         <div class="mobile-nav" id="mobile-nav">
-            <a href="#inicio" class="nav-link active" data-section="inicio" data-i18n="navInicio">Inicio</a>
-            <a href="#biodiversidad" class="nav-link" data-section="biodiversidad" data-i18n="navBiodiversidad">Biodiversidad</a>
-            <a href="#servicios" class="nav-link" data-section="servicios" data-i18n="navServicios">Servicios Comunitarios</a>
-            <a href="#atractivos" class="nav-link" data-section="atractivos" data-i18n="navAtractivos">Atractivos Turísticos</a>
-            <a href="#rutas" class="nav-link" data-section="rutas" data-i18n="navRutas">Rutas y Senderos</a>
-            <a href="#mapa" class="nav-link" data-section="mapa" data-i18n="navMapa">Mapa Cartográfico</a>
-            <a href="#recomendaciones" class="nav-link" data-section="recomendaciones" data-i18n="navRecomendaciones">Recomendaciones</a>
+            <div class="mobile-nav-inner">
+                <a href="#inicio" class="mobile-nav-link active" data-section="inicio" data-i18n="navInicio">🏠 Inicio</a>
+                <a href="#biodiversidad" class="mobile-nav-link" data-section="biodiversidad" data-i18n="navBiodiversidad">🐾 Biodiversidad</a>
+                <a href="#servicios" class="mobile-nav-link" data-section="servicios" data-i18n="navServicios">🏡 Servicios Comunitarios</a>
+                <a href="#atractivos" class="mobile-nav-link" data-section="atractivos" data-i18n="navAtractivos">🏞️ Atractivos Turísticos</a>
+                <a href="#rutas" class="mobile-nav-link" data-section="rutas" data-i18n="navRutas">🥾 Rutas y Senderos</a>
+                <a href="#mapa" class="mobile-nav-link" data-section="mapa" data-i18n="navMapa">📍 Mapa Cartográfico</a>
+                <a href="#recomendaciones" class="mobile-nav-link" data-section="recomendaciones" data-i18n="navRecomendaciones">🌱 Recomendaciones</a>
+            </div>
         </div>
     </header>
 
     <!-- ==============================================================================
-         BANNER HERO
+         BANNER HERO CON VIDEO DE FONDO
          ============================================================================== -->
     <section class="hero-section">
+        <video class="hero-video-bg" autoplay loop muted playsinline id="hero-video" preload="auto">
+            <source src="assets/video/Portada página web.mp4" type="video/mp4">
+            <source src="Video de fondo/Portada página web.mp4" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
         <div class="hero-content">
-            <span class="hero-badge" data-i18n="heroBadge">Parque Nacional y ANMI Cotapata · La Paz, Bolivia</span>
             <h2 class="hero-title" data-i18n="heroTitle">Descubre la Riqueza Natural y Comunitaria de Cotapata</h2>
             <p class="hero-subtitle" data-i18n="heroSubtitle">
                 Plataforma comunitaria de información sobre biodiversidad, senderos ancestrales, servicios locales y conservación ambiental.
@@ -88,30 +94,6 @@
     </section>
 
     <!-- ==============================================================================
-         BARRA DE ESTADÍSTICAS RÁPIDAS
-         ============================================================================== -->
-    <section class="stats-strip">
-        <div class="stats-grid">
-            <div class="stat-item">
-                <span class="stat-num">580 km²</span>
-                <span class="stat-desc" data-i18n="statArea">Área Protegida</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-num">1,100 – 5,400 m</span>
-                <span class="stat-desc" data-i18n="statAltitud">Rango Altitudinal</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-num">27</span>
-                <span class="stat-desc" data-i18n="statComunidades">Comunidades SERNAP</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-num">El Choro</span>
-                <span class="stat-desc" data-i18n="statRuta">Ruta Precolombina</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==============================================================================
          CONTENEDOR PRINCIPAL DE CONTENIDOS (SECCIONES INTERACTIVAS)
          ============================================================================== -->
     <main class="main-content">
@@ -119,7 +101,7 @@
         <!-- 1. SECCIÓN: INICIO (HOME OVERVIEW) -->
         <section id="sec-inicio" class="section-block active">
             <div class="section-header">
-                <h2 class="section-title">🏞️ Bienvenidos al PN-ANMI Cotapata</h2>
+                <h2 class="section-title">🏞️ Bienvenidos a Cotapata Explora</h2>
                 <p class="section-subtitle">
                     Ubicado en la Cordillera Real de los Andes, en el departamento de La Paz, el Parque Nacional Cotapata protege uno de los gradientes ecológicos más pronunciados del mundo.
                 </p>
@@ -128,7 +110,7 @@
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.2rem; margin-bottom:2rem;">
                 <div class="card-item" onclick="navegarA('biodiversidad')">
                     <div class="card-media">
-                        <img src="assets/img/jungle_banner.jpg" alt="Biodiversidad" loading="lazy">
+                        <img src="assets/img/tilcayo1.jpg" alt="Biodiversidad" loading="lazy">
                         <span class="card-badge flora">40 Especies Documentadas</span>
                     </div>
                     <div class="card-content">
@@ -142,7 +124,8 @@
 
                 <div class="card-item" onclick="navegarA('servicios')">
                     <div class="card-media">
-                        <img src="assets/img/tilcayo1.jpg" alt="Servicios Comunitarios" loading="lazy">
+                        <img src="assets/video/Bienvenidos a Cotapata en bicicleta.png" alt="Turismo Comunitario" loading="lazy"
+                             onerror="this.onerror=null; this.src='Video de fondo/Bienvenidos a Cotapata en bicicleta.png'; this.onerror=function(){this.src='assets/img/Bienvenidos a Cotapata en bicicleta.png';};">
                         <span class="card-badge">Emprendimientos Locales</span>
                     </div>
                     <div class="card-content">
@@ -224,7 +207,9 @@
             <div class="controls-bar">
                 <div class="pills-container" id="pills-servicios">
                     <button class="filter-pill active" onclick="setFiltroServicio('todas', this)">Todas</button>
-                    <button class="filter-pill" onclick="setFiltroServicio('comunidad', this)">Comunidad</button>
+                    <button class="filter-pill" onclick="setFiltroServicio('alojamientos', this)">Alojamientos</button>
+                    <button class="filter-pill" onclick="setFiltroServicio('lugares', this)">Lugares</button>
+                    <button class="filter-pill" onclick="setFiltroServicio('comidas', this)">Comidas</button>
                     <button class="filter-pill" onclick="setFiltroServicio('Chairo', this)">Chairo</button>
                     <button class="filter-pill" onclick="setFiltroServicio('Sandillani', this)">Sandillani</button>
                     <button class="filter-pill" onclick="setFiltroServicio('Pacollo', this)">Pacollo</button>
@@ -273,6 +258,47 @@
                 </p>
             </div>
 
+            <!-- BANNER DESTACADO GOOGLE MAPS LLAMATIVO Y ELEGANTE -->
+            <div class="gmaps-featured-banner">
+                <div class="gmaps-banner-glow"></div>
+                <div class="gmaps-banner-left">
+                    <div class="gmaps-badge-live">
+                        <span class="gmaps-pulse-dot"></span>
+                        <span class="gmaps-badge-text">Navegación GPS y Vista Satelital 3D</span>
+                    </div>
+                    <h3 class="gmaps-banner-title">
+                        <span class="gmaps-title-icon">🗺️</span> Parque Nacional Cotapata en Google Maps
+                    </h3>
+                    <p class="gmaps-banner-desc">
+                        Visualiza en alta resolución la geografía andino-yungueña, planifica tu recorrido en tiempo real, calcula tiempos de viaje desde La Paz y explora la vista satelital oficial en Google Maps.
+                    </p>
+                    <div class="gmaps-meta-tags">
+                        <span class="gmaps-tag">📍 Cotapata · Coroico · La Paz</span>
+                        <span class="gmaps-tag">⛰️ 1,100 – 5,400 msnm</span>
+                        <span class="gmaps-tag">🛰️ Relieve e Imágenes Satelitales</span>
+                    </div>
+                </div>
+                <div class="gmaps-banner-right">
+                    <a href="https://maps.app.goo.gl/guHdzTdr36GNYdas9" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="btn-gmaps-link"
+                       title="Abrir ubicación en Google Maps">
+                        <span class="btn-gmaps-icon-wrap">
+                            <svg class="gmaps-svg-icon" viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="#EA4335" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                                <circle fill="#FFFFFF" cx="12" cy="9" r="2.5"/>
+                            </svg>
+                        </span>
+                        <span class="btn-gmaps-label">
+                            <strong>Abrir en Google Maps</strong>
+                            <small>Ver mapa interactivo / App GPS ↗</small>
+                        </span>
+                        <span class="btn-gmaps-arrow">➔</span>
+                    </a>
+                </div>
+            </div>
+
             <div class="map-card-wrapper">
                 <div id="leaflet-map"></div>
                 <div class="map-legend">
@@ -282,7 +308,7 @@
                     </div>
                     <div class="legend-item">
                         <span class="legend-marker" style="background:#2980b9;"></span>
-                        <span>Comunidades Anfitrionas y Servicios</span>
+                        <span>Comunidades Anfitrionas (Chairo, Sandillani, Pacollo)</span>
                     </div>
                     <div class="legend-item">
                         <span class="legend-marker" style="background:#e74c3c;"></span>
@@ -333,10 +359,10 @@
 
                 <!-- Caja de Control de Audio -->
                 <div class="modal-audio-box" id="modal-audio-box">
-                    <span style="font-size:0.75rem; font-weight:700; color:var(--primary-dark);">🔊 RECURSOS SONOROS DE LA ESPECIE:</span>
+                    <span style="font-size:0.75rem; font-weight:700; color:var(--primary-dark);">🔊 REGISTRO SONORO Y NARRACIÓN:</span>
                     <div class="audio-buttons-row">
                         <button class="btn-audio-ctrl" id="btn-play-animal" onclick="reproducirAudioAnimal()">
-                            <span>🔊</span> <span data-i18n="btnEscucharAudio">Sonido Animal</span>
+                            <span>▶</span> <span>Reproducir Canto</span>
                         </button>
                         <button class="btn-audio-ctrl tts" onclick="reproducirVozTTS()">
                             <span>🗣️</span> <span data-i18n="btnEscucharTTS">Narración Guiada</span>
@@ -617,5 +643,16 @@
     <script src="assets/leaflet/leaflet.js"></script>
     <script src="assets/js/app.js"></script>
     <script src="assets/js/admin.js"></script>
+    <script>
+        // Garantizar que el video de fondo esté muteado y con volumen 0
+        document.addEventListener('DOMContentLoaded', function() {
+            var heroVideo = document.getElementById('hero-video');
+            if (heroVideo) {
+                heroVideo.muted = true;
+                heroVideo.volume = 0;
+                heroVideo.play().catch(function() {});
+            }
+        });
+    </script>
 </body>
 </html>

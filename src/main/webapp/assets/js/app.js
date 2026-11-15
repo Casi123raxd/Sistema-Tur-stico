@@ -477,61 +477,316 @@ const DATASET_ESPECIES_DEFAULT = [
 
 // Fallbacks de Servicios, Atractivos, Rutas y Recomendaciones
 const DATASET_SERVICIOS_DEFAULT = [
+    // ======================== ALOJAMIENTOS ========================
+    // --- Chairo ---
     {
-        id: 1,
-        categoria: 'alojamiento',
-        nombreCategoria: 'Alojamiento',
-        iconoCategoria: '🏡',
-        comunidad: 'Sandillani',
-        nombre: 'Albergue y Camping Ecológico Sandillani',
-        descripcion: 'Hospedaje rústico y zona de acampada con agua potable de vertiente natural al finalizar el tramo montañoso del Choro.',
-        ubicacionReferencial: 'Hito intermedio en la senda precolombina El Choro',
-        horarioAtencion: 'Todos los días 07:00 - 20:00',
-        rangoPrecios: 'Precios solidarios comunitarios',
-        idiomasAtencion: 'Español, Aymara',
-        imagen: 'tilcayo1.jpg'
+        id: 101, tipoServicio: 'alojamiento', comunidad: 'Chairo',
+        nombre: 'Cabaña Familiar Río Chairo',
+        descripcion: 'Acogedora cabaña de adobe y madera a orillas del río, rodeada de vegetación subtropical. Disfrute del murmullo del agua y el canto de aves tropicales al despertar. Incluye ropa de cama limpia, mosquitero y desayuno con frutas locales.',
+        imagen: 'alojamiento/alojamiento1.jpeg',
+        precios: '80 Bs/noche (individual) · 120 Bs/noche (doble) · 200 Bs/2 noches (doble)',
+        iconoCategoria: '🏡', nombreCategoria: 'Alojamiento',
+        ubicacionReferencial: 'A 150 m del puente de Chairo', horarioAtencion: 'Check-in: 14:00 – Check-out: 11:00',
+        rangoPrecios: '80 – 200 Bs', idiomasAtencion: 'Español, Aymara'
     },
     {
-        id: 2,
-        categoria: 'alimentacion',
-        nombreCategoria: 'Alimentación',
-        iconoCategoria: '🍲',
-        comunidad: 'Chairo',
-        nombre: 'Comedor Tradicional El Puente Chairo',
-        descripcion: 'Alimentación caliente y nutritiva para caminantes: sopas andinas, trucha fresca, frutas locales y mate de coca reconfortante.',
-        ubicacionReferencial: 'Extremo final del Camino del Choro junto al río',
-        horarioAtencion: '08:00 - 19:00',
-        rangoPrecios: 'Accesible según menú diario',
-        idiomasAtencion: 'Español, Aymara',
-        imagen: 'tilcayo2.jpg'
+        id: 102, tipoServicio: 'alojamiento', comunidad: 'Chairo',
+        nombre: 'Hospedaje Comunitario El Valle',
+        descripcion: 'Habitaciones sencillas y limpias con vista al valle subtropical de Chairo. Ideal para caminantes que llegan tras completar la ruta del Choro. Baño compartido con agua caliente por sistema solar.',
+        imagen: 'alojamiento/alojamiento2.jpeg',
+        precios: '60 Bs/noche (individual) · 100 Bs/noche (doble) · 250 Bs/3 noches (doble)',
+        iconoCategoria: '🏡', nombreCategoria: 'Alojamiento',
+        ubicacionReferencial: 'Centro de la comunidad de Chairo', horarioAtencion: 'Check-in: 13:00 – Check-out: 10:00',
+        rangoPrecios: '60 – 250 Bs', idiomasAtencion: 'Español, Aymara'
     },
     {
-        id: 3,
-        categoria: 'guiado',
-        nombreCategoria: 'Guías Locales',
-        iconoCategoria: '🥾',
-        comunidad: 'Chairo',
-        nombre: 'Guías Comunitarios Sub Central Chairo',
-        descripcion: 'Acompañamiento e interpretación de flora, fauna y patrimonio histórico brindado por guías locales conocedores del territorio.',
-        ubicacionReferencial: 'Punto de encuentro en Chairo o inicio de senda',
-        horarioAtencion: 'Previa coordinación comunal',
-        rangoPrecios: 'Tarifa acordada con la comunidad',
-        idiomasAtencion: 'Español, Aymara',
-        imagen: 'cotapata_aerial.jpg'
+        id: 103, tipoServicio: 'alojamiento', comunidad: 'Chairo',
+        nombre: 'Posada del Caminante Chairo',
+        descripcion: 'Refugio rústico con hamacas y literas para mochileros. Cocina comunitaria disponible, fogón al aire libre para compartir historias del camino. El clima cálido del valle hace agradable cada estadía.',
+        imagen: 'alojamiento/alojamiento3.jpeg',
+        precios: '45 Bs/noche (litera) · 70 Bs/noche (privada) · 180 Bs/3 noches (privada)',
+        iconoCategoria: '🏡', nombreCategoria: 'Alojamiento',
+        ubicacionReferencial: 'Final del sendero El Choro, junto al río', horarioAtencion: 'Check-in: 12:00 – Check-out: 11:00',
+        rangoPrecios: '45 – 180 Bs', idiomasAtencion: 'Español, Aymara'
+    },
+    // --- Sandillani ---
+    {
+        id: 104, tipoServicio: 'alojamiento', comunidad: 'Sandillani',
+        nombre: 'Albergue Bosque Nublado Sandillani',
+        descripcion: 'Refugio ecológico inmerso en el bosque nublado, donde la neblina matutina abraza los jardines de orquídeas. Habitaciones con paredes de piedra y techo de paja, ideales para el descanso profundo del caminante. Incluye infusión de hierbas aromáticas al llegar.',
+        imagen: 'alojamiento/alojamiento4.jpeg',
+        precios: '95 Bs/noche (individual) · 150 Bs/noche (doble) · 270 Bs/2 noches (doble)',
+        iconoCategoria: '🏡', nombreCategoria: 'Alojamiento',
+        ubicacionReferencial: 'Tramo medio del Choro, sector Sandillani', horarioAtencion: 'Check-in: 14:00 – Check-out: 10:00',
+        rangoPrecios: '95 – 270 Bs', idiomasAtencion: 'Español, Aymara'
     },
     {
-        id: 4,
-        categoria: 'experiencias',
-        nombreCategoria: 'Experiencias',
-        iconoCategoria: '🌿',
-        comunidad: 'Pacollo',
-        nombre: 'Ruta Agroecológica del Café y Cacao Pacollo',
-        descripcion: 'Recorrido por parcelas familiares agroforestales donde se produce café de sombra de alta calidad respetando la cobertura vegetal.',
-        ubicacionReferencial: 'Sector medio del valle de Huarinilla',
-        horarioAtencion: 'Fines de semana y previa reserva',
-        rangoPrecios: 'Aporte voluntario comunitario',
-        idiomasAtencion: 'Español',
-        imagen: 'jungle_banner.jpg'
+        id: 105, tipoServicio: 'alojamiento', comunidad: 'Sandillani',
+        nombre: 'Camping y Jardín de Orquídeas',
+        descripcion: 'Zona de acampada con plataformas niveladas entre helechos gigantes y un sendero de orquídeas silvestres. Baños ecológicos, agua de vertiente cristalina y un fogón techado para noches estrelladas en la ceja de monte.',
+        imagen: 'alojamiento/alojamiento5.jpeg',
+        precios: '35 Bs/noche (carpa propia) · 55 Bs/noche (carpa alquiler) · 90 Bs/2 noches (carpa alquiler)',
+        iconoCategoria: '🏡', nombreCategoria: 'Alojamiento',
+        ubicacionReferencial: 'Ladera boscosa junto a cascada Sandillani', horarioAtencion: 'Abierto las 24 horas',
+        rangoPrecios: '35 – 90 Bs', idiomasAtencion: 'Español'
+    },
+    {
+        id: 106, tipoServicio: 'alojamiento', comunidad: 'Sandillani',
+        nombre: 'Casa de Descanso La Neblina',
+        descripcion: 'Habitación privada con balcón panorámico al valle nublado. Amanecer entre nubes, jardín medicinal y servicio de mate de coca y api caliente para recuperar energías. El silencio del bosque es el mejor lujo.',
+        imagen: 'alojamiento/alojamiento6.jpeg',
+        precios: '110 Bs/noche (individual) · 170 Bs/noche (doble) · 300 Bs/2 noches (doble)',
+        iconoCategoria: '🏡', nombreCategoria: 'Alojamiento',
+        ubicacionReferencial: 'Mirador alto de Sandillani', horarioAtencion: 'Check-in: 15:00 – Check-out: 10:00',
+        rangoPrecios: '110 – 300 Bs', idiomasAtencion: 'Español, Aymara'
+    },
+    // --- Pacollo ---
+    {
+        id: 107, tipoServicio: 'alojamiento', comunidad: 'Pacollo',
+        nombre: 'Ecolodge Cafetal Pacollo',
+        descripcion: 'Cabañas rodeadas de plantaciones de café orgánico de sombra. Despierte con el aroma del café recién tostado y explore los senderos agroforestales. Cada cabaña tiene ventanas amplias hacia el cañón verde del Huarinilla.',
+        imagen: 'alojamiento/alojamiento7.jpeg',
+        precios: '130 Bs/noche (individual) · 200 Bs/noche (doble) · 350 Bs/2 noches (doble)',
+        iconoCategoria: '🏡', nombreCategoria: 'Alojamiento',
+        ubicacionReferencial: 'Finca cafetalera de Pacollo, valle de Huarinilla', horarioAtencion: 'Check-in: 14:00 – Check-out: 11:00',
+        rangoPrecios: '130 – 350 Bs', idiomasAtencion: 'Español'
+    },
+    {
+        id: 108, tipoServicio: 'alojamiento', comunidad: 'Pacollo',
+        nombre: 'Hospedaje Familiar Los Cítricos',
+        descripcion: 'Casa familiar con habitaciones cómodas entre huertos de naranjas y mandarinas. Desayuno casero con mermeladas artesanales. Ambiente familiar con patio amplio y vistas al verdor eterno de los Yungas.',
+        imagen: 'alojamiento/alojamiento8.jpeg',
+        precios: '75 Bs/noche (individual) · 120 Bs/noche (doble) · 210 Bs/2 noches (doble)',
+        iconoCategoria: '🏡', nombreCategoria: 'Alojamiento',
+        ubicacionReferencial: 'Sector agrícola de Pacollo', horarioAtencion: 'Check-in: 13:00 – Check-out: 10:00',
+        rangoPrecios: '75 – 210 Bs', idiomasAtencion: 'Español, Aymara'
+    },
+    {
+        id: 109, tipoServicio: 'alojamiento', comunidad: 'Pacollo',
+        nombre: 'Refugio Caminante del Cañón',
+        descripcion: 'Pequeño refugio en el borde del cañón con terrazas naturales para contemplar los atardeceres yungueños. Ideal para fotógrafos y naturalistas. Servicio básico con autenticidad rural incomparable.',
+        imagen: 'alojamiento/alojamiento9.jpeg',
+        precios: '55 Bs/noche (individual) · 90 Bs/noche (doble) · 160 Bs/2 noches (doble)',
+        iconoCategoria: '🏡', nombreCategoria: 'Alojamiento',
+        ubicacionReferencial: 'Mirador del cañón Huarinilla, Pacollo', horarioAtencion: 'Check-in: 12:00 – Check-out: 11:00',
+        rangoPrecios: '55 – 160 Bs', idiomasAtencion: 'Español'
+    },
+
+    // ======================== LUGARES ========================
+    // --- Chairo ---
+    {
+        id: 201, tipoServicio: 'lugar', comunidad: 'Chairo',
+        nombre: 'Centro Comunitario de Chairo',
+        descripcion: 'Corazón de la comunidad de Chairo, donde las familias se reúnen, los caminantes son recibidos con hospitalidad y la vida cotidiana fluye entre huertos, animales y el rumor del río cercano.',
+        imagen: 'lugares/Chairo1.jpeg',
+        iconoCategoria: '📍', nombreCategoria: 'Lugar',
+        ubicacionReferencial: 'Centro de la comunidad de Chairo'
+    },
+    {
+        id: 202, tipoServicio: 'lugar', comunidad: 'Chairo',
+        nombre: 'Puente Histórico del Río Chairo',
+        descripcion: 'Punto de encuentro donde el antiguo camino del Choro cruza el río. Las casas de adobe y los techos de calamina se mezclan con el follaje tropical. Un lugar de descanso con significado histórico profundo.',
+        imagen: 'lugares/Chairo2.jpeg',
+        iconoCategoria: '📍', nombreCategoria: 'Lugar',
+        ubicacionReferencial: 'Ribera del río, Chairo'
+    },
+    {
+        id: 203, tipoServicio: 'lugar', comunidad: 'Chairo',
+        nombre: 'Mirador y Casas de Chairo',
+        descripcion: 'Desde las terrazas de las casas de Chairo se contemplan las laderas cubiertas de vegetación subtropical, el río serpenteante y los senderos que suben hacia el bosque nublado.',
+        imagen: 'lugares/Chairo3.jpeg',
+        iconoCategoria: '📍', nombreCategoria: 'Lugar',
+        ubicacionReferencial: 'Sector alto de Chairo'
+    },
+    // --- Sandillani ---
+    {
+        id: 204, tipoServicio: 'lugar', comunidad: 'Sandillani',
+        nombre: 'Aldea de Sandillani entre Nubes',
+        descripcion: 'Pequeña comunidad asentada en la ladera del bosque nublado. Las casas emergen entre la niebla matutina, rodeadas de helechos arborescentes y el canto constante de aves del bosque.',
+        imagen: 'lugares/Sandillani1.jpeg',
+        iconoCategoria: '📍', nombreCategoria: 'Lugar',
+        ubicacionReferencial: 'Comunidad de Sandillani, ceja de monte'
+    },
+    {
+        id: 205, tipoServicio: 'lugar', comunidad: 'Sandillani',
+        nombre: 'Sendero de las Cascadas Sandillani',
+        descripcion: 'Camino entre vegetación exuberante que conduce a pequeñas cascadas cristalinas. El musgo y las orquídeas adornan cada roca, creando un paisaje de cuento de hadas andino.',
+        imagen: 'lugares/Sandillani2.jpeg',
+        iconoCategoria: '📍', nombreCategoria: 'Lugar',
+        ubicacionReferencial: 'Quebrada baja de Sandillani'
+    },
+    {
+        id: 206, tipoServicio: 'lugar', comunidad: 'Sandillani',
+        nombre: 'Vista Panorámica de Sandillani',
+        descripcion: 'Desde este punto elevado se divisa el valle entero envuelto en nubes. Las casas de la comunidad se ven diminutas entre el bosque denso, un testimonio de la convivencia armónica con la naturaleza.',
+        imagen: 'lugares/Sandillani3.jpeg',
+        iconoCategoria: '📍', nombreCategoria: 'Lugar',
+        ubicacionReferencial: 'Mirador alto Sandillani'
+    },
+    // --- Pacollo ---
+    {
+        id: 207, tipoServicio: 'lugar', comunidad: 'Pacollo',
+        nombre: 'Plaza y Viviendas de Pacollo',
+        descripcion: 'Centro comunitario de Pacollo rodeado de parcelas agrícolas familiares donde se cultivan café, cítricos y coca. Un lugar donde la tradición agraria se mantiene viva generación tras generación.',
+        imagen: 'lugares/Pacollo1.jpeg',
+        iconoCategoria: '📍', nombreCategoria: 'Lugar',
+        ubicacionReferencial: 'Centro de Pacollo'
+    },
+    {
+        id: 208, tipoServicio: 'lugar', comunidad: 'Pacollo',
+        nombre: 'Cafetales y Huertos de Pacollo',
+        descripcion: 'Terrazas agrícolas con cafetales de sombra, árboles frutales y huertas familiares. El paisaje verde intenso de los Yungas enmarca cada parcela con una belleza natural impresionante.',
+        imagen: 'lugares/Pacollo2.jpeg',
+        iconoCategoria: '📍', nombreCategoria: 'Lugar',
+        ubicacionReferencial: 'Sector agrícola de Pacollo'
+    },
+    {
+        id: 209, tipoServicio: 'lugar', comunidad: 'Pacollo',
+        nombre: 'Camino Rural y Paisaje de Pacollo',
+        descripcion: 'Sendero de tierra que conecta las casas de Pacollo con las parcelas y el bosque circundante. Las vistas al cañón del Huarinilla son espectaculares en cada recodo del camino.',
+        imagen: 'lugares/Pacollo3.jpeg',
+        iconoCategoria: '📍', nombreCategoria: 'Lugar',
+        ubicacionReferencial: 'Camino rural de Pacollo'
+    },
+
+    // ======================== COMIDAS ========================
+    {
+        id: 301, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Api de la Aurora Tibia',
+        descripcion: 'Bebida espesa y reconfortante de maíz morado, canela y clavo de olor. Servida caliente al amanecer, es el abrazo líquido perfecto para comenzar la jornada en las alturas de Cotapata.',
+        imagen: 'comidas/Api.jpeg', precio: '8 Bs'
+    },
+    {
+        id: 302, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Café del Bosque Nublado',
+        descripcion: 'Café orgánico cultivado bajo la sombra de los árboles nativos de Cotapata. Tostado artesanalmente, con notas achocolatadas y aroma profundo que evoca la tierra húmeda del Yungas.',
+        imagen: 'comidas/Café.jpeg', precio: '10 Bs'
+    },
+    {
+        id: 303, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Caldo de la Brisa Quieta',
+        descripcion: 'Sopa reconfortante de verduras frescas del huerto comunitario, con papa andina y hierbas aromáticas recogidas al alba. Un plato que calienta el alma del caminante cansado.',
+        imagen: 'comidas/Caldo de la Brisa Quieta.jpeg', precio: '18 Bs'
+    },
+    {
+        id: 304, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Cazuela de Tiempo Lento',
+        descripcion: 'Guiso de carne cocido lentamente con especias locales, zanahoria, choclo tierno y papa runa. Un plato que lleva horas de paciencia y generaciones de sazón familiar.',
+        imagen: 'comidas/Cazuela de lento.jpeg', precio: '30 Bs'
+    },
+    {
+        id: 305, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Chicharrón Crocante del Valle',
+        descripcion: 'Cerdo crocante dorado a fuego bajo, servido con mote suave y ensalada fresca. Cada bocado cruje con el sabor auténtico de la cocina yungueña de montaña.',
+        imagen: 'comidas/Chicharon de cerdo.jpeg', precio: '35 Bs'
+    },
+    {
+        id: 306, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Desayuno Yungueño Completo',
+        descripcion: 'Pan artesanal, queso fresco, mermelada de frutos silvestres, huevos de campo y jugo natural de naranja del valle. Todo servido con la calidez de una familia anfitriona.',
+        imagen: 'comidas/Desayuno Yungueño.jpeg', precio: '22 Bs'
+    },
+    {
+        id: 307, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Refresco de Aguas Mansas',
+        descripcion: 'Mocochinchi artesanal: durazno deshidratado al sol rehidratado con canela, clavo y un toque de azúcar morena. La bebida más refrescante para el calor subtropical.',
+        imagen: 'comidas/fresco de mocochinchi.jpeg', precio: '7 Bs'
+    },
+    {
+        id: 308, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Guiso de la Tarde Mansa',
+        descripcion: 'Estofado espeso de cordero con papas nativas, arvejas frescas y comino andino. Servido en plato de barro con chuño phuti como acompañamiento tradicional.',
+        imagen: 'comidas/Guiso de la mansa.jpeg', precio: '28 Bs'
+    },
+    {
+        id: 309, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Néctar de Chicha Morada',
+        descripcion: 'Refresco natural de maíz morado con limón, manzana y especias aromáticas. De color púrpura intenso y sabor dulce con un toque cítrico revitalizante.',
+        imagen: 'comidas/Jugo de chicha mora.jpeg', precio: '8 Bs'
+    },
+    {
+        id: 310, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Jugo Sol de Naranja',
+        descripcion: 'Jugo recién exprimido de naranjas del valle de Huarinilla. Sin azúcar añadida, pura vitamina C natural con el dulzor perfecto de la fruta madura al sol subtropical.',
+        imagen: 'comidas/Jugo de naranja.jpeg', precio: '7 Bs'
+    },
+    {
+        id: 311, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Elixir de Papaya Tropical',
+        descripcion: 'Batido cremoso de papaya fresca cosechada en las huertas familiares. Suave, dulce y naturalmente refrescante, perfecto para hidratarse después de una larga caminata.',
+        imagen: 'comidas/Jugo de papaya.jpeg', precio: '9 Bs'
+    },
+    {
+        id: 312, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Néctar de Piña Silvestre',
+        descripcion: 'Jugo de piña fresca del valle con hierbabuena. Ácido y dulce en equilibrio perfecto, como el contraste entre la cumbre andina y el trópico yungueño.',
+        imagen: 'comidas/Jugo de piña.jpeg', precio: '8 Bs'
+    },
+    {
+        id: 313, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Batido de Plátano del Río Manso',
+        descripcion: 'Plátano maduro de los huertos de Cotapata batido con leche fresca. Energético, cremoso y con el sabor genuino de la fruta cultivada sin químicos.',
+        imagen: 'comidas/Jugo de platano.jpeg', precio: '8 Bs'
+    },
+    {
+        id: 314, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Néctar de la Calma',
+        descripcion: 'Infusión fría de frutas del bosque con miel de abeja silvestre y hierbas aromáticas locales. Una bebida que transmite la serenidad del paisaje de Cotapata en cada sorbo.',
+        imagen: 'comidas/Néctar de la Calma.jpeg', precio: '10 Bs'
+    },
+    {
+        id: 315, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Bocados del Río Manso',
+        descripcion: 'Trucha fresca del río Huarinilla, asada a la parrilla con limón, ajo silvestre y romero de montaña. Servida sobre hojas de plátano con yuca dorada y ensalada local.',
+        imagen: 'comidas/pescado a la parrilla.jpeg', precio: '38 Bs'
+    },
+    {
+        id: 316, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Piquemacho de la Cumbre',
+        descripcion: 'Generosa fuente de carne de res y embutido sobre papas fritas crocantes, cebolla salteada, tomate, locoto y huevo. El plato contundente para reponer energías del trekking.',
+        imagen: 'comidas/Piquemacho.jpeg', precio: '40 Bs'
+    },
+    {
+        id: 317, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Medallones del Claro de Bosque',
+        descripcion: 'Pollo de campo horneado lentamente con hierbas de la ceja de monte, servido con arroz graneado y plátano maduro frito. Sabor casero con la esencia de los Yungas.',
+        imagen: 'comidas/Pollo al hornio.jpeg', precio: '32 Bs'
+    },
+    {
+        id: 318, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Pétalos de Huerto en Reposo',
+        descripcion: 'Delicada ensalada de hojas verdes del huerto comunitario, flores comestibles, queso fresco desmenuzado y vinagreta de limón. Un plato ligero y visualmente encantador.',
+        imagen: 'comidas/Pétalos de huerto reposo.jpeg', precio: '18 Bs'
+    },
+    {
+        id: 319, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Estofado de la Tarde Clara',
+        descripcion: 'Carne de res rellena con huevo, aceitunas y especias andinas, cocida al horno con salsa de ají colorado. Una receta transmitida de generación en generación en los Yungas.',
+        imagen: 'comidas/Relleno de carne.jpeg', precio: '30 Bs'
+    },
+    {
+        id: 320, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Rollo de Cosecha Serena',
+        descripcion: 'Rollito de masa relleno de verduras salteadas y queso fundido, horneado hasta dorar. Crujiente por fuera, suave por dentro, con un dip de ají de maní casero.',
+        imagen: 'comidas/Rollo de cosecha serena.jpeg', precio: '15 Bs'
+    },
+    {
+        id: 321, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Crema de Rocío Matinal',
+        descripcion: 'Salteñas jugosas rellenas de carne picada, papa, arvejas, huevo y caldo especiado. Masa dorada y dulce que guarda un interior caldoso y aromático. Tradición boliviana en cada mordisco.',
+        imagen: 'comidas/Salteñas.jpeg', precio: '12 Bs'
+    },
+    {
+        id: 322, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Sopa de Maní del Caminante',
+        descripcion: 'Sopa espesa de maní molido con fideos, papa, zanahoria y carne. La receta más emblemática de Bolivia, servida humeante para reconfortar al viajero tras horas de senda.',
+        imagen: 'comidas/Sopa de mani.jpeg', precio: '20 Bs'
+    },
+    {
+        id: 323, tipoServicio: 'comida', comunidad: 'Cotapata',
+        nombre: 'Pastel de la Cumbre Dormida',
+        descripcion: 'Yuca fresca del valle cortada en bastones gruesos y frita hasta lograr un dorado perfecto. Crocante y suave a la vez, acompañada con salsa picante de locoto y llajwa.',
+        imagen: 'comidas/Yuca frita.jpeg', precio: '12 Bs'
     }
 ];
 
@@ -552,7 +807,7 @@ const DATASET_ATRACTIVOS_DEFAULT = [
         altitudMsnm: 2400,
         descripcion: 'Área de condensación permanente de nieblas donde proliferan orquídeas, helechos gigantes, bromelias y cientos de aves endémicas.',
         recomendaciones: 'No cortar plantas ni extraer orquídeas; transitar en silencio para escuchar aves.',
-        imagen: 'jungle_banner.jpg'
+        imagen: 'Bosque nublado yungas.jpg'
     },
     {
         id: 3,
@@ -561,7 +816,7 @@ const DATASET_ATRACTIVOS_DEFAULT = [
         altitudMsnm: 1300,
         descripcion: 'Principal cuenca hidrográfica del parque, vital para la regulación de agua dulce de comunidades yungueñas.',
         recomendaciones: 'Prohibido arrojar residuos plásticos o jabones no biodegradables al agua.',
-        imagen: 'cotapata_stats.jpg'
+        imagen: 'Río huarinilla.png'
     },
     {
         id: 4,
@@ -584,7 +839,7 @@ const DATASET_RUTAS_DEFAULT = [
         desnivelMetros: 3500,
         descripcion: 'Recorrido clásico de tres días que desciende desde la fría cumbre andina a 4,800 msnm hasta la cálida vegetación yungueña en Chairo a 1,300 msnm.',
         recomendacionesSeguridad: 'Es indispensable registrarse en el puesto de guardaparques SERNAP en La Cumbre, contratar guías comunitarios y portar botiquín.',
-        imagen: 'cotapata_aerial.jpg'
+        imagen: 'Travesia choro.jpg'
     },
     {
         id: 2,
@@ -595,7 +850,7 @@ const DATASET_RUTAS_DEFAULT = [
         desnivelMetros: 1100,
         descripcion: 'Tramo final del Choro ideal para senderistas que buscan una caminata de un día entre plantaciones locales, orquídeas y bosques fluviales.',
         recomendacionesSeguridad: 'Llevar repelente biodegradable para mosquitos y suficiente agua potable para el calor yungueño.',
-        imagen: 'jungle_banner.jpg'
+        imagen: 'Senderon interpretativo sandillani.jpg'
     },
     {
         id: 3,
@@ -606,17 +861,81 @@ const DATASET_RUTAS_DEFAULT = [
         desnivelMetros: 450,
         descripcion: 'Recorrido de altura por las faldas de la Cordillera Real conociendo queñuas milenarias y humedales reguladores de agua.',
         recomendacionesSeguridad: 'Ruta de gran altitud: aclimatarse previamente para evitar sorojchi y llevar ropa térmica contra viento helado.',
-        imagen: 'cotapata_stats.jpg'
+        imagen: 'Bosque en Queñuas.jpg'
     }
 ];
 
 const DATASET_RECOMENDACIONES_DEFAULT = [
-    { id: 1, icono: '🗑️', titulo: 'Principio Zero Basura', descripcion: 'Todo residuo que traigas contigo debe retornar a la ciudad. En Cotapata no existe servicio municipal de recojo en sendas.', consejoPractico: 'Lleva una bolsa de tela o impermeable exclusiva para tus desperdicios plásticos y orgánicos.' },
-    { id: 2, icono: '🌱', titulo: 'Respeto a la Flora Nativa', descripcion: 'Está terminantemente prohibido cortar, quebrar o arrancar orquídeas, musgos, helechos o flores silvestres.', consejoPractico: 'Captura la belleza con tu cámara. Cada planta viva es alimento y refugio para polinizadores únicos.' },
-    { id: 3, icono: '🐾', titulo: 'Protección a la Fauna Silvestre', descripcion: 'Observa a los animales desde una distancia segura. No los persigas, no emitas ruidos fuertes y nunca los alimentes.', consejoPractico: 'La comida humana altera la salud animal y crea dependencia peligrosa para osos y zorros.' },
-    { id: 4, icono: '🔥', titulo: 'Prohibición Total de Fogatas', descripcion: 'Hacer fuego está prohibido en todo el parque. Un descuido puede desencadenar incendios que arrasan ecosistemas frágiles.', consejoPractico: 'Utiliza cocinillas portátiles de gas certificadas en zonas designadas de campamento.' },
-    { id: 5, icono: '🥾', titulo: 'Permanecer en los Senderos Marcados', descripcion: 'Caminar fuera de sendero compacta el suelo, destruye nidos microscópicos y acelera la erosión por lluvias torrenciales.', consejoPractico: 'Sigue siempre las huellas oficiales de la calzada prehispánica para no desorientarte.' },
-    { id: 6, icono: '📸', titulo: 'Fotografía Ética y Respetuosa', descripcion: 'No uses flash directo sobre aves o mamíferos nocturnos. Solicita permiso antes de fotografiar a comunarios y sus hogares.', consejoPractico: 'El consentimiento y el respeto a la privacidad comunitaria son el pilar del turismo responsable.' }
+    {
+        id: 1,
+        icono: '🗑️',
+        titulo: 'Principio Zero Basura (No Deje Rastro)',
+        descripcion: 'Todo residuo que traigas contigo debe retornar a la ciudad de La Paz. En las sendas y cañones de Cotapata no existe servicio de recojo de basura.',
+        consejoPractico: 'Lleva bolsas herméticas reutilizables para separar y cargar tus residuos orgánicos e inorgánicos hasta un punto urbano de acopio.'
+    },
+    {
+        id: 2,
+        icono: '🧥',
+        titulo: 'Equipamiento para Cambio Climático y Altitud',
+        descripcion: 'El recorrido transita desde el frío gélido de la cordillera andina (4,800 msnm) hasta el calor húmedo y la lluvia subtropical de Yungas (1,300 msnm).',
+        consejoPractico: 'Vístete en capas: primera capa térmica respirable, polar intermedio, impermeable cortaviento y ropa ligera transpirable para el descenso.'
+    },
+    {
+        id: 3,
+        icono: '💧',
+        titulo: 'Hidratación y Alimentación en Ruta',
+        descripcion: 'El esfuerzo físico continuado provoca deshidratación acelerada. Aunque existen cursos de agua de montaña, es vital beber agua segura.',
+        consejoPractico: 'Carga mínimo 2 litros de agua por día, pastillas potabilizadoras o filtro portátil, frutos secos, barritas de cereal y electrolitos.'
+    },
+    {
+        id: 4,
+        icono: '🌧️',
+        titulo: 'Seguridad en Época de Lluvias',
+        descripcion: 'Entre diciembre y marzo las lluvias pueden intensificarse rápidamente, haciendo resbaladizas las calzadas de piedra incaicas e incrementando caudales de ríos.',
+        consejoPractico: 'Utiliza botas de caña media con suela de tracción antideslizante, bastones de trekking regulables y consulta el reporte de SERNAP antes de partir.'
+    },
+    {
+        id: 5,
+        icono: '📋',
+        titulo: 'Registro en Puestos de Guardaparques',
+        descripcion: 'Registrarse formalmente en el puesto SERNAP de La Cumbre o Unduavi es mandatorio para garantizar la protección del área y la seguridad del visitante.',
+        consejoPractico: 'Porta documento de identidad, cancela el canon oficial de ingreso al parque y conserva el comprobante hasta el puesto de control de salida en Chairo.'
+    },
+    {
+        id: 6,
+        icono: '📸',
+        titulo: 'Fotografía Ética y Respeto Local',
+        descripcion: 'Chairo, Sandillani y Pacollo son comunidades vivas con normas y costumbres tradicionales. La empatía y el respeto fundamentan el turismo comunitario.',
+        consejoPractico: 'Pide autorización cordial antes de fotografiar a comunarios, viviendas o huertos familiares; valora y adquiere productos directamente de las familias.'
+    },
+    {
+        id: 7,
+        icono: '🐾',
+        titulo: 'Protección a la Fauna Silvestre',
+        descripcion: 'Cotapata alberga especies amenazadas como el Oso Jucumari, el Tunki y felinos nativos. Jamás intentes alimentarlos ni alteres su hábitat.',
+        consejoPractico: 'Mantén una distancia prudente, guarda los alimentos herméticamente en campamento y camina en silencio para disfrutar de sus sonidos naturales.'
+    },
+    {
+        id: 8,
+        icono: '🔥',
+        titulo: 'Prohibición Absoluta de Fogatas',
+        descripcion: 'Hacer fuego está terminantemente prohibido en pastizales, bosques y senderos debido al grave riesgo de incendios forestales incontrolables.',
+        consejoPractico: 'Utiliza exclusivamente cocinillas portátiles a gas en áreas de acampada delimitadas y autorizadas por las comunidades locales.'
+    },
+    {
+        id: 9,
+        icono: '🥾',
+        titulo: 'Permanecer en los Senderos Marcados',
+        descripcion: 'Caminar fuera de sendero compacta el suelo fértil, deteriora especies botánicas pioneras y expone al caminante a caídas en pendientes pronunciadas.',
+        consejoPractico: 'Sigue la calzada prehispánica oficial; ante niebla densa, mantente en grupo y evita atajos no verificados por guardaparques.'
+    },
+    {
+        id: 10,
+        icono: '🍃',
+        titulo: 'Prevención del Mal de Altura (Sorojchi)',
+        descripcion: 'El inicio en La Cumbre supera los 4,700 msnm, lo que exige una debida aclimatación previa del organismo al aire enrarecido.',
+        consejoPractico: 'Pasa al menos 24 a 48 horas en La Paz antes del trekking, evita comidas pesadas previas y consume infusiones tibias de coca y muña.'
+    }
 ];
 
 // Diccionario de textos bilingües de la interfaz
@@ -632,16 +951,11 @@ const I18N = {
         navRecomendaciones: 'Recomendaciones',
         navProyecto: 'El Proyecto',
         navAdmin: 'Administración',
-        heroBadge: 'Universidad Salesiana de Bolivia · PN-ANMI Cotapata · SERNAP',
         heroTitle: 'Descubre la Riqueza Natural y Comunitaria de Cotapata',
         heroSubtitle: 'Plataforma comunitaria de información sobre biodiversidad, senderos ancestrales, servicios locales y conservación ambiental.',
-        btnExplorar: 'Explorar Fauna y Flora',
+        btnExplorar: 'Explorar Biodiversidad',
         btnServicios: 'Servicios Comunitarios',
         btnMapa: 'Ver Mapa Interactivo',
-        statArea: 'Área Protegida',
-        statAltitud: 'Rango Altitudinal',
-        statComunidades: 'Comunidades SERNAP',
-        statRuta: 'Ruta Precolombina',
         bioTitulo: 'Catálogo de Biodiversidad Nativa',
         bioSub: '40 especies documentadas con registros fotográficos de alta resolución, nombres científicos, hábitat en Cotapata, dieta, estado de conservación y reproductores de audio.',
         searchPlaceholder: 'Buscar por nombre común o científico...',
@@ -653,9 +967,7 @@ const I18N = {
         pillRoedores: 'Roedores',
         servTitulo: 'Servicios Turísticos Comunitarios',
         servSub: 'Iniciativas y emprendimientos locales con autorización y consentimiento informado de las comunidades.',
-        servNotice: 'Información validada voluntariamente por comunarios de Chairo, Sandillani y valles yungueños. Sin intermediarios comerciales.',
-        filtroCatLabel: 'Categoría:',
-        filtroComLabel: 'Comunidad:',
+        servNotice: 'Información validada voluntariamente por comunarios de Chairo, Sandillani y Pacollo. Sin intermediarios comerciales.',
         atrTitulo: 'Atractivos Turísticos y Culturales',
         atrSub: 'Puntos de interés natural, cascadas, miradores y vestigios del Camino del Choro.',
         rutasTitulo: 'Rutas y Senderos de Cotapata',
@@ -664,11 +976,6 @@ const I18N = {
         mapaSub: 'Mosaicos cartográficos del Parque Nacional Cotapata con atractivos, comunidades y senderos.',
         recTitulo: 'Recomendaciones para una Visita Responsable',
         recSub: 'Código ético de conservación para proteger los ecosistemas andinos y respetar a las comunidades.',
-        compromisosTitulo: 'Mis Compromisos Ambientales',
-        compromisosSub: 'Toca cada principio para asumirlo durante tu visita a Cotapata:',
-        proyTitulo: 'Acerca del Proyecto Académico y Enfoque Ético',
-        proySub: 'Universidad Salesiana de Bolivia · Ingeniería de Sistemas · La Paz, 2026',
-        btnEscucharAudio: '🔊 Sonido Animal',
         btnEscucharTTS: '🗣️ Narración Guiada',
         btnPausar: '⏸️ Pausar',
         btnDetalles: 'Ver Ficha Completa',
@@ -686,16 +993,11 @@ const I18N = {
         navRecomendaciones: 'Guidelines',
         navProyecto: 'About Project',
         navAdmin: 'Admin Portal',
-        heroBadge: 'Salesian University of Bolivia · Cotapata National Park · SERNAP',
         heroTitle: 'Discover the Natural & Community Heritage of Cotapata',
         heroSubtitle: 'A community-driven digital platform for biodiversity exploration, ancestral trails, local services, and environmental stewardship.',
-        btnExplorar: 'Explore Wildlife & Flora',
+        btnExplorar: 'Explore Biodiversity',
         btnServicios: 'Community Services',
         btnMapa: 'View Interactive Map',
-        statArea: 'Protected Area',
-        statAltitud: 'Altitude Span',
-        statComunidades: 'SERNAP Communities',
-        statRuta: 'Ancestral Incan Trail',
         bioTitulo: 'Native Biodiversity Catalog',
         bioSub: '40 documented species featuring high-res photographic records, scientific taxonomy, habitat in Cotapata, diet, IUCN status, and built-in audio players.',
         searchPlaceholder: 'Search by common or scientific name...',
@@ -707,9 +1009,7 @@ const I18N = {
         pillRoedores: 'Rodents',
         servTitulo: 'Community Tourism Services',
         servSub: 'Local initiatives and family ventures shared with community consent and authorization.',
-        servNotice: 'Information verified with informed consent from Chairo, Sandillani, and Yungas communities. No commercial markups.',
-        filtroCatLabel: 'Category:',
-        filtroComLabel: 'Community:',
+        servNotice: 'Information verified with informed consent from Chairo, Sandillani, and Pacollo communities. No commercial markups.',
         atrTitulo: 'Natural & Cultural Attractions',
         atrSub: 'Scenic viewpoints, cloud forests, mountain rivers, and ancestral paved roads.',
         rutasTitulo: 'Hiking Routes & Trails',
@@ -718,11 +1018,6 @@ const I18N = {
         mapaSub: 'High-resolution park map showing key points of interest, communities, and trails.',
         recTitulo: 'Responsible Visitor Guidelines',
         recSub: 'An ethical conservation code to safeguard fragile Andean cloud forests and respect local residents.',
-        compromisosTitulo: 'My Environmental Commitments',
-        compromisosSub: 'Tap each principle to adopt it during your journey through Cotapata:',
-        proyTitulo: 'About the University Project & Ethical Framework',
-        proySub: 'Salesian University of Bolivia · Systems Engineering · La Paz, 2026',
-        btnEscucharAudio: '🔊 Animal Call',
         btnEscucharTTS: '🗣️ Spoken Guide',
         btnPausar: '⏸️ Pause',
         btnDetalles: 'View Details',
@@ -752,6 +1047,10 @@ async function initApp() {
     renderizarTodo();
     actualizarTextosInterfaz();
 
+    // Auto-cargador del mapa para que nunca aparezca en blanco al hacer scroll
+    setupMapAutoLoader();
+    setTimeout(iniciarMapaSiEsNecesario, 350);
+
     // Intentar conectar con la API REST (Supabase / Tomcat) de manera asíncrona
     await cargarDatos();
 }
@@ -773,10 +1072,22 @@ function setupNavigation() {
     const mobileToggle = document.getElementById('mobile-toggle');
     const mobileNav = document.getElementById('mobile-nav');
     if (mobileToggle && mobileNav) {
-        mobileToggle.addEventListener('click', () => {
-            mobileNav.classList.toggle('open');
+        mobileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = mobileNav.classList.toggle('open');
+            mobileToggle.innerHTML = isOpen ? '✕' : '☰';
+            mobileToggle.setAttribute('aria-label', isOpen ? 'Cerrar Menú' : 'Abrir Menú');
         });
     }
+
+    // Cerrar al hacer click fuera del menú móvil
+    document.addEventListener('click', (e) => {
+        if (mobileNav && mobileNav.classList.contains('open')) {
+            if (!mobileNav.contains(e.target) && e.target !== mobileToggle) {
+                cerrarMenuMovil();
+            }
+        }
+    });
 
     // ScrollSpy automático con IntersectionObserver para sincronizar el enlace activo al hacer scroll
     setupScrollSpy();
@@ -786,7 +1097,7 @@ function setupScrollSpy() {
     if (!('IntersectionObserver' in window)) return;
 
     const sections = document.querySelectorAll('.hero-section, .section-block');
-    const navLinks = document.querySelectorAll('.nav-link[data-section]');
+    const navLinks = document.querySelectorAll('.nav-link[data-section], .mobile-nav-link[data-section]');
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -796,6 +1107,14 @@ function setupScrollSpy() {
                     id = 'inicio';
                 } else if (id && id.startsWith('sec-')) {
                     id = id.replace('sec-', '');
+                }
+
+                if (id === 'mapa') {
+                    iniciarMapaSiEsNecesario();
+                    if (AppState.mapaInstancia) {
+                        setTimeout(() => AppState.mapaInstancia.invalidateSize(), 50);
+                        setTimeout(() => AppState.mapaInstancia.invalidateSize(), 250);
+                    }
                 }
 
                 navLinks.forEach(link => {
@@ -816,6 +1135,44 @@ function setupScrollSpy() {
     sections.forEach(sec => observer.observe(sec));
 }
 
+function setupMapAutoLoader() {
+    const mapSec = document.getElementById('sec-mapa') || document.getElementById('leaflet-map');
+    if (!mapSec) return;
+
+    if ('IntersectionObserver' in window) {
+        const mapObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    iniciarMapaSiEsNecesario();
+                    if (AppState.mapaInstancia) {
+                        AppState.mapaInstancia.invalidateSize();
+                        setTimeout(() => {
+                            if (AppState.mapaInstancia) AppState.mapaInstancia.invalidateSize();
+                        }, 200);
+                    }
+                }
+            });
+        }, {
+            root: null,
+            rootMargin: '350px 0px 350px 0px',
+            threshold: 0
+        });
+
+        mapObserver.observe(mapSec);
+    }
+
+    // Listener pasivo de scroll para garantizar carga inmediata si el usuario baja la página
+    window.addEventListener('scroll', () => {
+        const rect = mapSec.getBoundingClientRect();
+        if (rect.top <= window.innerHeight + 350 && rect.bottom >= -200) {
+            iniciarMapaSiEsNecesario();
+            if (AppState.mapaInstancia) {
+                AppState.mapaInstancia.invalidateSize();
+            }
+        }
+    }, { passive: true });
+}
+
 function navegarA(seccionId) {
     detenerAudios();
     AppState.seccionActual = seccionId;
@@ -829,7 +1186,7 @@ function navegarA(seccionId) {
         }
     }
 
-    document.querySelectorAll('.nav-link').forEach(link => {
+    document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
         if (link.getAttribute('data-section') === seccionId) {
             link.classList.add('active');
         } else {
@@ -844,7 +1201,12 @@ function navegarA(seccionId) {
 
 function cerrarMenuMovil() {
     const mobileNav = document.getElementById('mobile-nav');
+    const mobileToggle = document.getElementById('mobile-toggle');
     if (mobileNav) mobileNav.classList.remove('open');
+    if (mobileToggle) {
+        mobileToggle.innerHTML = '☰';
+        mobileToggle.setAttribute('aria-label', 'Abrir Menú');
+    }
 }
 
 // ==============================================================================
@@ -883,18 +1245,13 @@ function actualizarTextosInterfaz() {
 // ==============================================================================
 async function cargarDatos() {
     try {
-        const [resEsp, resServ, resAtr, resRut, resRec] = await Promise.all([
-            fetch(`api/publico/especies?lang=${AppState.idioma}`).catch(() => null),
-            fetch(`api/publico/servicios?lang=${AppState.idioma}`).catch(() => null),
-            fetch(`api/publico/atractivos?lang=${AppState.idioma}`).catch(() => null),
-            fetch(`api/publico/rutas?lang=${AppState.idioma}`).catch(() => null),
-            fetch(`api/publico/recomendaciones?lang=${AppState.idioma}`).catch(() => null)
+        const [resEsp] = await Promise.all([
+            fetch(`api/publico/especies?lang=${AppState.idioma}`).catch(() => null)
         ]);
 
         if (resEsp && resEsp.ok) {
             const serverEspecies = await resEsp.json();
             if (Array.isArray(serverEspecies) && serverEspecies.length > 0) {
-                // Mergear atributos complementarios (hábitat/dieta si vienen del servidor o dataset)
                 AppState.especies = serverEspecies.map(item => {
                     const fallback = DATASET_ESPECIES_DEFAULT.find(d => d.id === item.id) || {};
                     return {
@@ -909,22 +1266,6 @@ async function cargarDatos() {
                     };
                 });
             }
-        }
-        if (resServ && resServ.ok) {
-            const data = await resServ.json();
-            if (Array.isArray(data) && data.length > 0) AppState.servicios = data;
-        }
-        if (resAtr && resAtr.ok) {
-            const data = await resAtr.json();
-            if (Array.isArray(data) && data.length > 0) AppState.atractivos = data;
-        }
-        if (resRut && resRut.ok) {
-            const data = await resRut.json();
-            if (Array.isArray(data) && data.length > 0) AppState.rutas = data;
-        }
-        if (resRec && resRec.ok) {
-            const data = await resRec.json();
-            if (Array.isArray(data) && data.length > 0) AppState.recomendaciones = data;
         }
 
         renderizarTodo();
@@ -956,22 +1297,104 @@ function obtenerClaseConservacion(estado) {
 }
 
 // ==============================================================================
-// SINCRONIZACIÓN DE AUDIO GLOBAL (PAUSA AUDIOS SIMULTÁNEOS)
+// CONTROL DE AUDIO MINIMALISTA (PLAY / PAUSE + TIEMPO TRANSCURRIDO / DURACIÓN)
 // ==============================================================================
-function sincronizarReproduccionAudio(reproductorActivo) {
-    document.querySelectorAll('audio').forEach(audioEl => {
-        if (audioEl !== reproductorActivo && !audioEl.paused) {
-            audioEl.pause();
-        }
-    });
+let audioActivoGlobal = null;
+let intervalAudioGlobal = null;
 
+function formatAudioTime(seconds) {
+    if (isNaN(seconds) || seconds < 0) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+function toggleAudioAnimal(espId, btnEl, evt) {
+    if (evt) evt.stopPropagation();
+    const audio = document.getElementById(`audio-elem-${espId}`);
+    if (!audio) return;
+
+    const iconSpan = btnEl.querySelector('.audio-btn-icon');
+    const curTimeEl = document.getElementById(`time-cur-${espId}`);
+    const durTimeEl = document.getElementById(`time-dur-${espId}`);
+
+    // Si ya está reproduciéndose este audio, pausar
+    if (!audio.paused) {
+        audio.pause();
+        btnEl.classList.remove('playing');
+        if (iconSpan) iconSpan.innerText = '▶';
+        if (intervalAudioGlobal) clearInterval(intervalAudioGlobal);
+        return;
+    }
+
+    // Detener cualquier otro audio que esté sonando
+    detenerAudios();
+
+    // Actualizar duración si ya está disponible
+    if (audio.duration && !isNaN(audio.duration)) {
+        if (durTimeEl) durTimeEl.innerText = formatAudioTime(audio.duration);
+    } else {
+        audio.addEventListener('loadedmetadata', () => {
+            if (durTimeEl) durTimeEl.innerText = formatAudioTime(audio.duration);
+        }, { once: true });
+    }
+
+    audio.play().then(() => {
+        btnEl.classList.add('playing');
+        if (iconSpan) iconSpan.innerText = '⏸';
+        audioActivoGlobal = audio;
+
+        if (intervalAudioGlobal) clearInterval(intervalAudioGlobal);
+        intervalAudioGlobal = setInterval(() => {
+            if (curTimeEl) curTimeEl.innerText = formatAudioTime(audio.currentTime);
+            if (durTimeEl && audio.duration && !isNaN(audio.duration)) {
+                durTimeEl.innerText = formatAudioTime(audio.duration);
+            }
+        }, 200);
+
+        audio.onended = () => {
+            btnEl.classList.remove('playing');
+            if (iconSpan) iconSpan.innerText = '▶';
+            if (curTimeEl) curTimeEl.innerText = '0:00';
+            if (intervalAudioGlobal) clearInterval(intervalAudioGlobal);
+        };
+
+        audio.onpause = () => {
+            btnEl.classList.remove('playing');
+            if (iconSpan) iconSpan.innerText = '▶';
+            if (intervalAudioGlobal) clearInterval(intervalAudioGlobal);
+        };
+    }).catch(err => {
+        console.warn('Error al reproducir audio animal:', err);
+    });
+}
+
+function detenerAudios() {
+    if (intervalAudioGlobal) {
+        clearInterval(intervalAudioGlobal);
+        intervalAudioGlobal = null;
+    }
+    document.querySelectorAll('audio').forEach(a => {
+        if (!a.paused) a.pause();
+    });
+    document.querySelectorAll('.audio-play-btn').forEach(b => {
+        b.classList.remove('playing');
+        const icon = b.querySelector('.audio-btn-icon');
+        if (icon) icon.innerText = '▶';
+    });
+    if (AppState.audioActual) {
+        AppState.audioActual.pause();
+        AppState.audioActual = null;
+    }
+    const nativePlayer = document.getElementById('modal-native-player');
+    if (nativePlayer) nativePlayer.pause();
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
     }
 }
 
 // ==============================================================================
-// SECCIÓN 2: BIODIVERSIDAD (CARDS INTERACTIVAS, IMÁGENES RESPONSIVAS Y AUDIOS)
+// SECCIÓN 2: BIODIVERSIDAD (REPRODUCTOR MINIMALISTA PLAY/PAUSE + INDICADOR DE TIEMPO)
 // ==============================================================================
 function renderizarEspecies() {
     const container = document.getElementById('grid-especies');
@@ -1027,26 +1450,30 @@ function renderizarEspecies() {
         const endemicaBadge = esp.esEndemica ? `<span class="card-badge badge-endemica">⭐ ${isEn ? 'Endemic' : 'Endémica'}</span>` : '';
         const conservacionClass = obtenerClaseConservacion(esp.estadoConservacion);
 
-        // Reproductor de Audio In-Card Integrado
+        // Control de Audio Limpio y Minimalista (Play/Pause + Indicador de Tiempo/Duración)
         let audioPlayerHtml = '';
         if (esFauna && esp.audio && esp.tieneAudio !== false) {
             const audioSrc = `assets/audio/${encodeURIComponent(esp.audio)}`;
             audioPlayerHtml = `
-                <div class="card-audio-wrapper" onclick="event.stopPropagation()">
-                    <div class="audio-control-header">
-                        <span class="audio-sound-wave" aria-hidden="true">🔊</span>
-                        <span>${isEn ? 'Wild Call / Audio' : 'Sonido / Canto en libertad'}</span>
+                <div class="card-audio-minimal" onclick="event.stopPropagation()">
+                    <button class="audio-play-btn" type="button" aria-label="Reproducir canto de ${nombreComun}" onclick="toggleAudioAnimal(${esp.id}, this, event)">
+                        <span class="audio-btn-icon">▶</span>
+                    </button>
+                    <div class="audio-timer-wrap">
+                        <span class="audio-time-current" id="time-cur-${esp.id}">0:00</span>
+                        <span class="audio-time-divider">/</span>
+                        <span class="audio-time-total" id="time-dur-${esp.id}">0:15</span>
                     </div>
-                    <audio controls preload="none" class="styled-audio-player" onplay="sincronizarReproduccionAudio(this)">
+                    <audio id="audio-elem-${esp.id}" preload="metadata">
                         <source src="${audioSrc}" type="audio/mpeg">
                         <source src="assets/audio/${esp.audio}" type="audio/mpeg">
-                        ${isEn ? 'Your browser does not support audio playback.' : 'Tu navegador no soporta reproducción de audio.'}
+                        <source src="imagenes y audios/${encodeURIComponent(esp.audio)}" type="audio/mpeg">
                     </audio>
                 </div>
             `;
         }
 
-        // Ficha estructurada de Hábitat y Dieta
+        // Ficha técnica estructurada de Hábitat y Dieta
         let habitatDietaHtml = '';
         if (habitat || dieta) {
             habitatDietaHtml = `
@@ -1095,14 +1522,17 @@ function renderizarEspecies() {
                 ${factHtml}
                 <div class="card-meta">
                     <span class="meta-chip status-chip ${conservacionClass}">🛡️ ${esp.estadoConservacion || 'Preocupación Menor'}</span>
-                    <button class="btn-card-more" onclick="abrirModalEspeciePorId(${esp.id}); event.stopPropagation();">
+                    <button class="btn-card-more" onclick="manejarClickCard(this.closest('.card-item'), () => abrirModalEspeciePorId(${esp.id})); event.stopPropagation();">
                         ${isEn ? 'Full species file' : 'Ver Ficha Completa'} →
                     </button>
                 </div>
             </div>
         `;
 
-        card.addEventListener('click', () => abrirModalEspecie(esp));
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.card-audio-minimal')) return;
+            manejarClickCard(card, () => abrirModalEspecie(esp));
+        });
         container.appendChild(card);
     });
 }
@@ -1120,7 +1550,22 @@ function setFiltroEspecie(filtro, btnEl) {
 }
 
 // ==============================================================================
-// MODAL DE DETALLE DE ESPECIE (AUDIO ANIMAL + SÍNTESIS DE VOZ TTS + FICHA)
+// GESTOR DE CLICS DINÁMICOS CON ZOOM TÁCTIL Y APERTURA DE MODAL
+// ==============================================================================
+function manejarClickCard(cardEl, callback) {
+    if (cardEl) {
+        cardEl.classList.add('card-click-zoom');
+        setTimeout(() => {
+            cardEl.classList.remove('card-click-zoom');
+            if (typeof callback === 'function') callback();
+        }, 130);
+    } else {
+        if (typeof callback === 'function') callback();
+    }
+}
+
+// ==============================================================================
+// MODAL DE DETALLE DE ESPECIE Y TARJETAS INTERACTIVAS
 // ==============================================================================
 function abrirModalEspeciePorId(id) {
     const esp = AppState.especies.find(e => e.id === id);
@@ -1147,7 +1592,6 @@ function abrirModalEspecie(esp) {
     const factBox = document.getElementById('modal-fact-box');
     const factText = document.getElementById('modal-fact');
     const audioBox = document.getElementById('modal-audio-box');
-    const audioBtn = document.getElementById('btn-play-animal');
     const nativePlayer = document.getElementById('modal-native-player');
 
     // Ficha técnica
@@ -1173,9 +1617,13 @@ function abrirModalEspecie(esp) {
     if (specsBox) {
         if (habitat || dieta || esp.estadoConservacion) {
             specsBox.style.display = 'block';
-            if (habitatEl) habitatEl.innerText = habitat || (isEn ? 'Not specified' : 'No especificado');
-            if (dietaEl) dietaEl.innerText = dieta || (isEn ? 'Not specified' : 'No especificado');
-            if (conservacionEl) conservacionEl.innerText = esp.estadoConservacion || 'Preocupación Menor (LC)';
+            specsBox.innerHTML = `
+                <div style="background:#f4f8f5; border-left:3.5px solid var(--secondary); padding:0.6rem 0.8rem; border-radius:0 8px 8px 0; display:flex; flex-direction:column; gap:0.4rem; color:#223628;">
+                    <div id="modal-habitat-row">🏞️ <strong>${isEn ? 'Habitat:' : 'Hábitat:'}</strong> ${habitat || (isEn ? 'Not specified' : 'No especificado')}</div>
+                    <div id="modal-dieta-row">🍃 <strong>${isEn ? 'Diet:' : 'Dieta:'}</strong> ${dieta || (isEn ? 'Not specified' : 'No especificado')}</div>
+                    <div id="modal-conservacion-row">🛡️ <strong>${isEn ? 'Conservation:' : 'Conservación:'}</strong> ${esp.estadoConservacion || 'Preocupación Menor (LC)'}</div>
+                </div>
+            `;
         } else {
             specsBox.style.display = 'none';
         }
@@ -1195,22 +1643,260 @@ function abrirModalEspecie(esp) {
     if (audioBox) {
         if (esp.tipo === 'fauna' && esp.audio) {
             audioBox.style.display = 'block';
-            if (audioBtn) audioBtn.style.display = 'inline-flex';
             if (nativePlayer) {
                 nativePlayer.style.display = 'block';
                 nativePlayer.src = `assets/audio/${encodeURIComponent(esp.audio)}`;
             }
         } else {
-            audioBox.style.display = 'block';
-            if (audioBtn) audioBtn.style.display = 'none';
-            if (nativePlayer) nativePlayer.style.display = 'none';
+            audioBox.style.display = 'none';
         }
     }
 
-    if (modal) modal.classList.add('active');
+    if (modal) {
+        modal.classList.remove('active');
+        void modal.offsetWidth; // reset animaciones CSS
+        modal.classList.add('active');
+    }
 
-    // Registrar métrica agregada anónima en Supabase
     registrarMetrica('FAUNA', esp.id, nombreComun);
+}
+
+function abrirModalAtractivo(a) {
+    if (!a) return;
+    detenerAudios();
+    const modal = document.getElementById('modal-detalle');
+    const imgEl = document.getElementById('modal-img');
+    const titleEl = document.getElementById('modal-title');
+    const cientEl = document.getElementById('modal-cientifico');
+    const badgeEl = document.getElementById('modal-badge');
+    const descEl = document.getElementById('modal-desc');
+    const factBox = document.getElementById('modal-fact-box');
+    const factText = document.getElementById('modal-fact');
+    const audioBox = document.getElementById('modal-audio-box');
+    const specsBox = document.getElementById('modal-specs');
+
+    if (imgEl) {
+        imgEl.src = `assets/img/${encodeURI(a.imagen)}`;
+        imgEl.alt = a.nombre;
+    }
+    if (titleEl) titleEl.innerText = a.nombre;
+    if (cientEl) cientEl.innerText = `Parque Nacional Cotapata · ${a.altitudMsnm} msnm`;
+    if (badgeEl) {
+        badgeEl.innerText = `🏞️ ${a.categoria.toUpperCase()}`;
+        badgeEl.className = 'meta-chip flora';
+    }
+    if (specsBox) {
+        specsBox.style.display = 'block';
+        specsBox.innerHTML = `
+            <div style="background:#f4f8f5; border-left:3.5px solid var(--secondary); padding:0.6rem 0.8rem; border-radius:0 8px 8px 0; font-size:0.84rem; display:flex; flex-direction:column; gap:0.4rem; color:#223628;">
+                <div>⛰️ <strong>Altitud de referencia:</strong> ${a.altitudMsnm} msnm</div>
+                <div>🌿 <strong>Ecosistema:</strong> Ceja de Monte y Valles Yungueños</div>
+                <div>🗺️ <strong>Jurisdicción:</strong> SERNAP · Parque Nacional Cotapata</div>
+            </div>
+        `;
+    }
+    if (audioBox) audioBox.style.display = 'none';
+    if (descEl) descEl.innerText = a.descripcion;
+    if (factBox && factText) {
+        factBox.style.display = 'block';
+        factText.innerHTML = `<strong>Consejo y Recomendaciones de Visita:</strong> ${a.recomendaciones || 'Transitar exclusivamente por sendero marcado y respetar las normas del parque.'}`;
+    }
+
+    if (modal) {
+        modal.classList.remove('active');
+        void modal.offsetWidth;
+        modal.classList.add('active');
+    }
+}
+
+function abrirModalRuta(r) {
+    if (!r) return;
+    detenerAudios();
+    const modal = document.getElementById('modal-detalle');
+    const imgEl = document.getElementById('modal-img');
+    const titleEl = document.getElementById('modal-title');
+    const cientEl = document.getElementById('modal-cientifico');
+    const badgeEl = document.getElementById('modal-badge');
+    const descEl = document.getElementById('modal-desc');
+    const factBox = document.getElementById('modal-fact-box');
+    const factText = document.getElementById('modal-fact');
+    const audioBox = document.getElementById('modal-audio-box');
+    const specsBox = document.getElementById('modal-specs');
+
+    if (imgEl) {
+        imgEl.src = `assets/img/${encodeURI(r.imagen)}`;
+        imgEl.alt = r.nombre;
+    }
+    if (titleEl) titleEl.innerText = r.nombre;
+    if (cientEl) cientEl.innerText = `Travesía de Trekking en Cotapata · Dificultad: ${r.dificultad}`;
+    if (badgeEl) {
+        badgeEl.innerText = `🥾 DIFICULTAD: ${r.dificultad.toUpperCase()}`;
+        badgeEl.className = 'meta-chip fauna';
+    }
+    if (specsBox) {
+        specsBox.style.display = 'block';
+        specsBox.innerHTML = `
+            <div style="background:#f4f8f5; border-left:3.5px solid var(--secondary); padding:0.6rem 0.8rem; border-radius:0 8px 8px 0; font-size:0.84rem; display:flex; flex-direction:column; gap:0.4rem; color:#223628;">
+                <div>📏 <strong>Distancia Total:</strong> ${r.distanciaKm} km</div>
+                <div>⏱️ <strong>Duración Estimada:</strong> ${r.duracionHoras}</div>
+                <div>📉 <strong>Desnivel acumulado:</strong> ${r.desnivelMetros} metros de descenso</div>
+            </div>
+        `;
+    }
+    if (audioBox) audioBox.style.display = 'none';
+    if (descEl) descEl.innerText = r.descripcion;
+    if (factBox && factText) {
+        factBox.style.display = 'block';
+        factText.innerHTML = `⚠️ <strong>Normas de Seguridad y Equipamiento:</strong> ${r.recomendacionesSeguridad}`;
+    }
+
+    if (modal) {
+        modal.classList.remove('active');
+        void modal.offsetWidth;
+        modal.classList.add('active');
+    }
+}
+
+function abrirModalAlojamientoPorId(id) {
+    const item = DATASET_SERVICIOS_DEFAULT.find(s => s.id === id);
+    if (!item) return;
+    detenerAudios();
+    const modal = document.getElementById('modal-detalle');
+    const imgEl = document.getElementById('modal-img');
+    const titleEl = document.getElementById('modal-title');
+    const cientEl = document.getElementById('modal-cientifico');
+    const badgeEl = document.getElementById('modal-badge');
+    const descEl = document.getElementById('modal-desc');
+    const factBox = document.getElementById('modal-fact-box');
+    const factText = document.getElementById('modal-fact');
+    const audioBox = document.getElementById('modal-audio-box');
+    const specsBox = document.getElementById('modal-specs');
+
+    if (imgEl) {
+        imgEl.src = `assets/img/${encodeURI(item.imagen)}`;
+        imgEl.alt = item.nombre;
+    }
+    if (titleEl) titleEl.innerText = item.nombre;
+    if (cientEl) cientEl.innerText = `📍 Comunidad ${item.comunidad} · ${item.ubicacionReferencial}`;
+    if (badgeEl) {
+        badgeEl.innerText = `🏡 ALOJAMIENTO · ${item.comunidad.toUpperCase()}`;
+        badgeEl.className = 'meta-chip flora';
+    }
+    if (specsBox) {
+        specsBox.style.display = 'block';
+        specsBox.innerHTML = `
+            <div style="background:#f4f8f5; border-left:3.5px solid var(--accent); padding:0.6rem 0.8rem; border-radius:0 8px 8px 0; font-size:0.84rem; display:flex; flex-direction:column; gap:0.4rem; color:#223628;">
+                <div style="color:var(--primary); font-weight:700;">💳 <strong>Tarifas por fechas/noches (Bolivianos):</strong><br><span style="color:#d35400; font-size:0.95rem;">${item.precios}</span></div>
+                <div>⏰ <strong>Horario de atención:</strong> ${item.horarioAtencion}</div>
+                <div>🤝 <strong>Turismo Comunitario:</strong> Administrado por comunarios locales</div>
+            </div>
+        `;
+    }
+    if (audioBox) audioBox.style.display = 'none';
+    if (descEl) descEl.innerText = item.descripcion;
+    if (factBox && factText) {
+        factBox.style.display = 'block';
+        factText.innerHTML = `💡 <strong>Turismo Responsable:</strong> Hospédate en las comunidades de Cotapata para apoyar directamente la economía de las familias locales.`;
+    }
+
+    if (modal) {
+        modal.classList.remove('active');
+        void modal.offsetWidth;
+        modal.classList.add('active');
+    }
+}
+
+function abrirModalLugarPorId(id) {
+    const item = DATASET_SERVICIOS_DEFAULT.find(s => s.id === id);
+    if (!item) return;
+    detenerAudios();
+    const modal = document.getElementById('modal-detalle');
+    const imgEl = document.getElementById('modal-img');
+    const titleEl = document.getElementById('modal-title');
+    const cientEl = document.getElementById('modal-cientifico');
+    const badgeEl = document.getElementById('modal-badge');
+    const descEl = document.getElementById('modal-desc');
+    const factBox = document.getElementById('modal-fact-box');
+    const audioBox = document.getElementById('modal-audio-box');
+    const specsBox = document.getElementById('modal-specs');
+
+    if (imgEl) {
+        imgEl.src = `assets/img/${encodeURI(item.imagen)}`;
+        imgEl.alt = item.nombre;
+    }
+    if (titleEl) titleEl.innerText = item.nombre;
+    if (cientEl) cientEl.innerText = `📍 Entorno Comunitario de ${item.comunidad} · ${item.ubicacionReferencial}`;
+    if (badgeEl) {
+        badgeEl.innerText = `📍 LUGAR · ${item.comunidad.toUpperCase()}`;
+        badgeEl.className = 'meta-chip fauna';
+    }
+    if (specsBox) {
+        specsBox.style.display = 'block';
+        specsBox.innerHTML = `
+            <div style="background:#f4f8f5; border-left:3.5px solid var(--secondary); padding:0.6rem 0.8rem; border-radius:0 8px 8px 0; font-size:0.84rem; display:flex; flex-direction:column; gap:0.4rem; color:#223628;">
+                <div>🏞️ <strong>Comunidad:</strong> ${item.comunidad}</div>
+                <div>🧭 <strong>Ubicación:</strong> ${item.ubicacionReferencial}</div>
+                <div>🌿 <strong>Paisaje:</strong> Ceja de monte, huertos tradicionales y arquitectura rural</div>
+            </div>
+        `;
+    }
+    if (audioBox) audioBox.style.display = 'none';
+    if (descEl) descEl.innerText = item.descripcion;
+    if (factBox) factBox.style.display = 'none';
+
+    if (modal) {
+        modal.classList.remove('active');
+        void modal.offsetWidth;
+        modal.classList.add('active');
+    }
+}
+
+function abrirModalComidaPorId(id) {
+    const item = DATASET_SERVICIOS_DEFAULT.find(s => s.id === id);
+    if (!item) return;
+    detenerAudios();
+    const modal = document.getElementById('modal-detalle');
+    const imgEl = document.getElementById('modal-img');
+    const titleEl = document.getElementById('modal-title');
+    const cientEl = document.getElementById('modal-cientifico');
+    const badgeEl = document.getElementById('modal-badge');
+    const descEl = document.getElementById('modal-desc');
+    const factBox = document.getElementById('modal-fact-box');
+    const factText = document.getElementById('modal-fact');
+    const audioBox = document.getElementById('modal-audio-box');
+    const specsBox = document.getElementById('modal-specs');
+
+    if (imgEl) {
+        imgEl.src = `assets/img/${encodeURI(item.imagen)}`;
+        imgEl.alt = item.nombre;
+    }
+    if (titleEl) titleEl.innerText = item.nombre;
+    if (cientEl) cientEl.innerText = `Gastronomía Tradicional y Sabores de Cotapata`;
+    if (badgeEl) {
+        badgeEl.innerText = `🍲 SABORES DE COTAPATA`;
+        badgeEl.className = 'meta-chip flora';
+    }
+    if (specsBox) {
+        specsBox.style.display = 'block';
+        specsBox.innerHTML = `
+            <div style="background:#fef9e7; border-left:3.5px solid #f39c12; padding:0.7rem 0.9rem; border-radius:0 8px 8px 0; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center; color:#784212;">
+                <div>💰 <strong>Precio de Referencia:</strong></div>
+                <div style="font-size:1.15rem; font-weight:800; color:#d35400;">${item.precio}</div>
+            </div>
+        `;
+    }
+    if (audioBox) audioBox.style.display = 'none';
+    if (descEl) descEl.innerText = item.descripcion;
+    if (factBox && factText) {
+        factBox.style.display = 'block';
+        factText.innerHTML = `🍃 <em>Catálogo gastronómico informativo. Consulta disponibilidad en los comedores comunales de Chairo, Sandillani o Pacollo durante tu visita.</em>`;
+    }
+
+    if (modal) {
+        modal.classList.remove('active');
+        void modal.offsetWidth;
+        modal.classList.add('active');
+    }
 }
 
 function cerrarModal() {
@@ -1218,7 +1904,6 @@ function cerrarModal() {
     document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
 }
 
-// Controles de audio
 function reproducirAudioAnimal() {
     const esp = AppState.especieSeleccionada;
     if (!esp || !esp.audio) return;
@@ -1253,26 +1938,97 @@ function reproducirVozTTS() {
     window.speechSynthesis.speak(utterance);
 }
 
-function detenerAudios() {
-    if (AppState.audioActual) {
-        AppState.audioActual.pause();
-        AppState.audioActual = null;
+// ==============================================================================
+// SECCIÓN 3: SERVICIOS COMUNITARIOS (REESTRUCTURACIÓN COMPLETA)
+// Pestañas: Todas, Alojamientos, Lugares, Comidas, Chairo, Sandillani, Pacollo
+// ==============================================================================
+function setFiltroServicio(filtro, btnEl) {
+    AppState.filtroServicio = filtro;
+    document.querySelectorAll('#pills-servicios .filter-pill').forEach(b => b.classList.remove('active'));
+    if (btnEl) {
+        btnEl.classList.add('active');
+    } else {
+        const btn = Array.from(document.querySelectorAll('#pills-servicios .filter-pill'))
+                         .find(b => b.textContent.trim().toLowerCase() === filtro.toLowerCase());
+        if (btn) btn.classList.add('active');
     }
-    const nativePlayer = document.getElementById('modal-native-player');
-    if (nativePlayer) {
-        nativePlayer.pause();
-    }
-    document.querySelectorAll('audio').forEach(a => {
-        if (!a.paused) a.pause();
-    });
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-    }
+    renderizarServicios();
 }
 
-// ==============================================================================
-// SECCIÓN 3: SERVICIOS COMUNITARIOS
-// ==============================================================================
+function crearCardAlojamientoHtml(item) {
+    const imgEnc = encodeURI(`assets/img/${item.imagen}`);
+    const imgFallback = encodeURI(`imagen alojamiento/${item.imagen.replace('alojamiento/', '')}`);
+    return `
+        <div class="card-item alojamiento-card" onclick="manejarClickCard(this, () => abrirModalAlojamientoPorId(${item.id}))" tabindex="0">
+            <div class="card-media">
+                <span class="card-badge">🏡 ${item.comunidad}</span>
+                <span class="card-zoom-badge">🔍 Ver detalle</span>
+                <img src="${imgEnc}" alt="${item.nombre}" loading="lazy"
+                     onerror="this.onerror=null; this.src='${imgFallback}';">
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">${item.nombre}</h3>
+                <p class="card-subtitle">📍 ${item.comunidad} · ${item.ubicacionReferencial}</p>
+                <p class="card-text">${item.descripcion}</p>
+                <div class="servicio-precios-box">
+                    <span class="servicio-precios-label">💳 Tarifas de Alojamiento por fechas / noches:</span>
+                    <div class="servicio-precios-val"><strong>${item.precios}</strong></div>
+                </div>
+                <div class="card-meta">
+                    <span class="meta-chip">⏰ ${item.horarioAtencion}</span>
+                    <span class="meta-chip">✓ Turismo Comunitario</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function crearCardLugarHtml(item) {
+    const imgEnc = encodeURI(`assets/img/${item.imagen}`);
+    const imgFallback = encodeURI(`imagen lugares/${item.imagen.replace('lugares/', '')}`);
+    return `
+        <div class="card-item lugar-card" onclick="manejarClickCard(this, () => abrirModalLugarPorId(${item.id}))" tabindex="0">
+            <div class="card-media">
+                <span class="card-badge">📍 ${item.comunidad}</span>
+                <span class="card-zoom-badge">🔍 Ver detalle</span>
+                <img src="${imgEnc}" alt="${item.nombre}" loading="lazy"
+                     onerror="this.onerror=null; this.src='${imgFallback}';">
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">${item.nombre}</h3>
+                <p class="card-subtitle">📍 Entorno de ${item.comunidad} · ${item.ubicacionReferencial}</p>
+                <p class="card-text">${item.descripcion}</p>
+                <div class="card-meta">
+                    <span class="meta-chip">🏞️ Paisaje & Comunidad</span>
+                    <span class="meta-chip">Parque Cotapata</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function crearCardComidaHtml(item) {
+    const imgEnc = encodeURI(`assets/img/${item.imagen}`);
+    const imgFallback = encodeURI(`imagen comidas/${item.imagen.replace('comidas/', '')}`);
+    return `
+        <div class="card-item comida-card" onclick="manejarClickCard(this, () => abrirModalComidaPorId(${item.id}))" tabindex="0">
+            <div class="card-media">
+                <span class="card-badge">🍲 Sabores de Cotapata</span>
+                <span class="card-zoom-badge">🔍 Ver detalle</span>
+                <img src="${imgEnc}" alt="${item.nombre}" loading="lazy"
+                     onerror="this.onerror=null; this.src='${imgFallback}';">
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">${item.nombre}</h3>
+                <p class="card-text">${item.descripcion}</p>
+                <div class="servicio-precio">
+                    <span>Precio:</span> <strong>${item.precio}</strong>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function renderizarServicios() {
     const container = document.getElementById('grid-servicios');
     if (!container) return;
@@ -1280,58 +2036,262 @@ function renderizarServicios() {
 
     const filtro = (AppState.filtroServicio || 'todas').toLowerCase();
 
-    const filtrados = AppState.servicios.filter(s => {
-        if (filtro === 'todas') return true;
-        if (filtro === 'comunidad') {
-            return Boolean(s.comunidad && s.comunidad.trim().length > 0);
-        }
-        return s.comunidad && s.comunidad.toLowerCase() === filtro;
-    });
+    // Obtener los subconjuntos desde DATASET_SERVICIOS_DEFAULT
+    const todosAlojamientos = DATASET_SERVICIOS_DEFAULT.filter(s => s.tipoServicio === 'alojamiento');
+    const todosLugares = DATASET_SERVICIOS_DEFAULT.filter(s => s.tipoServicio === 'lugar');
+    const todasComidas = DATASET_SERVICIOS_DEFAULT.filter(s => s.tipoServicio === 'comida');
 
-    filtrados.forEach(s => {
-        const card = document.createElement('div');
-        card.className = 'card-item';
-        card.innerHTML = `
-            <div class="card-media">
-                <span class="card-badge">${s.iconoCategoria || '🏡'} ${s.nombreCategoria || 'Servicio'}</span>
-                <img src="assets/img/${s.imagen}" alt="${s.nombre}" loading="lazy" onerror="this.src='assets/img/jungle_banner.jpg'">
+    // 1. FILTRO: ALOJAMIENTOS (Chairo, Sandillani y Pacollo - alojamiento1 a 9)
+    if (filtro === 'alojamientos') {
+        const header = document.createElement('div');
+        header.style.gridColumn = '1 / -1';
+        header.innerHTML = `
+            <div class="servicio-section-title">
+                🏡 Catálogo de Alojamientos Comunitarios en Cotapata (Chairo, Sandillani y Pacollo)
             </div>
-            <div class="card-content">
-                <h3 class="card-title">${s.nombre}</h3>
-                <p class="card-subtitle">📍 ${s.comunidad} · ${s.ubicacionReferencial}</p>
-                <p class="card-text">${s.descripcion}</p>
-                <div class="card-meta">
-                    <span class="meta-chip">⏰ ${s.horarioAtencion}</span>
-                    <span class="meta-chip">💲 ${s.rangoPrecios}</span>
-                </div>
-                <div style="margin-top:0.6rem; font-size:0.72rem; color:var(--success); font-weight:700;">
-                    ✓ Autorizado por la Comunidad · Idiomas: ${s.idiomasAtencion}
-                </div>
-            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                Hospedajes ecológicos, cabañas familiares y zonas de camping administrados con consentimiento informado por las familias locales. Precios en Bolivianos (Bs).
+            </p>
         `;
-        container.appendChild(card);
+        container.appendChild(header);
+
+        todosAlojamientos.forEach(aloj => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = crearCardAlojamientoHtml(aloj);
+            container.appendChild(wrap.firstElementChild);
+        });
+        return;
+    }
+
+    // 2. FILTRO: LUGARES (Casas y paisajes de Chairo, Sandillani y Pacollo - 1 a 3 cada uno)
+    if (filtro === 'lugares') {
+        const header = document.createElement('div');
+        header.style.gridColumn = '1 / -1';
+        header.innerHTML = `
+            <div class="servicio-section-title">
+                📍 Galería de Casas y Paisajes Comunitarios de Cotapata
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                Recorrido visual por la arquitectura rural tradicional, casas familiares y vistas naturales de Chairo, Sandillani y Pacollo.
+            </p>
+        `;
+        container.appendChild(header);
+
+        todosLugares.forEach(lug => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = crearCardLugarHtml(lug);
+            container.appendChild(wrap.firstElementChild);
+        });
+        return;
+    }
+
+    // 3. FILTRO: COMIDAS (Catálogo completo de 23 imágenes - Puramente informativo sin botones)
+    if (filtro === 'comidas') {
+        const header = document.createElement('div');
+        header.style.gridColumn = '1 / -1';
+        header.innerHTML = `
+            <div class="servicio-section-title">
+                🍲 Catálogo Gastronómico Tradicional de Cotapata (23 Platos y Bebidas)
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                Muestra gastronómica representativa de los Yungas y los valles de Cotapata. Catálogo de referencia informativa con precios en Bolivianos (Bs).
+            </p>
+        `;
+        container.appendChild(header);
+
+        todasComidas.forEach(com => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = crearCardComidaHtml(com);
+            container.appendChild(wrap.firstElementChild);
+        });
+        return;
+    }
+
+    // 4. FILTRO: CHAIRO (Sección Alojamientos Chairo + Sección Lugares Chairo)
+    if (filtro === 'chairo') {
+        // Subsección Alojamiento en Chairo
+        const secAloj = document.createElement('div');
+        secAloj.style.gridColumn = '1 / -1';
+        secAloj.innerHTML = `
+            <div class="servicio-section-title">
+                🏡 Alojamientos en Chairo (Valle Subtropical)
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                Hospedajes cálidos y acogedores en el valle de Chairo, meta final del Camino del Choro junto al río. Tarifas expresadas en Bolivianos (Bs).
+            </p>
+        `;
+        container.appendChild(secAloj);
+
+        todosAlojamientos.filter(a => a.comunidad === 'Chairo').forEach(aloj => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = crearCardAlojamientoHtml(aloj);
+            container.appendChild(wrap.firstElementChild);
+        });
+
+        // Subsección Lugares en Chairo
+        const secLug = document.createElement('div');
+        secLug.style.gridColumn = '1 / -1';
+        secLug.innerHTML = `
+            <div class="servicio-section-title" style="margin-top:2rem;">
+                📍 Casas y Entorno Comunitario de Chairo
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                Vistas de las viviendas locales, el histórico puente sobre el río y el entorno subtropical de la comunidad de Chairo.
+            </p>
+        `;
+        container.appendChild(secLug);
+
+        todosLugares.filter(l => l.comunidad === 'Chairo').forEach(lug => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = crearCardLugarHtml(lug);
+            container.appendChild(wrap.firstElementChild);
+        });
+        return;
+    }
+
+    // 5. FILTRO: SANDILLANI (Sección Alojamientos Sandillani + Sección Lugares Sandillani)
+    if (filtro === 'sandillani') {
+        // Subsección Alojamiento en Sandillani
+        const secAloj = document.createElement('div');
+        secAloj.style.gridColumn = '1 / -1';
+        secAloj.innerHTML = `
+            <div class="servicio-section-title">
+                🏡 Alojamientos en Sandillani (Bosque Nublado y Jardines)
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                Albergues ecológicos y áreas de descanso rodeados de jardines de orquídeas y helechos milenarios en la ceja de monte. Precios en Bolivianos (Bs).
+            </p>
+        `;
+        container.appendChild(secAloj);
+
+        todosAlojamientos.filter(a => a.comunidad === 'Sandillani').forEach(aloj => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = crearCardAlojamientoHtml(aloj);
+            container.appendChild(wrap.firstElementChild);
+        });
+
+        // Subsección Lugares en Sandillani
+        const secLug = document.createElement('div');
+        secLug.style.gridColumn = '1 / -1';
+        secLug.innerHTML = `
+            <div class="servicio-section-title" style="margin-top:2rem;">
+                📍 Casas y Paisajes Locales de Sandillani
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                La aldea entre la niebla, senderos fluviales de orquídeas y miradores panorámicos del bosque nublado andino.
+            </p>
+        `;
+        container.appendChild(secLug);
+
+        todosLugares.filter(l => l.comunidad === 'Sandillani').forEach(lug => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = crearCardLugarHtml(lug);
+            container.appendChild(wrap.firstElementChild);
+        });
+        return;
+    }
+
+    // 6. FILTRO: PACOLLO (Sección Alojamientos Pacollo + Sección Lugares Pacollo)
+    if (filtro === 'pacollo') {
+        // Subsección Alojamiento en Pacollo
+        const secAloj = document.createElement('div');
+        secAloj.style.gridColumn = '1 / -1';
+        secAloj.innerHTML = `
+            <div class="servicio-section-title">
+                🏡 Alojamientos en Pacollo (Valle del Café y Cañón de Huarinilla)
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                Ecolodges y casas de estancia familiar entre plantaciones agroforestales de café de sombra y huertos de cítricos. Precios en Bolivianos (Bs).
+            </p>
+        `;
+        container.appendChild(secAloj);
+
+        todosAlojamientos.filter(a => a.comunidad === 'Pacollo').forEach(aloj => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = crearCardAlojamientoHtml(aloj);
+            container.appendChild(wrap.firstElementChild);
+        });
+
+        // Subsección Lugares en Pacollo
+        const secLug = document.createElement('div');
+        secLug.style.gridColumn = '1 / -1';
+        secLug.innerHTML = `
+            <div class="servicio-section-title" style="margin-top:2rem;">
+                📍 Casas y Vistas de la Comunidad de Pacollo
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+                Terrazas agrícolas familiares, cafetales tradicionales y vistas espectaculares al cañón verde del río Huarinilla.
+            </p>
+        `;
+        container.appendChild(secLug);
+
+        todosLugares.filter(l => l.comunidad === 'Pacollo').forEach(lug => {
+            const wrap = document.createElement('div');
+            wrap.innerHTML = crearCardLugarHtml(lug);
+            container.appendChild(wrap.firstElementChild);
+        });
+        return;
+    }
+
+    // 7. FILTRO: TODAS (Muestra Alojamientos, Lugares y Comidas organizados claramente)
+    const secTodasAloj = document.createElement('div');
+    secTodasAloj.style.gridColumn = '1 / -1';
+    secTodasAloj.innerHTML = `
+        <div class="servicio-section-title">
+            🏡 Alojamientos Comunitarios (Chairo, Sandillani y Pacollo)
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+            Catálogo completo de hospedajes en las tres comunidades anfitrionas con precios fijados en Bolivianos (Bs).
+        </p>
+    `;
+    container.appendChild(secTodasAloj);
+
+    todosAlojamientos.forEach(aloj => {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = crearCardAlojamientoHtml(aloj);
+        container.appendChild(wrap.firstElementChild);
     });
-}
 
-function setFiltroServicio(filtro, btnEl) {
-    AppState.filtroServicio = filtro;
-    document.querySelectorAll('#pills-servicios .filter-pill').forEach(b => b.classList.remove('active'));
-    if (btnEl) btnEl.classList.add('active');
-    renderizarServicios();
-}
+    const secTodasLug = document.createElement('div');
+    secTodasLug.style.gridColumn = '1 / -1';
+    secTodasLug.innerHTML = `
+        <div class="servicio-section-title" style="margin-top:2.5rem;">
+            📍 Casas y Paisajes Comunitarios
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+            Imágenes del entorno de vida y paisajes cotidianos de Chairo, Sandillani y Pacollo.
+        </p>
+    `;
+    container.appendChild(secTodasLug);
 
-function setFiltroServicioCat(cat, btnEl) {
-    AppState.filtroServicioCat = cat;
-    renderizarServicios();
-}
+    todosLugares.forEach(lug => {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = crearCardLugarHtml(lug);
+        container.appendChild(wrap.firstElementChild);
+    });
 
-function setFiltroServicioCom(com, btnEl) {
-    AppState.filtroServicio = com;
-    renderizarServicios();
+    const secTodasCom = document.createElement('div');
+    secTodasCom.style.gridColumn = '1 / -1';
+    secTodasCom.innerHTML = `
+        <div class="servicio-section-title" style="margin-top:2.5rem;">
+            🍲 Catálogo Gastronómico de Cotapata
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">
+            Platos tradicionales y bebidas típicas de las comunidades de Cotapata con precios en Bolivianos (Bs).
+        </p>
+    `;
+    container.appendChild(secTodasCom);
+
+    todasComidas.forEach(com => {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = crearCardComidaHtml(com);
+        container.appendChild(wrap.firstElementChild);
+    });
 }
 
 // ==============================================================================
 // SECCIÓN 4: ATRACTIVOS TURÍSTICOS
+// Imágenes actualizadas: cotapata_aerial.jpg (El Choro), Bosque nublado yungas.jpg y Río huarinilla.png
 // ==============================================================================
 function renderizarAtractivos() {
     const container = document.getElementById('grid-atractivos');
@@ -1341,10 +2301,17 @@ function renderizarAtractivos() {
     AppState.atractivos.forEach(a => {
         const card = document.createElement('div');
         card.className = 'card-item';
+        card.setAttribute('tabindex', '0');
+        const imgEnc = encodeURI(`assets/img/${a.imagen}`);
+        const imgModificado = encodeURI(`assets/img/modificado/${a.imagen}`);
+        const imgDirDirecto = encodeURI(`imagenes modificado/${a.imagen}`);
+
         card.innerHTML = `
             <div class="card-media">
                 <span class="card-badge">🏞️ ${a.categoria}</span>
-                <img src="assets/img/${a.imagen}" alt="${a.nombre}" loading="lazy" onerror="this.src='assets/img/cotapata_aerial.jpg'">
+                <span class="card-zoom-badge">🔍 Ver detalle</span>
+                <img src="${imgEnc}" alt="${a.nombre}" loading="lazy"
+                     onerror="this.onerror=null; this.src='${imgModificado}'; this.onerror=function(){this.src='${imgDirDirecto}';};">
             </div>
             <div class="card-content">
                 <h3 class="card-title">${a.nombre}</h3>
@@ -1355,12 +2322,16 @@ function renderizarAtractivos() {
                 </div>
             </div>
         `;
+        card.addEventListener('click', () => {
+            manejarClickCard(card, () => abrirModalAtractivo(a));
+        });
         container.appendChild(card);
     });
 }
 
 // ==============================================================================
 // SECCIÓN 5: RUTAS Y SENDEROS
+// Imágenes actualizadas: Travesia choro.jpg, Senderon interpretativo sandillani.jpg, Bosque en Queñuas.jpg
 // ==============================================================================
 function renderizarRutas() {
     const container = document.getElementById('grid-rutas');
@@ -1370,10 +2341,17 @@ function renderizarRutas() {
     AppState.rutas.forEach(r => {
         const card = document.createElement('div');
         card.className = 'card-item';
+        card.setAttribute('tabindex', '0');
+        const imgEnc = encodeURI(`assets/img/${r.imagen}`);
+        const imgModificado = encodeURI(`assets/img/modificado/${r.imagen}`);
+        const imgDirDirecto = encodeURI(`imagenes modificado/${r.imagen}`);
+
         card.innerHTML = `
             <div class="card-media">
                 <span class="card-badge">🥾 Dificultad: ${r.dificultad}</span>
-                <img src="assets/img/${r.imagen}" alt="${r.nombre}" loading="lazy" onerror="this.src='assets/img/cotapata_aerial.jpg'">
+                <span class="card-zoom-badge">🔍 Ver detalle</span>
+                <img src="${imgEnc}" alt="${r.nombre}" loading="lazy"
+                     onerror="this.onerror=null; this.src='${imgModificado}'; this.onerror=function(){this.src='${imgDirDirecto}';};">
             </div>
             <div class="card-content">
                 <h3 class="card-title">${r.nombre}</h3>
@@ -1387,12 +2365,17 @@ function renderizarRutas() {
                 </div>
             </div>
         `;
+        card.addEventListener('click', () => {
+            manejarClickCard(card, () => abrirModalRuta(r));
+        });
         container.appendChild(card);
     });
 }
 
 // ==============================================================================
 // SECCIÓN 6: MAPA INTERACTIVO LEAFLET
+// Marcadores identificados: Pacollo y Sandillani agregados claramente con popups
+// Acceso directo a Google Maps: https://maps.app.goo.gl/guHdzTdr36GNYdas9
 // ==============================================================================
 function iniciarMapaSiEsNecesario() {
     if (AppState.mapaIniciado && AppState.mapaInstancia) {
@@ -1423,30 +2406,106 @@ function iniciarMapaSiEsNecesario() {
     });
     offlineLayer.addTo(map);
 
+    // Control flotante de Google Maps en la esquina superior derecha del mapa
+    const gmapsControl = L.control({ position: 'topright' });
+    gmapsControl.onAdd = function() {
+        const div = L.DomUtil.create('div', 'leaflet-gmaps-control-box');
+        div.innerHTML = `
+            <a href="https://maps.app.goo.gl/guHdzTdr36GNYdas9" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               class="leaflet-gmaps-floating-btn" 
+               title="Ver en Google Maps Satélite">
+                <span class="gmaps-pin-dot"></span>
+                <span>Google Maps ↗</span>
+            </a>
+        `;
+        return div;
+    };
+    gmapsControl.addTo(map);
+
+    // Marcadores con puntos clave, incluyendo Pacollo y Sandillani claramente identificados
     const puntos = [
-        { lat: -16.20, lng: -67.85, titulo: 'Camino Precolombino El Choro', desc: 'Calzada ancestral prehispánica de trekking' },
-        { lat: -16.185, lng: -67.83, titulo: 'Bosque Nublado de los Yungas', desc: 'Ecosistema de alta biodiversidad y niebla' },
-        { lat: -16.16, lng: -67.80, titulo: 'Chairo (Final de Senda)', desc: 'Comunidad anfitriona, guías y gastronomía' },
-        { lat: -16.19, lng: -67.84, titulo: 'Sandillani', desc: 'Albergues y camping ecológico de altura' },
-        { lat: -16.22, lng: -67.86, titulo: 'Puesto Guardaparques SERNAP', desc: 'Registro obligatorio y control de visitantes' }
+        {
+            lat: -16.20,
+            lng: -67.85,
+            titulo: 'Camino Precolombino El Choro',
+            tipo: 'atractivo',
+            desc: 'Histórica calzada prehispánica incaica y preincaica de trekking.'
+        },
+        {
+            lat: -16.185,
+            lng: -67.83,
+            titulo: 'Bosque Nublado de los Yungas',
+            tipo: 'atractivo',
+            desc: 'Ecosistema de condensación permanente con gran biodiversidad de flora y fauna nativa.'
+        },
+        {
+            lat: -16.162,
+            lng: -67.802,
+            titulo: 'Chairo (Final de Senda)',
+            tipo: 'comunidad',
+            desc: 'Comunidad anfitriona al final de la ruta El Choro. Alojamientos, comedor y guías locales.'
+        },
+        {
+            lat: -16.182,
+            lng: -67.842,
+            titulo: 'Sandillani',
+            tipo: 'comunidad',
+            desc: 'Comunidad anfitriona en el bosque nublado. Albergues ecológicos, zonas de camping y jardines de orquídeas.'
+        },
+        {
+            lat: -16.172,
+            lng: -67.818,
+            titulo: 'Pacollo',
+            tipo: 'comunidad',
+            desc: 'Comunidad productora de café orgánico y cítricos. Alojamientos comunitarios y vistas al cañón de Huarinilla.'
+        },
+        {
+            lat: -16.225,
+            lng: -67.865,
+            titulo: 'Puesto Guardaparques SERNAP',
+            tipo: 'control',
+            desc: 'Registro obligatorio de ingreso y control de visitantes del Área Protegida.'
+        }
     ];
 
     puntos.forEach(p => {
         const marker = L.marker([p.lat, p.lng]).addTo(map);
+        const colorTag = p.tipo === 'comunidad' ? '#2980b9' : (p.tipo === 'control' ? '#e74c3c' : '#27ae60');
         marker.bindPopup(`
-            <div style="font-family:'Poppins',sans-serif; padding:4px;">
-                <b style="color:#235030;">${p.titulo}</b><br>
-                <span style="font-size:0.8rem; color:#555;">${p.desc}</span>
+            <div style="font-family:'Poppins',sans-serif; padding:4px; max-width:230px;">
+                <div style="display:inline-block; font-size:0.68rem; font-weight:700; color:#fff; background:${colorTag}; padding:2px 8px; border-radius:10px; margin-bottom:4px;">
+                    ${p.tipo === 'comunidad' ? '🏡 COMUNIDAD' : (p.tipo === 'control' ? '👮 CONTROL SERNAP' : '🏞️ ATRACTIVO')}
+                </div>
+                <h4 style="margin:2px 0 4px; font-size:0.95rem; color:#235030;">${p.titulo}</h4>
+                <p style="margin:0 0 6px; font-size:0.8rem; color:#444; line-height:1.4;">${p.desc}</p>
+                <div style="border-top:1px dashed #d5e2d8; padding-top:5px; margin-top:4px;">
+                    <a href="https://maps.app.goo.gl/guHdzTdr36GNYdas9" target="_blank" rel="noopener noreferrer" style="color:#d35400; font-size:0.75rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                        📍 Ver en Google Maps ↗
+                    </a>
+                </div>
             </div>
         `);
     });
 
     AppState.mapaInstancia = map;
     AppState.mapaIniciado = true;
+
+    // Redimensionamiento progresivo para garantizar que los mosaicos carguen de inmediato al bajar en la página
+    setTimeout(() => {
+        if (AppState.mapaInstancia) AppState.mapaInstancia.invalidateSize();
+    }, 100);
+    setTimeout(() => {
+        if (AppState.mapaInstancia) AppState.mapaInstancia.invalidateSize();
+    }, 300);
+    setTimeout(() => {
+        if (AppState.mapaInstancia) AppState.mapaInstancia.invalidateSize();
+    }, 700);
 }
 
 // ==============================================================================
-// SECCIÓN 7: RECOMENDACIONES Y COMPROMISOS AMBIENTALES
+// SECCIÓN 7: RECOMENDACIONES (AMPLIADO Y MODERNO)
 // ==============================================================================
 function renderizarRecomendaciones() {
     const container = document.getElementById('grid-recomendaciones');
