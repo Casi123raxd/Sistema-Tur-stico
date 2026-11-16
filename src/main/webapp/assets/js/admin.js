@@ -198,34 +198,120 @@ function setPestañaAdmin(tabId, btnEl) {
 }
 
 function cargarDatosPestaña(tabId) {
-    switch (tabId) {
-        case 'tab-adm-especies':
-            cargarAdmEspecies();
-            break;
-        case 'tab-adm-servicios':
-            cargarAdmServicios();
-            break;
-        case 'tab-adm-atractivos':
-            cargarAdmAtractivos();
-            break;
-        case 'tab-adm-rutas':
-            cargarAdmRutas();
-            break;
-        case 'tab-adm-recomendaciones':
-            cargarAdmRecomendaciones();
-            break;
-        case 'tab-adm-autorizaciones':
-            cargarAdmAutorizaciones();
-            break;
-        case 'tab-adm-metricas':
-            cargarAdmMetricas();
-            break;
+    if (tabId === 'tab-adm-servicios') {
+        cargarAdmServicios();
+    } else if (tabId === 'tab-adm-usuarios') {
+        cargarAdmUsuarios();
+    } else {
+        cargarAdmEspecies();
     }
 }
 
 // ==============================================================================
 // 1. CRUD ADMINISTRATIVO: ESPECIES (CON DIAGNÓSTICO RLS Y SUPABASE ROBUSTO)
 // ==============================================================================
+
+// Cliente Supabase unificado y Storage Helper
+const SUPABASE_CONFIG = {
+    url: 'https://bsyhayoglxcsnfhqgidg.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzeWhheW9nbHhjc25maHFnaWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDQ5ODMsImV4cCI6MjA1NzYyMDk4M30.default_anon'
+};
+
+let _supabaseInstancia = null;
+function obtenerClienteSupabase() {
+    if (_supabaseInstancia) return _supabaseInstancia;
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+        try {
+            _supabaseInstancia = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+            return _supabaseInstancia;
+        } catch (e) {
+            console.warn('[Supabase Admin] Error inicializando cliente JS:', e);
+        }
+    }
+    return null;
+}
+
+// Subir archivo a Supabase Storage con soporte de fallback
+async function subirArchivoSupabaseStorage(bucket, file, prefijo = '') {
+    if (!file) return null;
+    const client = obtenerClienteSupabase();
+    if (client && client.storage) {
+        try {
+            const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const path = `${prefijo}${Date.now()}_${cleanName}`;
+            console.log(`[Supabase Storage] Subiendo archivo "${file.name}" a bucket "${bucket}"...`);
+            const { data, error } = await client.storage.from(bucket).upload(path, file, {
+                cacheControl: '3600',
+                upsert: true
+            });
+            if (!error && data) {
+                const { data: urlData } = client.storage.from(bucket).getPublicUrl(path);
+                if (urlData && urlData.publicUrl) {
+                    console.log(`✓ [Supabase Storage] Archivo subido con URL pública:`, urlData.publicUrl);
+                    return urlData.publicUrl;
+                }
+            } else if (error) {
+                console.warn(`⚠️ [Supabase Storage] Bucket "${bucket}":`, error.message);
+            }
+        } catch (err) {
+            console.warn('[Supabase Storage] Excepción durante la subida:', err);
+        }
+    }
+    return null;
+}
+
+// Previsualización de Imagen en Modal de Especie
+function previsualizarImagenEspecie(input) {
+    const file = input && input.files && input.files[0];
+    const previewImg = document.getElementById('preview-esp-imagen');
+    const previewName = document.getElementById('preview-esp-imagen-name');
+    const hiddenInp = document.getElementById('form-esp-imagen');
+
+    if (!file) return;
+
+    if (previewName) {
+        previewName.innerText = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        if (previewImg) {
+            previewImg.src = e.target.result;
+            previewImg.style.display = 'block';
+        }
+        if (hiddenInp) {
+            hiddenInp.value = e.target.result;
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+// Previsualización de Audio en Modal de Especie
+function previsualizarAudioEspecie(input) {
+    const file = input && input.files && input.files[0];
+    const previewName = document.getElementById('preview-esp-audio-name');
+    const previewPlayer = document.getElementById('preview-esp-audio-player');
+    const hiddenInp = document.getElementById('form-esp-audio');
+
+    if (!file) return;
+
+    if (previewName) {
+        previewName.innerText = `🔊 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        if (previewPlayer) {
+            previewPlayer.src = e.target.result;
+            previewPlayer.style.display = 'block';
+            previewPlayer.load();
+        }
+        if (hiddenInp) {
+            hiddenInp.value = e.target.result;
+        }
+    };
+    reader.readAsDataURL(file);
+}
 
 // Helper para obtener dataset de respaldo consolidado
 function obtenerDatasetEspeciesMemoria() {
@@ -385,7 +471,7 @@ async function cargarAdmEspecies() {
     if (usandoFallback && errorCarga) {
         const warnRow = document.createElement('tr');
         warnRow.innerHTML = `
-            <td colspan="6" style="background:#fff8e1; color:#784212; padding:0.6rem 0.8rem; font-size:0.75rem; border-left:4px solid #f39c12;">
+            <td colspan="5" style="background:#fff8e1; color:#784212; padding:0.6rem 0.8rem; font-size:0.75rem; border-left:4px solid #f39c12;">
                 ⚠️ <strong>Aviso de Conexión:</strong> No se pudo conectar a la base de datos remota (${errorCarga.message}). Se cargaron ${list.length} especies desde el catálogo local. Revisa la <strong>Consola (F12)</strong> para el diagnóstico detallado de permisos RLS o API Key.
             </td>
         `;
@@ -393,7 +479,7 @@ async function cargarAdmEspecies() {
     }
 
     if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:var(--text-muted);">No hay especies registradas actualmente. Haz clic en "+ Nueva Especie" para agregar una.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:var(--text-muted);">No hay especies registradas actualmente. Haz clic en "+ Nueva Especie" para agregar una.</td></tr>';
         return;
     }
 
@@ -403,7 +489,6 @@ async function cargarAdmEspecies() {
         const tipoLabel = (e.tipo || 'FAUNA').toUpperCase();
         const nombreComun = e.nombreEs || e.nombre || 'Especie sin nombre';
         const nombreCientifico = e.cientifico || 'No especificado';
-        const estadoVal = e.estadoValidacion || 'Validado';
 
         const jsonSafe = encodeURIComponent(JSON.stringify(e));
 
@@ -412,15 +497,6 @@ async function cargarAdmEspecies() {
             <td><span class="meta-chip ${tipoBadgeClass}">${tipoLabel}</span></td>
             <td><strong>${nombreComun}</strong></td>
             <td><em>${nombreCientifico}</em></td>
-            <td>
-                <select class="form-control" style="padding:0.25rem 0.5rem; font-size:0.75rem;" 
-                        onchange="cambiarEstadoEntidad('especies', ${e.id}, this.value)">
-                    <option value="Validado" ${estadoVal === 'Validado' ? 'selected' : ''}>Validado</option>
-                    <option value="Pendiente" ${estadoVal === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                    <option value="Borrador" ${estadoVal === 'Borrador' ? 'selected' : ''}>Borrador</option>
-                    <option value="Retirado" ${estadoVal === 'Retirado' ? 'selected' : ''}>Retirado</option>
-                </select>
-            </td>
             <td>
                 <div style="display:flex; gap:0.4rem; align-items:center;">
                     <button class="btn-admin-act-edit" 
@@ -451,8 +527,30 @@ function abrirFormularioEspecie() {
     document.getElementById('form-esp-desc-en').value = '';
     document.getElementById('form-esp-curioso-es').value = '';
     document.getElementById('form-esp-curioso-en').value = '';
-    document.getElementById('form-esp-imagen').value = 'LOGOO.png';
-    document.getElementById('form-esp-audio').value = '';
+
+    // Reset de archivo imagen y preview
+    const fileImg = document.getElementById('form-esp-file-imagen');
+    if (fileImg) fileImg.value = '';
+    const hiddenImg = document.getElementById('form-esp-imagen');
+    if (hiddenImg) hiddenImg.value = 'LOGOO.png';
+    const previewImg = document.getElementById('preview-esp-imagen');
+    if (previewImg) previewImg.src = 'assets/img/LOGOO.png';
+    const previewImgName = document.getElementById('preview-esp-imagen-name');
+    if (previewImgName) previewImgName.innerText = 'LOGOO.png (Por defecto)';
+
+    // Reset de archivo audio y preview
+    const fileAud = document.getElementById('form-esp-file-audio');
+    if (fileAud) fileAud.value = '';
+    const hiddenAud = document.getElementById('form-esp-audio');
+    if (hiddenAud) hiddenAud.value = '';
+    const previewAudPlayer = document.getElementById('preview-esp-audio-player');
+    if (previewAudPlayer) {
+        previewAudPlayer.src = '';
+        previewAudPlayer.style.display = 'none';
+    }
+    const previewAudName = document.getElementById('preview-esp-audio-name');
+    if (previewAudName) previewAudName.innerText = 'Sin audio seleccionado';
+
     document.getElementById('form-esp-endemica').checked = false;
     document.getElementById('modal-form-especie').classList.add('active');
 }
@@ -478,8 +576,46 @@ function editarEspecieModal(esp) {
     document.getElementById('form-esp-desc-en').value = esp.descripcionEn || '';
     document.getElementById('form-esp-curioso-es').value = esp.datoCuriosoEs || '';
     document.getElementById('form-esp-curioso-en').value = esp.datoCuriosoEn || '';
-    document.getElementById('form-esp-imagen').value = esp.imagen || 'LOGOO.png';
-    document.getElementById('form-esp-audio').value = esp.audio || '';
+
+    // Cargar archivo y preview de imagen
+    const fileImg = document.getElementById('form-esp-file-imagen');
+    if (fileImg) fileImg.value = '';
+    const imgVal = esp.imagen || 'LOGOO.png';
+    const hiddenImg = document.getElementById('form-esp-imagen');
+    if (hiddenImg) hiddenImg.value = imgVal;
+    const previewImg = document.getElementById('preview-esp-imagen');
+    if (previewImg) {
+        previewImg.src = (imgVal.startsWith('data:') || imgVal.startsWith('http')) ? imgVal : `assets/img/${imgVal}`;
+        previewImg.onerror = function() { this.src = 'assets/img/LOGOO.png'; };
+    }
+    const previewImgName = document.getElementById('preview-esp-imagen-name');
+    if (previewImgName) {
+        previewImgName.innerText = imgVal.split('/').pop() || imgVal;
+    }
+
+    // Cargar archivo y preview de audio
+    const fileAud = document.getElementById('form-esp-file-audio');
+    if (fileAud) fileAud.value = '';
+    const audVal = esp.audio || '';
+    const hiddenAud = document.getElementById('form-esp-audio');
+    if (hiddenAud) hiddenAud.value = audVal;
+    const previewAudPlayer = document.getElementById('preview-esp-audio-player');
+    const previewAudName = document.getElementById('preview-esp-audio-name');
+    if (audVal) {
+        if (previewAudName) previewAudName.innerText = `🔊 ${audVal.split('/').pop() || audVal}`;
+        if (previewAudPlayer) {
+            previewAudPlayer.src = (audVal.startsWith('data:') || audVal.startsWith('http')) ? audVal : `assets/audio/${audVal}`;
+            previewAudPlayer.style.display = 'block';
+            previewAudPlayer.load();
+        }
+    } else {
+        if (previewAudName) previewAudName.innerText = 'Sin audio asignado';
+        if (previewAudPlayer) {
+            previewAudPlayer.style.display = 'none';
+            previewAudPlayer.src = '';
+        }
+    }
+
     document.getElementById('form-esp-endemica').checked = esp.esEndemica || false;
     document.getElementById('modal-form-especie').classList.add('active');
 }
@@ -487,6 +623,37 @@ function editarEspecieModal(esp) {
 async function guardarEspecieAdmin(e) {
     if (e) e.preventDefault();
     const id = parseInt(document.getElementById('form-esp-id').value) || 0;
+
+    const fileImgInput = document.getElementById('form-esp-file-imagen');
+    const fileAudInput = document.getElementById('form-esp-file-audio');
+    const hiddenImg = document.getElementById('form-esp-imagen');
+    const hiddenAud = document.getElementById('form-esp-audio');
+
+    let finalImg = hiddenImg ? hiddenImg.value : 'LOGOO.png';
+    let finalAud = hiddenAud ? hiddenAud.value : '';
+
+    // Subir imagen a Supabase Storage de forma asíncrona si hay un nuevo archivo seleccionado
+    if (fileImgInput && fileImgInput.files && fileImgInput.files[0]) {
+        const file = fileImgInput.files[0];
+        const uploadedUrl = await subirArchivoSupabaseStorage('cotapata-media', file, 'especies/img/');
+        if (uploadedUrl) {
+            finalImg = uploadedUrl;
+        } else {
+            finalImg = hiddenImg.value || file.name;
+        }
+    }
+
+    // Subir audio a Supabase Storage de forma asíncrona si hay un nuevo archivo seleccionado
+    if (fileAudInput && fileAudInput.files && fileAudInput.files[0]) {
+        const file = fileAudInput.files[0];
+        const uploadedUrl = await subirArchivoSupabaseStorage('cotapata-media', file, 'especies/audio/');
+        if (uploadedUrl) {
+            finalAud = uploadedUrl;
+        } else {
+            finalAud = hiddenAud.value || file.name;
+        }
+    }
+
     const body = {
         id: id,
         tipo: document.getElementById('form-esp-tipo').value,
@@ -498,8 +665,9 @@ async function guardarEspecieAdmin(e) {
         descripcionEn: (document.getElementById('form-esp-desc-en').value || '').trim(),
         datoCuriosoEs: (document.getElementById('form-esp-curioso-es').value || '').trim(),
         datoCuriosoEn: (document.getElementById('form-esp-curioso-en').value || '').trim(),
-        imagen: (document.getElementById('form-esp-imagen').value || '').trim() || 'LOGOO.png',
-        audio: (document.getElementById('form-esp-audio').value || '').trim(),
+        imagen: finalImg || 'LOGOO.png',
+        audio: finalAud || '',
+        tieneAudio: !!finalAud,
         esEndemica: document.getElementById('form-esp-endemica').checked,
         estadoValidacion: 'Validado'
     };
@@ -510,6 +678,24 @@ async function guardarEspecieAdmin(e) {
     }
 
     console.log(`[DEBUG Admin] Guardando especie #${id || 'NUEVA'} en Supabase / Backend...`, body);
+
+    // Intentar actualización directa en Supabase si está disponible
+    try {
+        const client = obtenerClienteSupabase();
+        if (client && id > 0) {
+            await client.from('especies').update({
+                tipo: body.tipo,
+                nombre_comun: body.nombreEs,
+                nombre_cientifico: body.cientifico,
+                descripcion: body.descripcionEs,
+                imagen_url: body.imagen,
+                audio_url: body.audio,
+                es_endemica: body.esEndemica
+            }).eq('id', id);
+        }
+    } catch(errDb) {
+        console.warn('[Supabase DB] Nota sobre actualización directa:', errDb);
+    }
 
     let guardadoApiOk = false;
     try {
@@ -597,31 +783,55 @@ async function eliminarEspecieAdmin(id, nombre) {
 async function cargarAdmServicios() {
     const tbody = document.getElementById('tbody-adm-servicios');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Cargando servicios...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:var(--text-muted);">Cargando servicios comunitarios...</td></tr>';
 
     try {
-        const res = await fetch('api/admin/servicios');
-        const list = await res.json();
+        let list = [];
+        try {
+            const res = await fetch('api/admin/servicios');
+            if (res.ok) list = await res.json();
+        } catch (e) {}
+
+        if (!Array.isArray(list) || list.length === 0) {
+            if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios) && AppState.servicios.length > 0) {
+                list = AppState.servicios;
+            } else if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined') {
+                list = DATASET_SERVICIOS_DEFAULT;
+            }
+        }
+
         tbody.innerHTML = '';
+        if (!list || list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:var(--text-muted);">No hay servicios registrados actualmente.</td></tr>';
+            return;
+        }
 
         list.forEach(s => {
             const tr = document.createElement('tr');
+            const tarifa = s.precios || s.precio || 'A convenir';
+            const catLabel = s.nombreCategoria || s.tipoServicio || 'Comunitario';
+            const catIcon = s.iconoCategoria || '📌';
+            const sNombre = (s.nombre || 'Servicio sin título').replace(/'/g, "\\'");
+
             tr.innerHTML = `
                 <td><strong>#${s.id}</strong></td>
-                <td>${s.nombre}</td>
-                <td>${s.comunidad}</td>
-                <td>${s.iconoCategoria || ''} ${s.nombreCategoria || ''}</td>
+                <td><strong>${s.nombre}</strong></td>
+                <td>${s.comunidad || 'Cotapata'}</td>
+                <td>${catIcon} ${catLabel}</td>
+                <td><span style="font-weight:600; color:var(--primary); font-size:0.82rem;">${tarifa}</span></td>
                 <td>
-                    <select class="form-control" style="padding:0.25rem 0.5rem; font-size:0.75rem;" 
-                            onchange="cambiarEstadoEntidad('servicios', ${s.id}, this.value)">
-                        <option value="Validado" ${s.estadoValidacion === 'Validado' ? 'selected' : ''}>Validado</option>
-                        <option value="Pendiente" ${s.estadoValidacion === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
-                        <option value="Borrador" ${s.estadoValidacion === 'Borrador' ? 'selected' : ''}>Borrador</option>
-                        <option value="Retirado" ${s.estadoValidacion === 'Retirado' ? 'selected' : ''}>Retirado</option>
-                    </select>
-                </td>
-                <td>
-                    <span style="font-size:0.75rem; color:var(--success); font-weight:700;">✓ Autorizado</span>
+                    <div style="display:flex; gap:0.4rem; align-items:center;">
+                        <button class="btn-admin-act-edit" 
+                                style="padding:0.26rem 0.6rem; font-size:0.74rem; font-weight:600; border-radius:4px; background:#2980b9; color:#fff; border:none; cursor:pointer;" 
+                                onclick="editarServicioAdminModal(${s.id})" title="Editar este servicio">
+                            ✏️ Editar
+                        </button>
+                        <button class="btn-admin-act-del" 
+                                style="padding:0.26rem 0.6rem; font-size:0.74rem; font-weight:600; border-radius:4px; background:#c0392b; color:#fff; border:none; cursor:pointer;" 
+                                onclick="eliminarServicioAdmin(${s.id}, '${sNombre}')" title="Eliminar definitivamente este servicio">
+                            🗑️ Quitar
+                        </button>
+                    </div>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -629,6 +839,94 @@ async function cargarAdmServicios() {
     } catch (err) {
         tbody.innerHTML = '<tr><td colspan="6" style="color:var(--danger); text-align:center;">Error cargando servicios.</td></tr>';
     }
+}
+
+async function eliminarServicioAdmin(id, nombre) {
+    if (!id) return;
+    const confirmacion = confirm(`¿Estás seguro de que deseas eliminar permanentemente el servicio "${nombre || '#' + id}" (#${id})?\n\nEsta acción quitará el registro del catálogo y de la base de datos.`);
+    if (!confirmacion) return;
+
+    console.log(`[DEBUG Admin] Solicitando eliminación de servicio #${id} (${nombre})...`);
+
+    // 1. Intentar eliminar en Supabase si está disponible
+    try {
+        const client = obtenerClienteSupabase();
+        if (client) {
+            await client.from('servicios').delete().eq('id', id);
+        }
+    } catch(e) {}
+
+    // 2. Intentar eliminar en backend API
+    try {
+        await fetch(`api/admin/servicios/eliminar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': AdminState.csrfToken
+            },
+            body: JSON.stringify({ id: id })
+        });
+    } catch (err) {}
+
+    // 3. Eliminar del dataset en memoria y local
+    if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
+        AppState.servicios = AppState.servicios.filter(s => s.id != id);
+    }
+    if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined' && Array.isArray(DATASET_SERVICIOS_DEFAULT)) {
+        const idx = DATASET_SERVICIOS_DEFAULT.findIndex(s => s.id == id);
+        if (idx !== -1) DATASET_SERVICIOS_DEFAULT.splice(idx, 1);
+    }
+    try {
+        let custom = JSON.parse(localStorage.getItem('cotapata_custom_servicios') || '[]');
+        custom = custom.filter(s => s.id != id);
+        localStorage.setItem('cotapata_custom_servicios', JSON.stringify(custom));
+    } catch(e) {}
+
+    cargarAdmServicios();
+    if (typeof renderizarServicios === 'function') {
+        renderizarServicios();
+    }
+
+    alert(`✓ El servicio "${nombre}" (#${id}) ha sido eliminado del catálogo.`);
+}
+
+function editarServicioAdminModal(id) {
+    let s = null;
+    if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
+        s = AppState.servicios.find(item => item.id == id);
+    }
+    if (!s && typeof DATASET_SERVICIOS_DEFAULT !== 'undefined') {
+        s = DATASET_SERVICIOS_DEFAULT.find(item => item.id == id);
+    }
+    if (!s) {
+        alert('No se encontró la información del servicio seleccionado.');
+        return;
+    }
+
+    const nuevoNombre = prompt('Editar nombre del servicio:', s.nombre);
+    if (nuevoNombre === null) return;
+    const nuevoPrecio = prompt('Editar tarifa / precio del servicio:', s.precios || s.precio || '50 Bs');
+    if (nuevoPrecio === null) return;
+
+    s.nombre = nuevoNombre.trim() || s.nombre;
+    s.precios = nuevoPrecio.trim() || s.precios;
+    s.precio = s.precios;
+
+    // Actualizar en localStorage
+    try {
+        let custom = JSON.parse(localStorage.getItem('cotapata_custom_servicios') || '[]');
+        const idx = custom.findIndex(item => item.id == id);
+        if (idx !== -1) {
+            custom[idx] = Object.assign({}, custom[idx], s);
+            localStorage.setItem('cotapata_custom_servicios', JSON.stringify(custom));
+        }
+    } catch(e) {}
+
+    cargarAdmServicios();
+    if (typeof renderizarServicios === 'function') {
+        renderizarServicios();
+    }
+    alert('✓ Servicio actualizado correctamente.');
 }
 
 // ==============================================================================
@@ -656,78 +954,109 @@ async function cambiarEstadoEntidad(entidad, id, nuevoEstado) {
 }
 
 // ==============================================================================
-// 4. AUTORIZACIONES COMUNITARIAS Y MÉTRICAS
+// 4. PESTAÑA ADMINISTRATIVA: USUARIOS REGISTRADOS (CONEXIÓN SUPABASE)
 // ==============================================================================
-async function cargarAdmAutorizaciones() {
-    const tbody = document.getElementById('tbody-adm-autorizaciones');
+async function cargarAdmUsuarios() {
+    const tbody = document.getElementById('tbody-adm-usuarios');
+    const badgeTotal = document.getElementById('adm-usuarios-total');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Cargando autorizaciones...</td></tr>';
 
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1.5rem; color:var(--text-muted);">🔄 Consultando usuarios en Supabase...</td></tr>';
+
+    let list = [];
+
+    // 1. Consultar usuarios en Supabase
     try {
-        const res = await fetch('api/admin/autorizaciones');
-        const list = await res.json();
-        tbody.innerHTML = '';
+        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+        if (client) {
+            const { data, error } = await client
+                .from('usuarios')
+                .select('*')
+                .order('id', { ascending: true });
 
-        list.forEach(a => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><code>${a.codigo}</code></td>
-                <td><strong>${a.tipoEntidad}</strong></td>
-                <td>${a.otorgadoPor}</td>
-                <td>${a.comunidad}</td>
-                <td>${a.fechaAutorizacion}</td>
-                <td><span class="status-badge ${a.vigente ? 'Validado' : 'Retirado'}">${a.vigente ? 'Vigente' : 'Inactiva'}</span></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--danger); text-align:center;">Error cargando autorizaciones.</td></tr>';
+            if (!error && Array.isArray(data) && data.length > 0) {
+                list = data;
+                console.log(`✓ [Admin Usuarios] ${list.length} usuarios recuperados de Supabase.`);
+            } else if (error) {
+                console.warn('[Admin Usuarios] Consulta a tabla usuarios en Supabase:', error.message);
+            }
+        }
+    } catch (errSup) {
+        console.warn('[Admin Usuarios] Error en cliente Supabase:', errSup);
     }
-}
 
-async function cargarAdmMetricas() {
-    const statsContainer = document.getElementById('adm-metricas-content');
-    if (!statsContainer) return;
-    statsContainer.innerHTML = '<p style="text-align:center;">Calculando indicadores agregados...</p>';
+    // 2. Fallback / Sincronización con usuarios de LocalStorage para resiliencia total
+    if (!list || list.length === 0) {
+        try {
+            if (typeof obtenerUsuariosRegistrados === 'function') {
+                list = obtenerUsuariosRegistrados();
+            } else {
+                const stored = localStorage.getItem('cotapata_registered_users');
+                list = stored ? JSON.parse(stored) : [];
+            }
+        } catch(e) {
+            list = [];
+        }
+    }
 
-    try {
-        const res = await fetch('api/admin/metricas');
-        const data = await res.json();
+    tbody.innerHTML = '';
+    if (badgeTotal) {
+        badgeTotal.innerText = `${list.length} persona${list.length !== 1 ? 's' : ''} registrada${list.length !== 1 ? 's' : ''}`;
+    }
 
-        let catHtml = '';
-        if (data.consultasPorCategoria && Array.isArray(data.consultasPorCategoria)) {
-            data.consultasPorCategoria.forEach(c => {
-                catHtml += `<li><strong>${c.categoria}:</strong> ${c.total} consultas anónimas</li>`;
-            });
+    if (!list || list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem; color:var(--text-muted);">No se encontraron usuarios registrados en la base de datos.</td></tr>';
+        return;
+    }
+
+    list.forEach((u, index) => {
+        const tr = document.createElement('tr');
+        const idDisplay = u.id ? `#${u.id}` : `#${index + 1}`;
+        
+        const esResidente = (u.tipo || '').toLowerCase() === 'residente' || (u.rol || '').toLowerCase().includes('residente');
+        const rolLabel = esResidente ? 'Residente del lugar' : 'Turista/Visitante';
+        const rolBadgeClass = esResidente ? 'badge-residente' : 'badge-turista';
+        const rolIcon = esResidente ? '🏡' : '🎒';
+
+        let comunidad = '-';
+        if (esResidente) {
+            comunidad = u.comunidad || 'Cotapata';
         }
 
-        let topHtml = '';
-        if (data.topRecursos && Array.isArray(data.topRecursos)) {
-            data.topRecursos.forEach(r => {
-                topHtml += `<li><strong>${r.nombre}</strong> (${r.tipo}): ${r.visitas} consultas</li>`;
-            });
+        // Formato legible: DD/MM/YYYY a las HH:MM
+        let fechaStr = 'Reciente';
+        const rawFecha = u.fecha_registro || u.fechaRegistro || u.created_at;
+        if (rawFecha) {
+            try {
+                const d = new Date(rawFecha);
+                if (!isNaN(d.getTime())) {
+                    const dia = String(d.getDate()).padStart(2, '0');
+                    const mes = String(d.getMonth() + 1).padStart(2, '0');
+                    const anio = d.getFullYear();
+                    const hora = String(d.getHours()).padStart(2, '0');
+                    const mins = String(d.getMinutes()).padStart(2, '0');
+                    fechaStr = `${dia}/${mes}/${anio} a las ${hora}:${mins}`;
+                }
+            } catch(e) {}
         }
 
-        statsContainer.innerHTML = `
-            <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:1rem;">
-                <div class="card-item" style="padding:1.2rem;">
-                    <h4 style="color:var(--primary); margin-bottom:0.6rem;">📊 Consultas por Categoría</h4>
-                    <ul style="padding-left:1.2rem; font-size:0.85rem; line-height:1.7;">
-                        ${catHtml || '<li>Sin registros aún</li>'}
-                    </ul>
-                </div>
-                <div class="card-item" style="padding:1.2rem;">
-                    <h4 style="color:var(--primary); margin-bottom:0.6rem;">⭐ Recursos Más Populares</h4>
-                    <ul style="padding-left:1.2rem; font-size:0.85rem; line-height:1.7;">
-                        ${topHtml || '<li>Sin registros aún</li>'}
-                    </ul>
-                </div>
-            </div>
-            <div class="rule-tip" style="margin-top:1rem; font-size:0.8rem;">
-                🔒 <strong>Privacidad Ética Garantizada:</strong> El sistema no almacena nombres, números de carnet de identidad ni números de teléfono de visitantes, cumpliendo estrictamente con los lineamientos del SERNAP y la ética salesiana del proyecto.
-            </div>
+        tr.innerHTML = `
+            <td>
+                <strong style="color:var(--primary); font-family:monospace; font-size:0.92rem;">${idDisplay}</strong>
+                <span style="font-size:0.82rem; color:var(--text-dark); margin-left:0.4rem; font-weight:600;">${u.username || u.nombreCompleto || 'Usuario'}</span>
+            </td>
+            <td>
+                <span class="user-role-badge ${rolBadgeClass}">
+                    ${rolIcon} ${rolLabel}
+                </span>
+            </td>
+            <td>
+                <strong style="color:${comunidad === '-' ? 'var(--text-muted)' : 'var(--primary-dark)'}; font-size:0.86rem;">${comunidad}</strong>
+            </td>
+            <td style="color:var(--text-dark); font-size:0.82rem; white-space:nowrap;">
+                🕒 ${fechaStr}
+            </td>
         `;
-    } catch (err) {
-        statsContainer.innerHTML = '<p style="color:var(--danger);">Error al cargar las métricas del sistema.</p>';
-    }
+        tbody.appendChild(tr);
+    });
 }

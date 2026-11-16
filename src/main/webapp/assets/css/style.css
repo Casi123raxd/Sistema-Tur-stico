@@ -73,31 +73,31 @@ button, input, select, textarea {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(22, 54, 32, 0.94);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.2);
+    background: rgba(18, 46, 28, 0.88) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     color: var(--text-light);
     transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-/* Modos de Color Dinámicos por Rol para la Barra de Navegación */
+/* Modos de Color Dinámicos por Rol para la Barra de Navegación con Glassmorphism */
 .main-header.role-turista {
-    background-color: rgba(22, 54, 32, 0.94); /* Verde oscuro clásico de bosque nublado */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: rgba(18, 46, 28, 0.88) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .main-header.role-residente {
-    background-color: rgba(36, 92, 52, 0.95); /* Tono verde más claro, cálido y armonioso para Residente / Vendedor */
-    border-bottom: 1px solid rgba(46, 204, 113, 0.45);
-    box-shadow: 0 4px 18px rgba(18, 62, 32, 0.35);
+    background-color: rgba(30, 85, 46, 0.88) !important;
+    border-bottom: 1px solid rgba(46, 204, 113, 0.4);
+    box-shadow: 0 4px 22px rgba(18, 62, 32, 0.35);
 }
 
 .main-header.role-admin {
-    background-color: rgba(14, 60, 55, 0.96); /* Tono verde esmeralda profundo / verde petróleo distinguido y jerárquico */
+    background-color: rgba(12, 54, 50, 0.90) !important;
     border-bottom: 1px solid rgba(243, 156, 18, 0.48);
-    box-shadow: 0 4px 22px rgba(8, 42, 38, 0.5);
+    box-shadow: 0 4px 24px rgba(8, 42, 38, 0.5);
 }
 
 .header-container {
@@ -349,9 +349,10 @@ button, input, select, textarea {
     right: 0;
     bottom: 0;
     height: calc(100vh - 62px);
-    background: rgba(18, 45, 26, 0.94);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: rgba(14, 38, 22, 0.90) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 999;
     display: flex;
     align-items: flex-start;
@@ -1828,92 +1829,264 @@ button, input, select, textarea {
 }
 
 /* ==============================================================================
-   PANEL ADMINISTRATIVO MODAL & DASHBOARD
+   PANEL ADMINISTRATIVO MODAL & DASHBOARD (Z-INDEX 9999 Y SUPERPOSICIONES PERFECTAS)
    ============================================================================== */
+#modal-admin-panel {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    background: rgba(10, 25, 15, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem;
+}
+
+#modal-admin-panel.active {
+    display: flex !important;
+}
+
 .admin-modal-sheet {
-    max-width: 900px;
+    background: #ffffff !important;
+    color: var(--text-dark) !important;
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 1000px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.25);
+    border: 1px solid var(--border-color);
 }
 
 .admin-header-bar {
-    background: var(--primary-dark);
-    color: #ffffff;
+    background: var(--primary-dark) !important;
+    color: #ffffff !important;
     padding: 1rem 1.5rem;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .admin-nav-tabs {
     display: flex;
-    background: var(--bg-light);
-    border-bottom: 1px solid var(--border-color);
-    padding: 0.5rem 1rem;
-    gap: 0.5rem;
+    align-items: center;
+    background: #f2f7f4 !important;
+    border-bottom: 2px solid #d4e7da !important;
+    padding: 0.85rem 1.6rem;
+    gap: 0.85rem;
     overflow-x: auto;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 20;
 }
 
 .admin-tab {
-    padding: 0.4rem 0.9rem;
+    padding: 0.6rem 1.6rem;
     border-radius: var(--radius-sm);
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 0.8rem;
+    border: 1.5px solid #c2dbcb;
+    background: #ffffff;
+    color: #1f472b;
+    font-weight: 700;
+    font-size: 0.88rem;
     cursor: pointer;
     white-space: nowrap;
-    transition: var(--transition);
+    transition: all 0.22s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.2px;
 }
 
 .admin-tab:hover {
-    background: rgba(35, 80, 48, 0.08);
+    background: #e4f2e8;
+    border-color: var(--primary);
+    color: var(--primary-dark);
+    transform: translateY(-1px);
 }
 
 .admin-tab.active {
-    background: var(--primary);
-    color: #ffffff;
+    background: var(--primary-dark) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-dark) !important;
+    box-shadow: 0 4px 12px rgba(27, 56, 36, 0.35);
 }
 
 .admin-tab-pane {
     display: none;
-    padding: 1.2rem;
+    padding: 1.4rem;
+    overflow-y: auto;
+    flex: 1;
+    background: #ffffff !important;
 }
 
 .admin-tab-pane.active {
-    display: block;
+    display: block !important;
 }
 
 .admin-table-wrap {
     width: 100%;
     overflow-x: auto;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-color);
+    border-radius: 12px !important;
+    border: 1.5px solid #d0e4d6 !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05) !important;
     margin-top: 1rem;
+    background: #ffffff;
 }
 
 .admin-table {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.84rem;
     text-align: left;
+    background: #ffffff;
 }
 
 .admin-table th {
-    background: var(--bg-light);
-    padding: 0.75rem 0.8rem;
+    background: #143820 !important; /* Verde oscuro elegante */
+    color: #ffffff !important;
+    padding: 0.9rem 1.1rem !important;
     font-weight: 700;
-    color: var(--primary);
-    border-bottom: 2px solid var(--border-color);
+    font-size: 0.81rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 2.5px solid #0b2213 !important;
+    white-space: nowrap;
+}
+
+.admin-table th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.admin-table th:last-child {
+    border-top-right-radius: 10px;
 }
 
 .admin-table td {
-    padding: 0.65rem 0.8rem;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0.8rem 1.1rem;
+    border-bottom: 1px solid #e5eee7;
+    vertical-align: middle;
+    color: #2c3e50;
+    font-size: 0.83rem;
 }
 
-.admin-table tr:hover {
-    background: #f8fbf9;
+/* Zebra-striping sutil e intercalado */
+.admin-table tbody tr:nth-child(even) {
+    background-color: #f7faf8 !important;
+}
+
+.admin-table tbody tr:nth-child(odd) {
+    background-color: #ffffff !important;
+}
+
+.admin-table tbody tr:hover {
+    background-color: #eaf4ed !important;
+    transition: background-color 0.2s ease;
+}
+
+.admin-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.admin-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+/* Badges de Roles de Usuario */
+.user-role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.7rem;
+    border-radius: 12px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.user-role-badge.badge-turista {
+    background: #e3f2fd !important;
+    color: #1565c0 !important;
+    border: 1px solid #90caf9 !important;
+}
+
+.user-role-badge.badge-residente {
+    background: #e8f5e9 !important;
+    color: #1b5e20 !important;
+    border: 1px solid #a5d6a7 !important;
+}
+
+.user-role-badge.badge-admin {
+    background: #fdf2e9 !important;
+    color: #d35400 !important;
+    border: 1px solid #edbb99 !important;
+}
+
+/* Modales Hijos que se superponen al Panel de Administración */
+#modal-form-especie {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 10005 !important;
+    background: rgba(0, 0, 0, 0.75) !important;
+    backdrop-filter: blur(6px) !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+#modal-form-especie.active {
+    display: flex !important;
+}
+
+#modal-mis-servicios {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    background: rgba(10, 25, 15, 0.82) !important;
+    backdrop-filter: blur(8px) !important;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+#modal-mis-servicios.active {
+    display: flex !important;
+}
+
+/* Botón Mis Servicios en Nav */
+.btn-mis-servicios-nav {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.18) 0%, rgba(41, 128, 185, 0.28) 100%);
+    border: 1.2px solid #3498db;
+    color: #ffffff;
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-mis-servicios-nav:hover {
+    background: #2980b9;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(41, 128, 185, 0.4);
 }
 
 .status-badge {
@@ -2310,4 +2483,123 @@ button, input, select, textarea {
     .rules-grid {
         grid-template-columns: repeat(3, 1fr);
     }
+}
+
+/* ==============================================================================
+   ANIMACIONES DE ENTRADA (SCROLL REVEAL SUAVE Y PROGRESIVO)
+   ============================================================================== */
+.reveal-fade-up {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.reveal-fade-up.is-revealed {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* ==============================================================================
+   EFECTOS HOVER DINÁMICOS EN TODAS LAS TARJETAS (ELEVACIÓN & SOMBRA PRONUNCIADA)
+   ============================================================================== */
+.card-item, 
+.service-card, 
+.route-card, 
+.welcome-card, 
+.animal-card, 
+.feature-card, 
+.atractivo-card {
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                border-color 0.3s ease !important;
+    will-change: transform, box-shadow;
+}
+
+.card-item:hover, 
+.service-card:hover, 
+.route-card:hover, 
+.welcome-card:hover, 
+.animal-card:hover, 
+.feature-card:hover, 
+.atractivo-card:hover {
+    transform: translateY(-6px) scale(1.015) !important;
+    box-shadow: 0 18px 40px rgba(18, 48, 26, 0.16), 0 0 0 1.5px rgba(136, 171, 117, 0.45) !important;
+    border-color: #88ab75 !important;
+}
+
+/* Zoom progresivo en imágenes internas de tarjetas al pasar el cursor */
+.card-item:hover img, 
+.service-card:hover img, 
+.route-card:hover img, 
+.welcome-card:hover img, 
+.animal-card:hover img, 
+.atractivo-card:hover img {
+    transform: scale(1.06);
+    filter: brightness(1.03) contrast(1.02);
+}
+
+.card-item img, 
+.service-card img, 
+.route-card img, 
+.welcome-card img, 
+.animal-card img, 
+.atractivo-card img {
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+}
+
+/* ==============================================================================
+   INTERACCIÓN Y PULSO SUAVE EN BOTONES UNIVERSALES
+   ============================================================================== */
+.btn-primary, 
+.btn-secondary, 
+.btn-outline, 
+.btn-filter, 
+.admin-tab, 
+.btn-admin-act-edit, 
+.btn-admin-act-del, 
+.btn-admin-header, 
+.btn-mis-servicios-nav, 
+.cta-button, 
+.modal-close-btn, 
+.btn-tts {
+    transition: all 0.24s cubic-bezier(0.2, 0.9, 0.3, 1) !important;
+}
+
+.btn-primary:hover, 
+.btn-secondary:hover, 
+.btn-outline:hover, 
+.btn-admin-act-edit:hover, 
+.btn-admin-act-del:hover, 
+.btn-mis-servicios-nav:hover, 
+.cta-button:hover, 
+.btn-tts:hover {
+    transform: translateY(-2.5px) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18) !important;
+    filter: brightness(1.05);
+}
+
+.btn-primary:active, 
+.btn-secondary:active, 
+.btn-outline:active, 
+.btn-admin-act-edit:active, 
+.btn-admin-act-del:active, 
+.btn-mis-servicios-nav:active, 
+.cta-button:active {
+    transform: translateY(0) scale(0.96) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ==============================================================================
+   TIPOGRAFÍA ARMÓNICA Y ESPACIADO ORDENADO
+   ============================================================================== */
+.section-header h2 {
+    letter-spacing: -0.3px;
+    line-height: 1.25;
+}
+
+.section-header p {
+    line-height: 1.65;
+    max-width: 680px;
+    margin: 0.5rem auto 0;
 }

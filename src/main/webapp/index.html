@@ -49,10 +49,13 @@
                 <a href="#recomendaciones" class="nav-link" data-section="recomendaciones" data-i18n="navRecomendaciones">Recomendaciones</a>
             </nav>
 
-            <!-- Acciones: Publicar (Residentes), Cambiar Usuario, Idioma y Menú Móvil -->
+            <!-- Acciones: Publicar (Residentes), Mis Servicios, Cambiar Usuario, Idioma y Menú Móvil -->
             <div class="header-actions">
                 <button class="btn-publicar-nav" id="btn-nav-publicar" style="display:none;" onclick="abrirModalPublicarServicio()" title="Publicar Servicio Comunitario">
                     <span>📢</span> <span class="btn-pub-text">Publicar Servicio</span>
+                </button>
+                <button class="btn-mis-servicios-nav" id="btn-nav-mis-servicios" style="display:none;" onclick="abrirModalMisServicios()" title="Ver y gestionar mis publicaciones">
+                    <span>📋</span> <span>Mis Servicios</span>
                 </button>
                 <button class="btn-cambiar-usuario" id="btn-cambiar-usuario" onclick="ejecutarLogoutUsuario()" title="Cambiar de usuario o perfil">Cambiar de usuario</button>
                 <button class="lang-btn active" data-lang="es" onclick="cambiarIdioma('es')">ES</button>
@@ -85,6 +88,11 @@
                 <!-- Botón de publicar para residentes en móvil -->
                 <a href="#" class="mobile-nav-link mobile-nav-pub" id="mobile-nav-publicar" style="display:none;" onclick="abrirModalPublicarServicio(); cerrarMenuMovil(); return false;">
                     📢 Publicar Servicio Comunitario
+                </a>
+
+                <!-- Botón para ver y gestionar mis servicios (vendedor) en móvil -->
+                <a href="#" class="mobile-nav-link" id="mobile-nav-mis-servicios" style="display:none; color:#3498db; font-weight:700;" onclick="abrirModalMisServicios(); cerrarMenuMovil(); return false;">
+                    📋 Mis Servicios Publicados
                 </a>
 
                 <!-- Botón Cambiar de Usuario claramente visible en móvil (texto limpio sin emojis) -->
@@ -489,11 +497,16 @@
     <div class="modal-backdrop" id="modal-publicar-servicio">
         <div class="modal-sheet" style="max-width:580px;">
             <button class="modal-close-btn" onclick="cerrarModalPublicarServicio()" aria-label="Cerrar">×</button>
-            <div style="background:var(--primary); color:#fff; padding:1.2rem 1.6rem; border-radius:18px 18px 0 0;">
-                <h3 style="font-size:1.25rem; font-weight:700;">📢 Publicar Servicio Comunitario</h3>
-                <p style="font-size:0.8rem; opacity:0.88; margin-top:0.2rem;" id="pub-residente-sub">
-                    Panel de Emprendimiento Local · Parque Nacional Cotapata
-                </p>
+            <div style="background:var(--primary); color:#fff; padding:1.2rem 1.6rem; border-radius:18px 18px 0 0; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="font-size:1.25rem; font-weight:700;">📢 Publicar Servicio Comunitario</h3>
+                    <p style="font-size:0.8rem; opacity:0.88; margin-top:0.2rem;" id="pub-residente-sub">
+                        Panel de Emprendimiento Local · Parque Nacional Cotapata
+                    </p>
+                </div>
+                <button type="button" onclick="cerrarModalPublicarServicio(); abrirModalMisServicios();" style="background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.35); color:#fff; font-size:0.75rem; font-weight:700; padding:0.35rem 0.8rem; border-radius:var(--radius-pill); cursor:pointer;">
+                    📋 Ver Mis Publicaciones
+                </button>
             </div>
             
             <form id="form-publicar-servicio" onsubmit="guardarPublicacionServicio(event)" style="padding:1.6rem;">
@@ -551,6 +564,32 @@
     </div>
 
     <!-- ==============================================================================
+         MODAL DE GESTIÓN PARA EL VENDEDOR (MIS SERVICIOS PUBLICADOS)
+         ============================================================================== -->
+    <div class="modal-backdrop" id="modal-mis-servicios">
+        <div class="modal-sheet" style="max-width:850px; padding:1.5rem; background:#ffffff;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--border-color); padding-bottom:0.8rem; margin-bottom:1rem;">
+                <div>
+                    <h3 style="color:var(--primary); font-size:1.25rem; margin:0; display:flex; align-items:center; gap:0.4rem;">
+                        <span>📋</span> <span>Mis Servicios Publicados</span>
+                    </h3>
+                    <span id="vendedor-servicios-sub" style="font-size:0.78rem; color:var(--text-muted);">Comunario anfitrión / Vendedor</span>
+                </div>
+                <div style="display:flex; gap:0.6rem; align-items:center;">
+                    <button class="btn-primary" style="font-size:0.78rem; padding:0.38rem 0.85rem;" onclick="cerrarModalMisServicios(); abrirModalPublicarServicio();">
+                        + Publicar Nuevo
+                    </button>
+                    <button class="modal-close-btn" style="position:static;" onclick="cerrarModalMisServicios()">×</button>
+                </div>
+            </div>
+
+            <div id="vendedor-servicios-list" style="margin-top:0.8rem;">
+                <!-- Inyectado dinámicamente por cargarListaServiciosVendedor() -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================================
          MODAL DEL PANEL DE ADMINISTRACIÓN COMPLETO (CRUD SEGURO)
          ============================================================================== -->
     <div class="modal-backdrop" id="modal-admin-panel">
@@ -566,12 +605,11 @@
                 </div>
             </div>
 
-            <!-- Navegación de Pestañas Admin -->
+            <!-- Navegación de Pestañas Admin (Especies, Servicios, Usuarios) -->
             <div class="admin-nav-tabs">
-                <button class="admin-tab active" onclick="setPestañaAdmin('tab-adm-especies', this)">Especies</button>
-                <button class="admin-tab" onclick="setPestañaAdmin('tab-adm-servicios', this)">Servicios</button>
-                <button class="admin-tab" onclick="setPestañaAdmin('tab-adm-autorizaciones', this)">Autorizaciones</button>
-                <button class="admin-tab" onclick="setPestañaAdmin('tab-adm-metricas', this)">Métricas de Uso</button>
+                <button class="admin-tab active" onclick="setPestañaAdmin('tab-adm-especies', this)">🌿 Especies</button>
+                <button class="admin-tab" onclick="setPestañaAdmin('tab-adm-servicios', this)">🛎️ Servicios</button>
+                <button class="admin-tab" onclick="setPestañaAdmin('tab-adm-usuarios', this)">👥 Usuarios</button>
             </div>
 
             <!-- Pestaña 1: Especies Admin -->
@@ -588,7 +626,6 @@
                                 <th>Tipo</th>
                                 <th>Nombre Común</th>
                                 <th>Nombre Científico</th>
-                                <th>Estado Publicación</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -610,8 +647,8 @@
                                 <th>Servicio</th>
                                 <th>Comunidad</th>
                                 <th>Categoría</th>
-                                <th>Estado</th>
-                                <th>Autorización</th>
+                                <th>Tarifa</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tbody-adm-servicios">
@@ -621,33 +658,28 @@
                 </div>
             </div>
 
-            <!-- Pestaña 3: Autorizaciones Admin -->
-            <div id="tab-adm-autorizaciones" class="admin-tab-pane">
-                <h4 style="color:var(--primary); margin-bottom:0.8rem;">Registro de Autorizaciones y Consentimientos Informados</h4>
+            <!-- Pestaña 3: Usuarios Admin -->
+            <div id="tab-adm-usuarios" class="admin-tab-pane">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                    <h4 style="color:var(--primary); font-size:1.1rem; font-weight:700;">Directorio de Personas Registradas</h4>
+                    <span id="adm-usuarios-total" style="font-size:0.78rem; font-weight:600; color:var(--text-muted); background:#e8f4ec; padding:0.3rem 0.75rem; border-radius:12px; border:1px solid #c2dbca;">
+                        Cargando usuarios...
+                    </span>
+                </div>
                 <div class="admin-table-wrap">
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>Código</th>
-                                <th>Tipo Entidad</th>
-                                <th>Otorgado Por</th>
+                                <th>ID de Usuario</th>
+                                <th>Rol</th>
                                 <th>Comunidad</th>
-                                <th>Fecha</th>
-                                <th>Vigencia</th>
+                                <th>Fecha y Hora de Registro</th>
                             </tr>
                         </thead>
-                        <tbody id="tbody-adm-autorizaciones">
+                        <tbody id="tbody-adm-usuarios">
                             <!-- Inyectado por admin.js -->
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-            <!-- Pestaña 4: Métricas Admin -->
-            <div id="tab-adm-metricas" class="admin-tab-pane">
-                <h4 style="color:var(--primary); margin-bottom:0.8rem;">Indicadores y Estadísticas Agregadas de Consulta</h4>
-                <div id="adm-metricas-content">
-                    <!-- Inyectado por admin.js -->
                 </div>
             </div>
         </div>
@@ -713,12 +745,22 @@
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.8rem;">
                     <div class="form-group">
-                        <label class="form-label" for="form-esp-imagen">Archivo Imagen</label>
-                        <input type="text" id="form-esp-imagen" class="form-control" value="LOGOO.png">
+                        <label class="form-label" for="form-esp-file-imagen">🖼️ Archivo de Imagen (.jpg, .png)</label>
+                        <input type="file" id="form-esp-file-imagen" class="form-control" accept="image/jpeg,image/png,image/webp,image/jpg" onchange="previsualizarImagenEspecie(this)">
+                        <input type="hidden" id="form-esp-imagen" value="LOGOO.png">
+                        <div id="preview-esp-imagen-wrap" style="margin-top:0.4rem; display:flex; align-items:center; gap:0.6rem;">
+                            <img id="preview-esp-imagen" src="assets/img/LOGOO.png" alt="Vista previa imagen" style="width:48px; height:48px; object-fit:cover; border-radius:6px; border:1.5px solid var(--border-color);">
+                            <span id="preview-esp-imagen-name" style="font-size:0.75rem; color:var(--text-muted); word-break:break-all;">LOGOO.png</span>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="form-esp-audio">Archivo Audio (.mp3)</label>
-                        <input type="text" id="form-esp-audio" class="form-control" placeholder="Sonido animal...">
+                        <label class="form-label" for="form-esp-file-audio">🔊 Archivo de Audio (.mp3, .wav)</label>
+                        <input type="file" id="form-esp-file-audio" class="form-control" accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg" onchange="previsualizarAudioEspecie(this)">
+                        <input type="hidden" id="form-esp-audio" value="">
+                        <div id="preview-esp-audio-wrap" style="margin-top:0.4rem;">
+                            <span id="preview-esp-audio-name" style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">Sin audio seleccionado</span>
+                            <audio id="preview-esp-audio-player" controls style="width:100%; height:30px; display:none;"></audio>
+                        </div>
                     </div>
                 </div>
 
@@ -778,6 +820,8 @@
 
     <!-- Scripts de la Aplicación -->
     <script src="assets/leaflet/leaflet.js"></script>
+    <!-- Cliente Oficial de Supabase para Operaciones Cloud y Storage -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="assets/js/app.js"></script>
     <script src="assets/js/admin.js"></script>
     <script>

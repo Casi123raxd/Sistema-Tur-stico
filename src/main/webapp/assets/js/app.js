@@ -1031,6 +1031,26 @@ const I18N = {
 // Conexión con Supabase / LocalStorage / Backend
 // ==============================================================================
 
+const SUPABASE_APP_CONFIG = {
+    url: 'https://bsyhayoglxcsnfhqgidg.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzeWhheW9nbHhjc25maHFnaWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDQ5ODMsImV4cCI6MjA1NzYyMDk4M30.default_anon'
+};
+
+let _supabaseAppInstancia = null;
+function obtenerClienteSupabase() {
+    if (_supabaseAppInstancia) return _supabaseAppInstancia;
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+        try {
+            _supabaseAppInstancia = window.supabase.createClient(SUPABASE_APP_CONFIG.url, SUPABASE_APP_CONFIG.anonKey);
+            return _supabaseAppInstancia;
+        } catch (e) {
+            console.warn('[Supabase App] Error inicializando cliente JS:', e);
+        }
+    }
+    return null;
+}
+window.obtenerClienteSupabase = obtenerClienteSupabase;
+
 const AuthState = {
     usuarioActual: null, // { username, tipo: 'turista' | 'residente' | 'admin', comunidad, nombreCompleto }
     vistaActual: 'login' // 'login' | 'register'
@@ -1042,29 +1062,41 @@ const USUARIOS_SEMILLA = [
         username: 'turista_demo',
         password: '12345password',
         tipo: 'turista',
+        rol: 'Turista/Visitante',
         nombreCompleto: 'Visitante Ecoturista',
-        comunidad: ''
+        comunidad: '',
+        fecha_registro: '2026-03-12T09:15:00.000Z',
+        fechaRegistro: '2026-03-12T09:15:00.000Z'
     },
     {
         username: 'residente_chairo',
         password: 'chairo2026',
         tipo: 'residente',
+        rol: 'Residente del lugar',
         nombreCompleto: 'Don Alberto (Chairo)',
-        comunidad: 'Chairo'
+        comunidad: 'Chairo',
+        fecha_registro: '2026-03-14T11:40:00.000Z',
+        fechaRegistro: '2026-03-14T11:40:00.000Z'
     },
     {
         username: 'residente_sandillani',
         password: 'sandillani2026',
         tipo: 'residente',
+        rol: 'Residente del lugar',
         nombreCompleto: 'Doña Flora (Sandillani)',
-        comunidad: 'Sandillani'
+        comunidad: 'Sandillani',
+        fecha_registro: '2026-03-15T15:20:00.000Z',
+        fechaRegistro: '2026-03-15T15:20:00.000Z'
     },
     {
         username: 'residente_pacollo',
         password: 'pacollo2026',
         tipo: 'residente',
+        rol: 'Residente del lugar',
         nombreCompleto: 'Juan Cafetalero (Pacollo)',
-        comunidad: 'Pacollo'
+        comunidad: 'Pacollo',
+        fecha_registro: '2026-03-18T16:50:00.000Z',
+        fechaRegistro: '2026-03-18T16:50:00.000Z'
     }
 ];
 
@@ -1075,7 +1107,18 @@ function obtenerUsuariosRegistrados() {
             localStorage.setItem('cotapata_registered_users', JSON.stringify(USUARIOS_SEMILLA));
             return [...USUARIOS_SEMILLA];
         }
-        return JSON.parse(stored);
+        let list = JSON.parse(stored);
+        if (Array.isArray(list)) {
+            // Asegurar que cada registro cuente con fecha_registro válida
+            list.forEach((u, i) => {
+                if (!u.fecha_registro && !u.fechaRegistro) {
+                    u.fecha_registro = new Date(Date.now() - (i + 1) * 86400000).toISOString();
+                    u.fechaRegistro = u.fecha_registro;
+                }
+            });
+            return list;
+        }
+        return [...USUARIOS_SEMILLA];
     } catch (e) {
         return [...USUARIOS_SEMILLA];
     }
@@ -1121,6 +1164,8 @@ function actualizarUIAuth() {
     const user = AuthState.usuarioActual || { username: 'Invitado', tipo: 'turista' };
     const btnNavPub = document.getElementById('btn-nav-publicar');
     const mobileNavPub = document.getElementById('mobile-nav-publicar');
+    const btnNavMisServ = document.getElementById('btn-nav-mis-servicios');
+    const mobileNavMisServ = document.getElementById('mobile-nav-mis-servicios');
     const mobileUserAvatar = document.getElementById('mobile-user-avatar');
     const mobileUserName = document.getElementById('mobile-user-name');
     const mainHeader = document.querySelector('.main-header');
@@ -1151,19 +1196,25 @@ function actualizarUIAuth() {
     if (user.tipo === 'admin') {
         if (btnNavPub) btnNavPub.style.display = 'none';
         if (mobileNavPub) mobileNavPub.style.display = 'none';
+        if (btnNavMisServ) btnNavMisServ.style.display = 'none';
+        if (mobileNavMisServ) mobileNavMisServ.style.display = 'none';
         if (mobileUserAvatar) mobileUserAvatar.innerText = '👑';
         if (mobileUserName) mobileUserName.innerText = 'Eddy Admin (Administrador)';
     } else if (user.tipo === 'residente') {
         const com = user.comunidad || 'Cotapata';
-        // Habilitar botón de publicar servicio para residentes
+        // Habilitar botones de publicación y de gestión de "Mis Servicios" para residentes
         if (btnNavPub) btnNavPub.style.display = 'inline-flex';
         if (mobileNavPub) mobileNavPub.style.display = 'flex';
+        if (btnNavMisServ) btnNavMisServ.style.display = 'inline-flex';
+        if (mobileNavMisServ) mobileNavMisServ.style.display = 'flex';
         if (mobileUserAvatar) mobileUserAvatar.innerText = '🏡';
         if (mobileUserName) mobileUserName.innerText = `${user.username} · Residente (${com})`;
     } else {
         // Turista / Visitante
         if (btnNavPub) btnNavPub.style.display = 'none';
         if (mobileNavPub) mobileNavPub.style.display = 'none';
+        if (btnNavMisServ) btnNavMisServ.style.display = 'none';
+        if (mobileNavMisServ) mobileNavMisServ.style.display = 'none';
         if (mobileUserAvatar) mobileUserAvatar.innerText = '🎒';
         if (mobileUserName) mobileUserName.innerText = `${user.nombreCompleto || user.username} (Turista)`;
     }
@@ -1415,18 +1466,45 @@ async function procesarRegistro(e) {
         return;
     }
 
+    const fechaRegistroExacta = new Date().toISOString();
     const nuevoUsuario = {
         username,
         password,
         tipo, // 'turista' | 'residente' (NUNCA admin)
+        rol: tipo === 'residente' ? 'Residente del lugar' : 'Turista/Visitante',
         comunidad: tipo === 'residente' ? comunidad : '',
         nombreCompleto: username,
-        fechaRegistro: new Date().toISOString()
+        fechaRegistro: fechaRegistroExacta,
+        fecha_registro: fechaRegistroExacta
     };
 
     guardarUsuarioRegistrado(nuevoUsuario);
 
-    // Intentar replicar al backend / Supabase de manera asíncrona
+    // Inserción directa en la base de datos de Supabase con fecha_registro exacta
+    try {
+        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+        if (client) {
+            client.from('usuarios').insert([{
+                username: nuevoUsuario.username,
+                password: nuevoUsuario.password,
+                tipo: nuevoUsuario.tipo,
+                rol: nuevoUsuario.rol,
+                comunidad: nuevoUsuario.comunidad || null,
+                nombre_completo: nuevoUsuario.nombreCompleto,
+                fecha_registro: fechaRegistroExacta
+            }]).then(({ data, error }) => {
+                if (error) {
+                    console.warn('[Supabase Registro] Nota sobre inserción:', error.message);
+                } else {
+                    console.log('✓ [Supabase Registro] Usuario guardado en base de datos Supabase exitosamente.');
+                }
+            }).catch(err => console.warn('[Supabase Registro] Error:', err));
+        }
+    } catch(errSup) {
+        console.warn('[Supabase Registro] Fallo cliente:', errSup);
+    }
+
+    // Intentar replicar al backend / Tomcat de manera asíncrona
     try {
         fetch('api/auth/register', {
             method: 'POST',
@@ -1625,6 +1703,211 @@ function guardarPublicacionServicio(e) {
     }, 700);
 }
 
+// ==============================================================================
+// GESTIÓN DE PUBLICACIONES DEL VENDEDOR (MIS SERVICIOS)
+// ==============================================================================
+
+function abrirModalMisServicios() {
+    const user = AuthState.usuarioActual;
+    if (!user || user.tipo !== 'residente') {
+        mostrarNotificacion('Debes iniciar sesión como "Residente del lugar" para gestionar tus servicios.');
+        abrirModalAuth('login');
+        return;
+    }
+
+    const modal = document.getElementById('modal-mis-servicios');
+    const subTitle = document.getElementById('vendedor-servicios-sub');
+    if (subTitle) {
+        subTitle.innerText = `Anfitrión: ${user.username} · Comunidad: ${user.comunidad || 'Cotapata'}`;
+    }
+
+    cargarListaServiciosVendedor();
+
+    if (modal) modal.classList.add('active');
+}
+
+function cerrarModalMisServicios() {
+    const modal = document.getElementById('modal-mis-servicios');
+    if (modal) modal.classList.remove('active');
+}
+
+function cargarListaServiciosVendedor() {
+    const container = document.getElementById('vendedor-servicios-list');
+    if (!container) return;
+
+    const user = AuthState.usuarioActual;
+    if (!user || user.tipo !== 'residente') {
+        container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:2rem;">Sesión no válida como residente.</p>';
+        return;
+    }
+
+    const usernameActual = (user.username || '').toLowerCase();
+
+    // Obtener todos los servicios que pertenecen a este vendedor
+    let misServicios = [];
+
+    if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
+        misServicios = AppState.servicios.filter(s => {
+            if (!s.autor) return false;
+            return s.autor.toLowerCase() === usernameActual || s.autor.toLowerCase() === (user.nombreCompleto || '').toLowerCase();
+        });
+    }
+
+    // Asegurar inclusión de los guardados en cotapata_custom_servicios
+    try {
+        const custom = JSON.parse(localStorage.getItem('cotapata_custom_servicios') || '[]');
+        custom.forEach(cs => {
+            const esMio = cs.autor && (cs.autor.toLowerCase() === usernameActual || cs.autor.toLowerCase() === (user.nombreCompleto || '').toLowerCase());
+            if (esMio && !misServicios.some(ms => ms.id == cs.id)) {
+                misServicios.push(cs);
+            }
+        });
+    } catch(e) {}
+
+    if (misServicios.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:3rem 1.5rem; background:#f9fafb; border-radius:12px; border:2px dashed var(--border-color);">
+                <div style="font-size:2.8rem; margin-bottom:0.5rem;">📦</div>
+                <h4 style="color:var(--text-dark); margin-bottom:0.4rem; font-size:1.1rem;">Aún no has publicado ningún servicio</h4>
+                <p style="color:var(--text-muted); font-size:0.85rem; max-width:440px; margin:0 auto 1.2rem auto;">
+                    Como residente de <strong>${user.comunidad || 'Cotapata'}</strong>, puedes publicar ofertas de hospedaje, guiado o alimentación para los turistas.
+                </p>
+                <button class="btn-primary" style="font-size:0.82rem; padding:0.45rem 1.1rem;" onclick="cerrarModalMisServicios(); abrirModalPublicarServicio();">
+                    + Publicar Mi Primer Servicio
+                </button>
+            </div>
+        `;
+        return;
+    }
+
+    let rowsHtml = '';
+    misServicios.forEach(s => {
+        const sId = s.id;
+        const sNombre = (s.nombre || 'Servicio sin título').replace(/'/g, "\\'");
+        const sTarifa = s.precios || s.precio || 'A convenir';
+        const sComunidad = s.comunidad || user.comunidad || 'Cotapata';
+        const sCat = s.nombreCategoria || s.tipoServicio || 'Servicio';
+        const sIcon = s.iconoCategoria || '📌';
+        const sImg = s.imagen || 'alojamiento/alojamiento1.jpeg';
+        const imgPath = (sImg.startsWith('data:') || sImg.startsWith('http')) ? sImg : `assets/img/${sImg}`;
+
+        rowsHtml += `
+            <tr style="border-bottom:1px solid var(--border-color);">
+                <td style="padding:0.75rem 0.6rem;">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <img src="${imgPath}" alt="${s.nombre}" onerror="this.src='assets/img/LOGOO.png'" style="width:46px; height:46px; object-fit:cover; border-radius:8px; border:1px solid var(--border-color); flex-shrink:0;">
+                        <div>
+                            <strong style="color:var(--text-dark); font-size:0.88rem; display:block;">${s.nombre}</strong>
+                            <span style="font-size:0.74rem; color:var(--text-muted);">${sIcon} ${sCat}</span>
+                        </div>
+                    </div>
+                </td>
+                <td style="padding:0.75rem 0.6rem; font-size:0.82rem; color:var(--text-dark);">
+                    📍 ${sComunidad}
+                </td>
+                <td style="padding:0.75rem 0.6rem; font-size:0.85rem; font-weight:700; color:var(--primary);">
+                    ${sTarifa}
+                </td>
+                <td style="padding:0.75rem 0.6rem; font-size:0.75rem; color:var(--text-muted);">
+                    ${s.fechaPublicacion ? new Date(s.fechaPublicacion).toLocaleDateString('es-BO') : 'Activo'}
+                </td>
+                <td style="padding:0.75rem 0.6rem; text-align:right;">
+                    <button class="btn-admin-act-del" 
+                            style="background:#c0392b; color:#ffffff; border:none; padding:0.38rem 0.8rem; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:0.35rem; transition:background 0.2s;"
+                            onclick="eliminarServicioVendedor(${sId}, '${sNombre}')"
+                            title="Eliminar esta publicación">
+                        🗑️ Quitar
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+
+    container.innerHTML = `
+        <div style="max-height:420px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;">
+            <table style="width:100%; border-collapse:collapse; text-align:left;">
+                <thead style="background:#f4f6f5; position:sticky; top:0; z-index:2;">
+                    <tr style="border-bottom:2px solid var(--border-color); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">
+                        <th style="padding:0.6rem;">Servicio</th>
+                        <th style="padding:0.6rem;">Comunidad</th>
+                        <th style="padding:0.6rem;">Tarifa</th>
+                        <th style="padding:0.6rem;">Fecha</th>
+                        <th style="padding:0.6rem; text-align:right;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+        </div>
+        <p style="font-size:0.74rem; color:var(--text-muted); margin-top:0.6rem; text-align:right;">
+            🔒 Como vendedor, solo tienes permisos para eliminar tus propias publicaciones.
+        </p>
+    `;
+}
+
+// Eliminación segura y estricta por autor
+async function eliminarServicioVendedor(id, nombre) {
+    const user = AuthState.usuarioActual;
+    if (!user || user.tipo !== 'residente') {
+        alert('Acceso denegado: solo el residente titular puede eliminar sus publicaciones.');
+        return;
+    }
+
+    const confirmacion = confirm(`¿Estás seguro de que deseas retirar y eliminar tu publicación "${nombre}"?\n\nEsta acción quitará el servicio del catálogo público.`);
+    if (!confirmacion) return;
+
+    console.log(`[Vendedor] Eliminando servicio propio #${id} (${nombre}) por usuario ${user.username}...`);
+
+    // 1. Supabase directo con filtro estricto por autor/comunario (Seguridad Backend)
+    try {
+        if (typeof obtenerClienteSupabase === 'function') {
+            const client = obtenerClienteSupabase();
+            if (client) {
+                const { error } = await client
+                    .from('servicios')
+                    .delete()
+                    .eq('id', id)
+                    .eq('autor', user.username); // Filtro estricto por autor
+                if (error) console.warn('[Supabase Vendedor] Advertencia de eliminación:', error);
+            }
+        }
+    } catch(err) {
+        console.warn('[Supabase Vendedor] Excepción:', err);
+    }
+
+    // 2. Intentar backend servlet con validación de autor
+    try {
+        fetch(`api/servicios/eliminar?id=${id}&autor=${encodeURIComponent(user.username)}`, {
+            method: 'DELETE'
+        }).catch(() => {});
+    } catch(e) {}
+
+    // 3. Eliminar de localStorage cotapata_custom_servicios
+    try {
+        let custom = JSON.parse(localStorage.getItem('cotapata_custom_servicios') || '[]');
+        custom = custom.filter(s => !(s.id == id && (s.autor === user.username || !s.autor)));
+        localStorage.setItem('cotapata_custom_servicios', JSON.stringify(custom));
+    } catch(e) {
+        console.warn('Error actualizando custom_servicios en localStorage:', e);
+    }
+
+    // 4. Eliminar de memoria en AppState y DATASET_SERVICIOS_DEFAULT
+    if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
+        AppState.servicios = AppState.servicios.filter(s => s.id != id);
+    }
+    if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined' && Array.isArray(DATASET_SERVICIOS_DEFAULT)) {
+        const idx = DATASET_SERVICIOS_DEFAULT.findIndex(s => s.id == id);
+        if (idx !== -1) DATASET_SERVICIOS_DEFAULT.splice(idx, 1);
+    }
+
+    // 5. Refrescar catálogo público y la lista del modal del vendedor
+    renderizarServicios();
+    cargarListaServiciosVendedor();
+
+    mostrarNotificacion(`✓ Tu servicio "${nombre}" ha sido retirado y eliminado con éxito.`);
+}
+
 // Toast de notificación emergente amigable
 function mostrarNotificacion(mensaje) {
     let toast = document.getElementById('cotapata-toast');
@@ -1682,6 +1965,12 @@ async function initApp() {
     // Auto-cargador del mapa para que nunca aparezca en blanco al hacer scroll
     setupMapAutoLoader();
     setTimeout(iniciarMapaSiEsNecesario, 350);
+
+    // Inicializar animaciones de entrada suave al scroll
+    if (typeof setupScrollReveal === 'function') {
+        setTimeout(setupScrollReveal, 100);
+        setTimeout(setupScrollReveal, 600);
+    }
 
     // Intentar conectar con la API REST (Supabase / Tomcat) de manera asíncrona
     await cargarDatos();
@@ -1805,6 +2094,51 @@ function setupMapAutoLoader() {
     }, { passive: true });
 }
 
+// ==============================================================================
+// ANIMACIONES DE ENTRADA (SCROLL REVEAL SUAVE Y PROGRESIVO)
+// ==============================================================================
+let _scrollRevealObserver = null;
+
+function setupScrollReveal() {
+    const selector = '.card-item, .service-card, .route-card, .welcome-card, .feature-box, .section-header, .stat-pill, .atractivo-card';
+    const items = document.querySelectorAll(selector);
+    if (!items || items.length === 0) return;
+
+    if (!('IntersectionObserver' in window)) {
+        items.forEach(el => el.classList.add('is-revealed'));
+        return;
+    }
+
+    if (!_scrollRevealObserver) {
+        _scrollRevealObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-revealed');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, {
+            root: null,
+            rootMargin: '0px 0px -30px 0px',
+            threshold: 0.08
+        });
+    }
+
+    items.forEach((el, index) => {
+        if (!el.classList.contains('reveal-fade-up')) {
+            el.classList.add('reveal-fade-up');
+            const delay = (index % 4) * 0.06;
+            el.style.transitionDelay = `${delay}s`;
+        }
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 30 && rect.bottom > 0) {
+            el.classList.add('is-revealed');
+        } else if (!el.classList.contains('is-revealed')) {
+            _scrollRevealObserver.observe(el);
+        }
+    });
+}
+
 function navegarA(seccionId) {
     detenerAudios();
     AppState.seccionActual = seccionId;
@@ -1913,6 +2247,9 @@ function renderizarTodo() {
     renderizarAtractivos();
     renderizarRutas();
     renderizarRecomendaciones();
+    if (typeof setupScrollReveal === 'function') {
+        setTimeout(setupScrollReveal, 50);
+    }
 }
 
 // ==============================================================================
@@ -2179,6 +2516,7 @@ function setFiltroEspecie(filtro, btnEl) {
     document.querySelectorAll('#pills-especies .filter-pill').forEach(b => b.classList.remove('active'));
     if (btnEl) btnEl.classList.add('active');
     renderizarEspecies();
+    if (typeof setupScrollReveal === 'function') setTimeout(setupScrollReveal, 40);
 }
 
 // ==============================================================================
@@ -2588,6 +2926,7 @@ function setFiltroServicio(filtro, btnEl) {
         if (btn) btn.classList.add('active');
     }
     renderizarServicios();
+    if (typeof setupScrollReveal === 'function') setTimeout(setupScrollReveal, 40);
 }
 
 function crearCardAlojamientoHtml(item) {
