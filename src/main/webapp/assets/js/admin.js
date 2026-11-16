@@ -468,18 +468,8 @@ async function cargarAdmEspecies() {
 
     tbody.innerHTML = '';
 
-    if (usandoFallback && errorCarga) {
-        const warnRow = document.createElement('tr');
-        warnRow.innerHTML = `
-            <td colspan="5" style="background:#fff8e1; color:#784212; padding:0.6rem 0.8rem; font-size:0.75rem; border-left:4px solid #f39c12;">
-                ⚠️ <strong>Aviso de Conexión:</strong> No se pudo conectar a la base de datos remota (${errorCarga.message}). Se cargaron ${list.length} especies desde el catálogo local. Revisa la <strong>Consola (F12)</strong> para el diagnóstico detallado de permisos RLS o API Key.
-            </td>
-        `;
-        tbody.appendChild(warnRow);
-    }
-
     if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:var(--text-muted);">No hay especies registradas actualmente. Haz clic en "+ Nueva Especie" para agregar una.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">No hay especies registradas actualmente en el catálogo.</td></tr>';
         return;
     }
 
@@ -514,45 +504,6 @@ async function cargarAdmEspecies() {
         `;
         tbody.appendChild(tr);
     });
-}
-
-function abrirFormularioEspecie() {
-    document.getElementById('form-esp-id').value = '0';
-    document.getElementById('form-esp-tipo').value = 'FAUNA';
-    document.getElementById('form-esp-nombre-es').value = '';
-    document.getElementById('form-esp-nombre-en').value = '';
-    document.getElementById('form-esp-cientifico').value = '';
-    document.getElementById('form-esp-cat-fauna').value = 'mamifero';
-    document.getElementById('form-esp-desc-es').value = '';
-    document.getElementById('form-esp-desc-en').value = '';
-    document.getElementById('form-esp-curioso-es').value = '';
-    document.getElementById('form-esp-curioso-en').value = '';
-
-    // Reset de archivo imagen y preview
-    const fileImg = document.getElementById('form-esp-file-imagen');
-    if (fileImg) fileImg.value = '';
-    const hiddenImg = document.getElementById('form-esp-imagen');
-    if (hiddenImg) hiddenImg.value = 'LOGOO.png';
-    const previewImg = document.getElementById('preview-esp-imagen');
-    if (previewImg) previewImg.src = 'assets/img/LOGOO.png';
-    const previewImgName = document.getElementById('preview-esp-imagen-name');
-    if (previewImgName) previewImgName.innerText = 'LOGOO.png (Por defecto)';
-
-    // Reset de archivo audio y preview
-    const fileAud = document.getElementById('form-esp-file-audio');
-    if (fileAud) fileAud.value = '';
-    const hiddenAud = document.getElementById('form-esp-audio');
-    if (hiddenAud) hiddenAud.value = '';
-    const previewAudPlayer = document.getElementById('preview-esp-audio-player');
-    if (previewAudPlayer) {
-        previewAudPlayer.src = '';
-        previewAudPlayer.style.display = 'none';
-    }
-    const previewAudName = document.getElementById('preview-esp-audio-name');
-    if (previewAudName) previewAudName.innerText = 'Sin audio seleccionado';
-
-    document.getElementById('form-esp-endemica').checked = false;
-    document.getElementById('modal-form-especie').classList.add('active');
 }
 
 function editarEspecieModalJson(encoded) {
