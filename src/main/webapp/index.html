@@ -99,6 +99,15 @@
                 <a href="#" class="mobile-nav-link mobile-nav-switch-user" id="mobile-nav-switch-user" onclick="ejecutarLogoutUsuario(); cerrarMenuMovil(); return false;">
                     Cambiar de usuario
                 </a>
+
+                <!-- Selector de Idioma en Menú Móvil -->
+                <div class="mobile-nav-lang-bar">
+                    <span class="mobile-nav-lang-label" data-i18n="langLabel">Idioma / Language:</span>
+                    <div class="mobile-nav-lang-group">
+                        <button class="lang-btn active" data-lang="es" onclick="cambiarIdioma('es'); cerrarMenuMovil();">Español (ES)</button>
+                        <button class="lang-btn" data-lang="en" onclick="cambiarIdioma('en'); cerrarMenuMovil();">English (EN)</button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>

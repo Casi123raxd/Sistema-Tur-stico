@@ -980,7 +980,8 @@ const I18N = {
         btnPausar: '⏸️ Pausar',
         btnDetalles: 'Ver Ficha Completa',
         cargando: 'Cargando información del parque...',
-        sinResultados: 'No se encontraron resultados que coincidan con la búsqueda.'
+        sinResultados: 'No se encontraron resultados que coincidan con la búsqueda.',
+        langLabel: 'Idioma / Language:'
     },
     en: {
         brandSubtitle: 'Integrated Community Tourism Information System',
@@ -1022,7 +1023,8 @@ const I18N = {
         btnPausar: '⏸️ Pause',
         btnDetalles: 'View Details',
         cargando: 'Loading park data...',
-        sinResultados: 'No matching entries found for your query.'
+        sinResultados: 'No matching entries found for your query.',
+        langLabel: 'Language / Idioma:'
     }
 };
 

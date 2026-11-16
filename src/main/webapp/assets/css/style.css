@@ -42,6 +42,10 @@
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 body {
@@ -52,7 +56,11 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 100%;
     overflow-x: hidden;
+    position: relative;
+    box-sizing: border-box;
 }
 
 img {
@@ -72,6 +80,11 @@ button, input, select, textarea {
 .main-header {
     position: sticky;
     top: 0;
+    left: 0;
+    right: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     z-index: 1000;
     background: rgba(18, 46, 28, 0.88) !important;
     backdrop-filter: blur(14px) !important;
@@ -101,12 +114,14 @@ button, input, select, textarea {
 }
 
 .header-container {
+    width: 100% !important;
     max-width: 1280px;
     margin: 0 auto;
     padding: 0.32rem 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-sizing: border-box !important;
 }
 
 .brand-wrapper {
@@ -321,35 +336,43 @@ button, input, select, textarea {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.22);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
     color: #ffffff;
-    font-size: 1.45rem;
+    font-size: 1.4rem;
     cursor: pointer;
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
     border-radius: var(--radius-sm);
     line-height: 1;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     user-select: none;
     z-index: 1001;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
 }
 
 .mobile-menu-toggle:hover,
 .mobile-menu-toggle:active {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.35);
+    border-color: #ffffff;
     transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
 }
 
 /* Mobile Drawer — Rediseñado Espacioso, Cómodo y Translúcido */
 .mobile-nav {
     position: fixed;
-    top: 62px;
+    top: 50px;
     left: 0;
     right: 0;
     bottom: 0;
-    height: calc(100vh - 62px);
-    background: rgba(14, 38, 22, 0.90) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    height: calc(100vh - 50px);
+    background: rgba(14, 38, 22, 0.95) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -359,6 +382,7 @@ button, input, select, textarea {
     justify-content: center;
     padding: 1.5rem 1rem 2.5rem;
     overflow-y: auto;
+    overflow-x: hidden;
     opacity: 0;
     visibility: hidden;
     transform: translateY(-12px);
@@ -380,6 +404,39 @@ button, input, select, textarea {
     width: 100%;
     max-width: 440px;
     padding: 0.5rem 0;
+}
+
+/* Selector de Idioma en Menú Móvil */
+.mobile-nav-lang-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.8rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.mobile-nav-lang-label {
+    font-size: 0.75rem;
+    color: var(--secondary-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mobile-nav-lang-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mobile-nav-lang-group .lang-btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.45rem;
+    font-size: 0.78rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .mobile-nav-link {
@@ -2196,34 +2253,156 @@ button, input, select, textarea {
    RESPONSIVE MEDIA QUERIES (MÓVIL, TABLET Y ESCRITORIO)
    ============================================================================== */
 @media (max-width: 768px) {
+    /* 1. Ancho Completo (Full Width) y Posicionamiento de Extremo a Extremo */
+    .main-header {
+        position: sticky !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
     .header-container {
-        padding: 0.32rem 0.75rem;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0.35rem 0.65rem !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+        gap: 0.35rem !important;
     }
+
+    /* 2. Logo / Marca a la izquierda (limpio, compacto y sin desbordes) */
     .brand-wrapper {
-        gap: 0.55rem;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.35rem !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 46% !important;
+        text-decoration: none !important;
+        order: 1 !important;
     }
+
     .brand-logo {
-        width: 38px;
-        height: 38px;
-        padding: 3px;
+        width: 32px !important;
+        height: 32px !important;
+        padding: 2px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
     }
-    .brand-divider {
-        height: 30px;
-    }
-    .brand-logo-usb {
-        height: 34px;
-        max-width: 105px;
-    }
-    .brand-text h1 {
-        font-size: 0.98rem;
-        letter-spacing: 0.3px;
-    }
+
+    /* Ocultar elementos secundarios del branding en móvil */
+    .brand-divider,
+    .brand-logo-usb,
+    .brand-badge-usb,
     .brand-text p {
-        display: none; /* Mantener la barra limpia y armónica en pantallas móviles */
+        display: none !important;
     }
-    .brand-badge-usb {
-        font-size: 0.58rem;
+
+    .brand-text {
+        display: flex !important;
+        flex-direction: column !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
     }
+
+    .brand-text h1 {
+        font-size: 0.82rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.2px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.1 !important;
+        color: #ffffff !important;
+    }
+
+    /* Ocultar navegación tradicional en móviles */
+    .nav-menu {
+        display: none !important;
+    }
+
+    /* 3. Distribución interna: Acciones */
+    .header-actions {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 0.4rem !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+    }
+
+    @supports (display: contents) {
+        .header-actions {
+            display: contents !important;
+        }
+    }
+
+    /* Ocultar en la barra superior botones que se gestionan desde el menú desplegable */
+    .header-actions #btn-nav-publicar,
+    .header-actions #btn-nav-mis-servicios,
+    .header-actions .lang-btn {
+        display: none !important;
+    }
+
+    /* 4. Botón esencial visible y centrado en la barra */
+    .header-actions #btn-cambiar-usuario,
+    #btn-cambiar-usuario {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 0.70rem !important;
+        font-weight: 600 !important;
+        padding: 0.28rem 0.55rem !important;
+        border-radius: var(--radius-pill) !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        order: 2 !important;
+        margin: 0 auto !important;
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.25) 0%, rgba(230, 126, 34, 0.35) 100%) !important;
+        border: 1.2px solid var(--accent) !important;
+        color: #ffffff !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+        cursor: pointer !important;
+    }
+
+    /* 5. Menú Hamburguesa a la derecha del todo con alto contraste */
+    .header-actions .mobile-menu-toggle,
+    .mobile-menu-toggle {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        flex-shrink: 0 !important;
+        order: 3 !important;
+        margin-left: auto !important;
+        background: rgba(255, 255, 255, 0.22) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+        color: #ffffff !important;
+        font-size: 1.35rem !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+        cursor: pointer !important;
+    }
+
+    .mobile-nav {
+        top: 48px !important;
+        height: calc(100vh - 48px) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
     #grid-especies {
         grid-template-columns: 1fr;
         gap: 1.2rem;
@@ -2233,6 +2412,30 @@ button, input, select, textarea {
     }
     .card-spec-grid {
         font-size: 0.76rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .header-container {
+        padding: 0.3rem 0.45rem !important;
+        gap: 0.25rem !important;
+    }
+    .brand-logo {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    .brand-text h1 {
+        font-size: 0.74rem !important;
+    }
+    #btn-cambiar-usuario {
+        font-size: 0.64rem !important;
+        padding: 0.22rem 0.45rem !important;
+    }
+    .mobile-menu-toggle {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        font-size: 1.2rem !important;
     }
 }
 
