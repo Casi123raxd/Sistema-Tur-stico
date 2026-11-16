@@ -49,17 +49,31 @@
                 <a href="#recomendaciones" class="nav-link" data-section="recomendaciones" data-i18n="navRecomendaciones">Recomendaciones</a>
             </nav>
 
-            <!-- Acciones: Idioma y Menú Móvil -->
+            <!-- Acciones: Publicar (Residentes), Cambiar Usuario, Idioma y Menú Móvil -->
             <div class="header-actions">
+                <button class="btn-publicar-nav" id="btn-nav-publicar" style="display:none;" onclick="abrirModalPublicarServicio()" title="Publicar Servicio Comunitario">
+                    <span>📢</span> <span class="btn-pub-text">Publicar Servicio</span>
+                </button>
+                <button class="btn-cambiar-usuario" id="btn-cambiar-usuario" onclick="ejecutarLogoutUsuario()" title="Cambiar de usuario o perfil">Cambiar de usuario</button>
                 <button class="lang-btn active" data-lang="es" onclick="cambiarIdioma('es')">ES</button>
                 <button class="lang-btn" data-lang="en" onclick="cambiarIdioma('en')">EN</button>
                 <button class="mobile-menu-toggle" id="mobile-toggle" aria-label="Abrir Menú">☰</button>
             </div>
         </div>
 
-        <!-- Menú Móvil Desplegable (Rediseñado) -->
+        <!-- Menú Móvil Desplegable (Rediseñado con opción Cambiar de Usuario) -->
         <div class="mobile-nav" id="mobile-nav">
             <div class="mobile-nav-inner">
+                <!-- Tarjeta de Estado del Usuario en Móvil -->
+                <div class="mobile-user-profile-card" onclick="abrirModalAuth('login'); cerrarMenuMovil();">
+                    <div class="mobile-user-avatar" id="mobile-user-avatar">🎒</div>
+                    <div class="mobile-user-info">
+                        <span class="mobile-user-role-label">Sesión Activa:</span>
+                        <strong class="mobile-user-name" id="mobile-user-name">Turista / Visitante</strong>
+                    </div>
+                    <span class="mobile-user-switch-badge">Cambiar</span>
+                </div>
+
                 <a href="#inicio" class="mobile-nav-link active" data-section="inicio" data-i18n="navInicio">🏠 Inicio</a>
                 <a href="#biodiversidad" class="mobile-nav-link" data-section="biodiversidad" data-i18n="navBiodiversidad">🐾 Biodiversidad</a>
                 <a href="#servicios" class="mobile-nav-link" data-section="servicios" data-i18n="navServicios">🏡 Servicios Comunitarios</a>
@@ -67,6 +81,16 @@
                 <a href="#rutas" class="mobile-nav-link" data-section="rutas" data-i18n="navRutas">🥾 Rutas y Senderos</a>
                 <a href="#mapa" class="mobile-nav-link" data-section="mapa" data-i18n="navMapa">📍 Mapa Cartográfico</a>
                 <a href="#recomendaciones" class="mobile-nav-link" data-section="recomendaciones" data-i18n="navRecomendaciones">🌱 Recomendaciones</a>
+
+                <!-- Botón de publicar para residentes en móvil -->
+                <a href="#" class="mobile-nav-link mobile-nav-pub" id="mobile-nav-publicar" style="display:none;" onclick="abrirModalPublicarServicio(); cerrarMenuMovil(); return false;">
+                    📢 Publicar Servicio Comunitario
+                </a>
+
+                <!-- Botón Cambiar de Usuario claramente visible en móvil (texto limpio sin emojis) -->
+                <a href="#" class="mobile-nav-link mobile-nav-switch-user" id="mobile-nav-switch-user" onclick="ejecutarLogoutUsuario(); cerrarMenuMovil(); return false;">
+                    Cambiar de usuario
+                </a>
             </div>
         </div>
     </header>
@@ -384,32 +408,145 @@
     </div>
 
     <!-- ==============================================================================
-         MODAL DE INICIO DE SESIÓN ADMINISTRATIVO
+         MODAL UNIFICADO DE AUTENTICACIÓN (LOGIN Y REGISTRO CON ROLES Y COMUNIDADES)
          ============================================================================== -->
-    <div class="modal-backdrop" id="modal-login">
-        <div class="modal-sheet" style="max-width:400px; padding:2rem;">
-            <button class="modal-close-btn" onclick="cerrarModalAdmin()" aria-label="Cerrar">×</button>
-            <div style="text-align:center; margin-bottom:1.5rem;">
-                <span style="font-size:2.5rem;">🔐</span>
-                <h3 style="color:var(--primary); font-size:1.3rem;">Acceso Administrativo</h3>
-                <p style="font-size:0.78rem; color:var(--text-muted);">Sistema Cotapata Explora · Panel Seguro</p>
+    <div class="modal-backdrop" id="modal-auth">
+        <div class="modal-sheet auth-modal-sheet">
+            <button class="modal-close-btn" onclick="cerrarModalAuth()" aria-label="Cerrar">×</button>
+            
+            <div class="auth-header">
+                <div class="auth-logo-badge">🌿 Cotapata Explora</div>
+                <h3 id="auth-modal-title" style="color:var(--primary); font-size:1.35rem; margin-top:0.4rem;">Iniciar Sesión</h3>
+                <p id="auth-modal-sub" style="font-size:0.8rem; color:var(--text-muted);">Accede a tu cuenta de visitante, residente comunitario o administrador.</p>
             </div>
 
-            <form onsubmit="ejecutarLogin(event)">
+            <!-- Selector de Pestañas: Iniciar Sesión / Registrarse -->
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab-btn active" id="tab-btn-login" onclick="cambiarVistaAuth('login')">🔑 Iniciar Sesión</button>
+                <button type="button" class="auth-tab-btn" id="tab-btn-register" onclick="cambiarVistaAuth('register')">📝 Crear Cuenta</button>
+            </div>
+
+            <!-- 1. VISTA: INICIO DE SESIÓN -->
+            <form id="form-auth-login" onsubmit="procesarLogin(event)">
                 <div class="form-group">
-                    <label class="form-label" for="login-username">Usuario</label>
-                    <input type="text" id="login-username" class="form-control" placeholder="admin" required>
+                    <label class="form-label" for="login-username">Usuario o Correo Electrónico</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="Ej. visitante2026 o Eddy Admin" required autocomplete="username">
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="login-password">Contraseña</label>
-                    <input type="password" id="login-password" class="form-control" placeholder="••••••••••••" required>
+                    <input type="password" id="login-password" class="form-control" placeholder="••••••••••••" required autocomplete="current-password">
                 </div>
-                <div id="login-error" style="display:none; color:var(--danger); font-size:0.8rem; margin-bottom:0.8rem; font-weight:600;"></div>
-                <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">Iniciar Sesión</button>
+                <div id="login-error" class="auth-alert error" style="display:none;"></div>
+                <div id="login-success" class="auth-alert success" style="display:none;"></div>
+                <button type="submit" class="btn-primary auth-submit-btn">Ingresar al Sistema</button>
+                <p class="auth-footer-note">
+                    ¿No tienes cuenta? <a href="#" onclick="cambiarVistaAuth('register'); return false;">Regístrate como Turista o Residente aquí</a>.
+                </p>
             </form>
-            <p style="font-size:0.7rem; color:var(--text-muted); text-align:center; margin-top:1rem;">
-                Protegido mediante sesiones de servidor y algoritmo PBKDF2WithHmacSHA256.
-            </p>
+
+            <!-- 2. VISTA: REGISTRO PÚBLICO (TURISTA O RESIDENTE) -->
+            <form id="form-auth-register" onsubmit="procesarRegistro(event)" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label" for="reg-username">Nombre de Usuario o Correo Electrónico <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="reg-username" class="form-control" placeholder="Ej. juancito_yungas" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="reg-password">Contraseña <span style="color:var(--danger)">*</span></label>
+                    <input type="password" id="reg-password" class="form-control" placeholder="Mínimo 5 caracteres" minlength="5" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="reg-tipo-cuenta">Tipo de Cuenta <span style="color:var(--danger)">*</span></label>
+                    <select id="reg-tipo-cuenta" class="form-control" onchange="toggleComunidadRegistro(this.value)" required>
+                        <option value="turista">Turista / Visitante (Solo Lectura)</option>
+                        <option value="residente">Residente del Lugar (Vendedor / Emprendedor)</option>
+                    </select>
+                    <small class="form-text-muted">* Opciones públicas de registro. No se permite registro de Administradores.</small>
+                </div>
+
+                <!-- Campo Condicional Obligatorio para Residentes -->
+                <div class="form-group" id="group-reg-comunidad" style="display:none;">
+                    <label class="form-label" for="reg-comunidad">Comunidad de Cotapata a la que perteneces <span style="color:var(--danger)">*</span></label>
+                    <select id="reg-comunidad" class="form-control">
+                        <option value="Chairo">Chairo (Valle Subtropical)</option>
+                        <option value="Sandillani">Sandillani (Ceja de Monte / Bosque Nublado)</option>
+                        <option value="Pacollo">Pacollo (Valle Cafetalero)</option>
+                    </select>
+                </div>
+
+                <div id="reg-error" class="auth-alert error" style="display:none;"></div>
+                <div id="reg-success" class="auth-alert success" style="display:none;"></div>
+                <button type="submit" class="btn-primary auth-submit-btn">Completar Registro</button>
+                <p class="auth-footer-note">
+                    ¿Ya estás registrado? <a href="#" onclick="cambiarVistaAuth('login'); return false;">Inicia sesión aquí</a>.
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==============================================================================
+         MODAL DE PUBLICACIÓN DE SERVICIOS (EXCLUSIVO PARA RESIDENTES COMUNITARIOS)
+         ============================================================================== -->
+    <div class="modal-backdrop" id="modal-publicar-servicio">
+        <div class="modal-sheet" style="max-width:580px;">
+            <button class="modal-close-btn" onclick="cerrarModalPublicarServicio()" aria-label="Cerrar">×</button>
+            <div style="background:var(--primary); color:#fff; padding:1.2rem 1.6rem; border-radius:18px 18px 0 0;">
+                <h3 style="font-size:1.25rem; font-weight:700;">📢 Publicar Servicio Comunitario</h3>
+                <p style="font-size:0.8rem; opacity:0.88; margin-top:0.2rem;" id="pub-residente-sub">
+                    Panel de Emprendimiento Local · Parque Nacional Cotapata
+                </p>
+            </div>
+            
+            <form id="form-publicar-servicio" onsubmit="guardarPublicacionServicio(event)" style="padding:1.6rem;">
+                <div class="form-group">
+                    <label class="form-label" for="pub-nombre">Título del Servicio o Producto <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="pub-nombre" class="form-control" placeholder="Ej. Hospedaje Familiar Las Orquídeas o Almuerzo Típico Yungueño" required>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.8rem;">
+                    <div class="form-group">
+                        <label class="form-label" for="pub-categoria">Categoría <span style="color:var(--danger)">*</span></label>
+                        <select id="pub-categoria" class="form-control" required>
+                            <option value="alojamiento">Alojamiento / Hospedaje / Cabaña</option>
+                            <option value="comida">Comida / Gastronomía Típica</option>
+                            <option value="lugar">Lugar Turístico / Entorno Natural</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="pub-comunidad">Comunidad de Origen <span style="color:var(--danger)">*</span></label>
+                        <select id="pub-comunidad" class="form-control" required>
+                            <option value="Chairo">Chairo</option>
+                            <option value="Sandillani">Sandillani</option>
+                            <option value="Pacollo">Pacollo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="pub-precio">Precio o Tarifas en Bolivianos (Bs) <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="pub-precio" class="form-control" placeholder="Ej. 85 Bs / noche  o  25 Bs / plato" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="pub-imagen-file">Foto del Servicio / Producto <span style="color:var(--danger)">*</span></label>
+                    <input type="file" id="pub-imagen-file" class="form-control" accept="image/*" onchange="previsualizarImagenPublicacion(event)">
+                    <div id="pub-img-preview" style="display:none; margin-top:0.6rem; text-align:center;">
+                        <img id="pub-img-preview-elem" src="" alt="Vista previa" style="max-height:160px; border-radius:10px; border:1.5px solid var(--border-color); object-fit:cover; width:100%;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="pub-descripcion">Descripción y Detalles del Servicio <span style="color:var(--danger)">*</span></label>
+                    <textarea id="pub-descripcion" class="form-control" rows="3" placeholder="Describe qué incluye el servicio, comodidades, atención o ingredientes tradicionales..." required></textarea>
+                </div>
+
+                <div id="pub-error" class="auth-alert error" style="display:none;"></div>
+                <div id="pub-success" class="auth-alert success" style="display:none;"></div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.8rem; margin-top:1.2rem;">
+                    <button type="button" class="btn-outline" style="color:var(--text-dark); border-color:var(--border-color);" onclick="cerrarModalPublicarServicio()">Cancelar</button>
+                    <button type="submit" class="btn-primary">🚀 Publicar en Catálogo</button>
+                </div>
+            </form>
         </div>
     </div>
 

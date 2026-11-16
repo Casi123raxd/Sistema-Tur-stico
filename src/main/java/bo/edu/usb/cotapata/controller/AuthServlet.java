@@ -93,6 +93,40 @@ public class AuthServlet extends HttpServlet {
             } catch (Exception e) {
                 JsonUtil.sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error procesando autenticación.");
             }
+        } else if ("/register".equals(pathInfo)) {
+            try {
+                JSONObject body = JsonUtil.parseRequestBody(request);
+                String username = body.optString("username", "").trim();
+                String password = body.optString("password", "").trim();
+                String tipo = body.optString("tipo", "turista").trim();
+                String comunidad = body.optString("comunidad", "").trim();
+
+                if (username.isEmpty() || password.isEmpty()) {
+                    JsonUtil.sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Debe ingresar usuario y contraseña.");
+                    return;
+                }
+
+                // Restricción: No se permite registrar rol Administrador públicamente
+                if ("admin".equalsIgnoreCase(tipo) || "administrador".equalsIgnoreCase(tipo)) {
+                    JsonUtil.sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "No está permitido registrar cuentas de Administrador.");
+                    return;
+                }
+
+                JSONObject res = new JSONObject();
+                res.put("success", true);
+                res.put("message", "Usuario registrado exitosamente.");
+
+                JSONObject uJson = new JSONObject();
+                uJson.put("username", username);
+                uJson.put("nombreCompleto", username);
+                uJson.put("tipo", "residente".equalsIgnoreCase(tipo) ? "residente" : "turista");
+                uJson.put("comunidad", comunidad);
+                res.put("usuario", uJson);
+
+                JsonUtil.sendJsonResponse(response, res);
+            } catch (Exception e) {
+                JsonUtil.sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error procesando registro de usuario.");
+            }
         } else if ("/logout".equals(pathInfo)) {
             HttpSession session = request.getSession(false);
             if (session != null) {

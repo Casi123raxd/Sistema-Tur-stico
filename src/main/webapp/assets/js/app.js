@@ -1027,6 +1027,623 @@ const I18N = {
 };
 
 // ==============================================================================
+// GESTIÓN DE AUTENTICACIÓN, ROLES Y PERFILES (TURISTA, RESIDENTE, ADMIN)
+// Conexión con Supabase / LocalStorage / Backend
+// ==============================================================================
+
+const AuthState = {
+    usuarioActual: null, // { username, tipo: 'turista' | 'residente' | 'admin', comunidad, nombreCompleto }
+    vistaActual: 'login' // 'login' | 'register'
+};
+
+// Usuarios registrados de base por defecto para pruebas inmediatas
+const USUARIOS_SEMILLA = [
+    {
+        username: 'turista_demo',
+        password: '12345password',
+        tipo: 'turista',
+        nombreCompleto: 'Visitante Ecoturista',
+        comunidad: ''
+    },
+    {
+        username: 'residente_chairo',
+        password: 'chairo2026',
+        tipo: 'residente',
+        nombreCompleto: 'Don Alberto (Chairo)',
+        comunidad: 'Chairo'
+    },
+    {
+        username: 'residente_sandillani',
+        password: 'sandillani2026',
+        tipo: 'residente',
+        nombreCompleto: 'Doña Flora (Sandillani)',
+        comunidad: 'Sandillani'
+    },
+    {
+        username: 'residente_pacollo',
+        password: 'pacollo2026',
+        tipo: 'residente',
+        nombreCompleto: 'Juan Cafetalero (Pacollo)',
+        comunidad: 'Pacollo'
+    }
+];
+
+function obtenerUsuariosRegistrados() {
+    try {
+        let stored = localStorage.getItem('cotapata_registered_users');
+        if (!stored) {
+            localStorage.setItem('cotapata_registered_users', JSON.stringify(USUARIOS_SEMILLA));
+            return [...USUARIOS_SEMILLA];
+        }
+        return JSON.parse(stored);
+    } catch (e) {
+        return [...USUARIOS_SEMILLA];
+    }
+}
+
+function guardarUsuarioRegistrado(user) {
+    try {
+        const users = obtenerUsuariosRegistrados();
+        users.push(user);
+        localStorage.setItem('cotapata_registered_users', JSON.stringify(users));
+    } catch (e) {
+        console.warn('Error guardando usuario local:', e);
+    }
+}
+
+function initAuth() {
+    try {
+        const storedUser = localStorage.getItem('cotapata_active_user');
+        if (storedUser) {
+            AuthState.usuarioActual = JSON.parse(storedUser);
+        } else {
+            // Usuario por defecto: Turista / Visitante
+            AuthState.usuarioActual = {
+                username: 'Turista Invitado',
+                nombreCompleto: 'Turista / Visitante',
+                tipo: 'turista',
+                comunidad: ''
+            };
+        }
+    } catch (e) {
+        AuthState.usuarioActual = {
+            username: 'Turista Invitado',
+            nombreCompleto: 'Turista / Visitante',
+            tipo: 'turista',
+            comunidad: ''
+        };
+    }
+
+    actualizarUIAuth();
+}
+
+function actualizarUIAuth() {
+    const user = AuthState.usuarioActual || { username: 'Invitado', tipo: 'turista' };
+    const btnNavPub = document.getElementById('btn-nav-publicar');
+    const mobileNavPub = document.getElementById('mobile-nav-publicar');
+    const mobileUserAvatar = document.getElementById('mobile-user-avatar');
+    const mobileUserName = document.getElementById('mobile-user-name');
+    const mainHeader = document.querySelector('.main-header');
+
+    // 1. Aplicar color dinámico en la barra de navegación según el rol
+    if (mainHeader) {
+        mainHeader.classList.remove('role-turista', 'role-residente', 'role-admin');
+        if (user.tipo === 'admin') {
+            mainHeader.classList.add('role-admin');
+        } else if (user.tipo === 'residente') {
+            mainHeader.classList.add('role-residente');
+        } else {
+            mainHeader.classList.add('role-turista');
+        }
+    }
+
+    // 2. Asegurar que los botones "Cambiar de usuario" tengan texto limpio sin emojis
+    const btnCambiarDesk = document.getElementById('btn-cambiar-usuario');
+    if (btnCambiarDesk) {
+        btnCambiarDesk.innerText = 'Cambiar de usuario';
+    }
+    const btnCambiarMob = document.getElementById('mobile-nav-switch-user');
+    if (btnCambiarMob) {
+        btnCambiarMob.innerText = 'Cambiar de usuario';
+    }
+
+    // 3. Ajustar visibilidad y datos según el rol
+    if (user.tipo === 'admin') {
+        if (btnNavPub) btnNavPub.style.display = 'none';
+        if (mobileNavPub) mobileNavPub.style.display = 'none';
+        if (mobileUserAvatar) mobileUserAvatar.innerText = '👑';
+        if (mobileUserName) mobileUserName.innerText = 'Eddy Admin (Administrador)';
+    } else if (user.tipo === 'residente') {
+        const com = user.comunidad || 'Cotapata';
+        // Habilitar botón de publicar servicio para residentes
+        if (btnNavPub) btnNavPub.style.display = 'inline-flex';
+        if (mobileNavPub) mobileNavPub.style.display = 'flex';
+        if (mobileUserAvatar) mobileUserAvatar.innerText = '🏡';
+        if (mobileUserName) mobileUserName.innerText = `${user.username} · Residente (${com})`;
+    } else {
+        // Turista / Visitante
+        if (btnNavPub) btnNavPub.style.display = 'none';
+        if (mobileNavPub) mobileNavPub.style.display = 'none';
+        if (mobileUserAvatar) mobileUserAvatar.innerText = '🎒';
+        if (mobileUserName) mobileUserName.innerText = `${user.nombreCompleto || user.username} (Turista)`;
+    }
+}
+
+function abrirModalAuth(vista = 'login') {
+    cambiarVistaAuth(vista);
+    const modal = document.getElementById('modal-auth') || document.getElementById('modal-login');
+    if (modal) {
+        modal.classList.add('active');
+    }
+}
+
+function cerrarModalAuth() {
+    const modal = document.getElementById('modal-auth') || document.getElementById('modal-login');
+    if (modal) modal.classList.remove('active');
+    const errLogin = document.getElementById('login-error');
+    if (errLogin) errLogin.style.display = 'none';
+    const errReg = document.getElementById('reg-error');
+    if (errReg) errReg.style.display = 'none';
+}
+
+function cambiarVistaAuth(vista) {
+    AuthState.vistaActual = vista;
+    const formLogin = document.getElementById('form-auth-login');
+    const formRegister = document.getElementById('form-auth-register');
+    const tabLogin = document.getElementById('tab-btn-login');
+    const tabRegister = document.getElementById('tab-btn-register');
+    const modalTitle = document.getElementById('auth-modal-title');
+    const modalSub = document.getElementById('auth-modal-sub');
+
+    if (vista === 'register') {
+        if (formLogin) formLogin.style.display = 'none';
+        if (formRegister) formRegister.style.display = 'block';
+        if (tabLogin) tabLogin.classList.remove('active');
+        if (tabRegister) tabRegister.classList.add('active');
+        if (modalTitle) modalTitle.innerText = 'Crear Cuenta en Cotapata';
+        if (modalSub) modalSub.innerText = 'Regístrate como visitante o como residente emprendedor de una comunidad.';
+    } else {
+        if (formLogin) formLogin.style.display = 'block';
+        if (formRegister) formRegister.style.display = 'none';
+        if (tabLogin) tabLogin.classList.add('active');
+        if (tabRegister) tabRegister.classList.remove('active');
+        if (modalTitle) modalTitle.innerText = 'Iniciar Sesión';
+        if (modalSub) modalSub.innerText = 'Accede a tu cuenta de visitante, residente comunitario o administrador.';
+    }
+}
+
+function toggleComunidadRegistro(tipo) {
+    const groupComunidad = document.getElementById('group-reg-comunidad');
+    const selComunidad = document.getElementById('reg-comunidad');
+    if (tipo === 'residente') {
+        if (groupComunidad) groupComunidad.style.display = 'block';
+        if (selComunidad) selComunidad.setAttribute('required', 'required');
+    } else {
+        if (groupComunidad) groupComunidad.style.display = 'none';
+        if (selComunidad) selComunidad.removeAttribute('required');
+    }
+}
+
+// INICIO DE SESIÓN CON LÓGICA OCULTA DE ADMIN
+async function procesarLogin(e) {
+    if (e) e.preventDefault();
+    const userInp = document.getElementById('login-username');
+    const passInp = document.getElementById('login-password');
+    const errEl = document.getElementById('login-error');
+    const succEl = document.getElementById('login-success');
+
+    if (errEl) errEl.style.display = 'none';
+    if (succEl) succEl.style.display = 'none';
+
+    const username = (userInp ? userInp.value : '').trim();
+    const password = (passInp ? passInp.value : '').trim();
+
+    if (!username || !password) {
+        if (errEl) {
+            errEl.innerText = 'Por favor ingresa tu usuario y contraseña.';
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+
+    // =========================================================================
+    // LÓGICA OCULTA DE ADMINISTRADOR:
+    // Si se ingresa "Eddy Admin" con "99963", asigna automáticamente rol Administrador
+    // =========================================================================
+    if (username === 'Eddy Admin' && password === '99963') {
+        const adminUser = {
+            username: 'Eddy Admin',
+            nombreCompleto: 'Eddy Administrador',
+            tipo: 'admin',
+            rol: 'Administrador',
+            comunidad: ''
+        };
+        AuthState.usuarioActual = adminUser;
+        localStorage.setItem('cotapata_active_user', JSON.stringify(adminUser));
+        actualizarUIAuth();
+
+        if (typeof AdminState !== 'undefined') {
+            AdminState.autenticado = true;
+            AdminState.usuario = {
+                username: 'Eddy Admin',
+                nombreCompleto: 'Eddy Administrador',
+                nombreRol: 'ADMINISTRADOR',
+                idRol: 1
+            };
+            if (typeof actualizarUIAdminLogueado === 'function') {
+                actualizarUIAdminLogueado();
+            }
+        }
+
+        if (succEl) {
+            succEl.innerText = '✓ Acceso concedido como Administrador. Abriendo panel...';
+            succEl.style.display = 'block';
+        }
+
+        setTimeout(() => {
+            cerrarModalAuth();
+            if (typeof abrirModalAdmin === 'function') {
+                abrirModalAdmin();
+            }
+        }, 500);
+        return;
+    }
+
+    // Verificar usuarios regulares (Turista o Residente)
+    const users = obtenerUsuariosRegistrados();
+    const found = users.find(u => 
+        (u.username.toLowerCase() === username.toLowerCase() || (u.correo && u.correo.toLowerCase() === username.toLowerCase())) &&
+        u.password === password
+    );
+
+    if (found) {
+        const activeUser = {
+            username: found.username,
+            nombreCompleto: found.nombreCompleto || found.username,
+            tipo: found.tipo || 'turista',
+            comunidad: found.comunidad || ''
+        };
+        AuthState.usuarioActual = activeUser;
+        localStorage.setItem('cotapata_active_user', JSON.stringify(activeUser));
+        actualizarUIAuth();
+
+        if (succEl) {
+            succEl.innerText = `✓ ¡Bienvenido, ${found.username}!`;
+            succEl.style.display = 'block';
+        }
+
+        setTimeout(() => {
+            cerrarModalAuth();
+            if (activeUser.tipo === 'residente') {
+                mostrarNotificacion(`Bienvenido, ${activeUser.username}. Tienes activo el botón "Publicar Servicio" en el menú.`);
+            } else {
+                mostrarNotificacion(`¡Bienvenido a Cotapata Explora, ${activeUser.username}!`);
+            }
+        }, 500);
+        return;
+    }
+
+    // Intentar también con API REST de backend si está disponible
+    try {
+        const res = await fetch('api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.usuario) {
+                const apiUser = {
+                    username: data.usuario.username,
+                    nombreCompleto: data.usuario.nombreCompleto,
+                    tipo: data.usuario.nombreRol && data.usuario.nombreRol.includes('ADMIN') ? 'admin' : 'turista',
+                    comunidad: ''
+                };
+                AuthState.usuarioActual = apiUser;
+                localStorage.setItem('cotapata_active_user', JSON.stringify(apiUser));
+                actualizarUIAuth();
+                cerrarModalAuth();
+                return;
+            }
+        }
+    } catch (e) {}
+
+    if (errEl) {
+        errEl.innerText = 'Usuario o contraseña incorrectos. Si no tienes cuenta, crea una en la pestaña "Crear Cuenta".';
+        errEl.style.display = 'block';
+    }
+}
+
+// REGISTRO PÚBLICO (TURISTA O RESIDENTE)
+async function procesarRegistro(e) {
+    if (e) e.preventDefault();
+    const userInp = document.getElementById('reg-username');
+    const passInp = document.getElementById('reg-password');
+    const tipoInp = document.getElementById('reg-tipo-cuenta');
+    const comInp = document.getElementById('reg-comunidad');
+    const errEl = document.getElementById('reg-error');
+    const succEl = document.getElementById('reg-success');
+
+    if (errEl) errEl.style.display = 'none';
+    if (succEl) succEl.style.display = 'none';
+
+    const username = (userInp ? userInp.value : '').trim();
+    const password = (passInp ? passInp.value : '').trim();
+    const tipo = tipoInp ? tipoInp.value : 'turista';
+    const comunidad = (tipo === 'residente' && comInp) ? comInp.value : '';
+
+    if (!username || !password) {
+        if (errEl) {
+            errEl.innerText = 'Por favor completa todos los campos obligatorios.';
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+
+    if (password.length < 5) {
+        if (errEl) {
+            errEl.innerText = 'La contraseña debe tener al menos 5 caracteres.';
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+
+    // Restricción: No se permite registrar Administradores
+    if (username.toLowerCase() === 'eddy admin' || username.toLowerCase().includes('admin')) {
+        if (errEl) {
+            errEl.innerText = 'El nombre o rol especificado está reservado por el sistema de administración.';
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+
+    if (tipo === 'residente' && !comunidad) {
+        if (errEl) {
+            errEl.innerText = 'Los residentes deben seleccionar su comunidad obligatoriamente.';
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+
+    // Verificar si el usuario ya existe
+    const users = obtenerUsuariosRegistrados();
+    if (users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+        if (errEl) {
+            errEl.innerText = 'Este nombre de usuario ya está registrado. Por favor elige otro o inicia sesión.';
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+
+    const nuevoUsuario = {
+        username,
+        password,
+        tipo, // 'turista' | 'residente' (NUNCA admin)
+        comunidad: tipo === 'residente' ? comunidad : '',
+        nombreCompleto: username,
+        fechaRegistro: new Date().toISOString()
+    };
+
+    guardarUsuarioRegistrado(nuevoUsuario);
+
+    // Intentar replicar al backend / Supabase de manera asíncrona
+    try {
+        fetch('api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevoUsuario)
+        }).catch(() => {});
+    } catch(e) {}
+
+    // Iniciar sesión automáticamente
+    AuthState.usuarioActual = {
+        username: nuevoUsuario.username,
+        nombreCompleto: nuevoUsuario.nombreCompleto,
+        tipo: nuevoUsuario.tipo,
+        comunidad: nuevoUsuario.comunidad
+    };
+    localStorage.setItem('cotapata_active_user', JSON.stringify(AuthState.usuarioActual));
+    actualizarUIAuth();
+
+    if (succEl) {
+        succEl.innerText = `✓ ¡Cuenta creada con éxito como ${tipo === 'residente' ? 'Residente de ' + comunidad : 'Turista'}! Iniciando sesión...`;
+        succEl.style.display = 'block';
+    }
+
+    setTimeout(() => {
+        cerrarModalAuth();
+        mostrarNotificacion(`¡Bienvenido a Cotapata Explora, ${username}! Tu cuenta ha sido activada.`);
+    }, 600);
+}
+
+// CAMBIAR DE USUARIO
+function ejecutarLogoutUsuario() {
+    AuthState.usuarioActual = {
+        username: 'Turista Invitado',
+        nombreCompleto: 'Turista / Visitante',
+        tipo: 'turista',
+        comunidad: ''
+    };
+    localStorage.removeItem('cotapata_active_user');
+    actualizarUIAuth();
+
+    if (typeof AdminState !== 'undefined') {
+        AdminState.autenticado = false;
+        AdminState.usuario = null;
+        if (typeof actualizarUIAdminDeslogueado === 'function') {
+            actualizarUIAdminDeslogueado();
+        }
+    }
+
+    abrirModalAuth('login');
+}
+
+// ==============================================================================
+// PANEL DE PUBLICACIÓN DE SERVICIOS (EXCLUSIVO PARA RESIDENTES COMUNITARIOS)
+// ==============================================================================
+let previewImagenPublicacionData = '';
+
+function abrirModalPublicarServicio() {
+    if (!AuthState.usuarioActual || AuthState.usuarioActual.tipo !== 'residente') {
+        mostrarNotificacion('Solo los usuarios con cuenta de "Residente del lugar" pueden publicar servicios.');
+        abrirModalAuth('login');
+        return;
+    }
+
+    const modal = document.getElementById('modal-publicar-servicio');
+    const selComunidad = document.getElementById('pub-comunidad');
+    const subTitle = document.getElementById('pub-residente-sub');
+
+    if (selComunidad && AuthState.usuarioActual.comunidad) {
+        selComunidad.value = AuthState.usuarioActual.comunidad;
+    }
+    if (subTitle) {
+        subTitle.innerText = `Publicando como residente de ${AuthState.usuarioActual.comunidad || 'Cotapata'} (${AuthState.usuarioActual.username})`;
+    }
+
+    previewImagenPublicacionData = '';
+    const prevWrap = document.getElementById('pub-img-preview');
+    if (prevWrap) prevWrap.style.display = 'none';
+
+    if (modal) modal.classList.add('active');
+}
+
+function cerrarModalPublicarServicio() {
+    const modal = document.getElementById('modal-publicar-servicio');
+    if (modal) modal.classList.remove('active');
+    const errEl = document.getElementById('pub-error');
+    if (errEl) errEl.style.display = 'none';
+}
+
+function previsualizarImagenPublicacion(e) {
+    const file = e.target.files && e.target.files[0];
+    const prevWrap = document.getElementById('pub-img-preview');
+    const prevElem = document.getElementById('pub-img-preview-elem');
+
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        previewImagenPublicacionData = evt.target.result;
+        if (prevElem) prevElem.src = previewImagenPublicacionData;
+        if (prevWrap) prevWrap.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function guardarPublicacionServicio(e) {
+    if (e) e.preventDefault();
+    const nombreInp = document.getElementById('pub-nombre');
+    const catInp = document.getElementById('pub-categoria');
+    const comInp = document.getElementById('pub-comunidad');
+    const precioInp = document.getElementById('pub-precio');
+    const descInp = document.getElementById('pub-descripcion');
+    const errEl = document.getElementById('pub-error');
+    const succEl = document.getElementById('pub-success');
+
+    if (errEl) errEl.style.display = 'none';
+    if (succEl) succEl.style.display = 'none';
+
+    const nombre = (nombreInp ? nombreInp.value : '').trim();
+    const categoria = catInp ? catInp.value : 'alojamiento';
+    const comunidad = comInp ? comInp.value : (AuthState.usuarioActual ? AuthState.usuarioActual.comunidad : 'Chairo');
+    const precio = (precioInp ? precioInp.value : '').trim();
+    const descripcion = (descInp ? descInp.value : '').trim();
+
+    if (!nombre || !precio || !descripcion) {
+        if (errEl) {
+            errEl.innerText = 'Por favor completa todos los campos requeridos.';
+            errEl.style.display = 'block';
+        }
+        return;
+    }
+
+    // Imagen: usar la DataURL de previsualización o una imagen de respaldo según comunidad/categoría
+    let imagenFinal = previewImagenPublicacionData;
+    if (!imagenFinal) {
+        if (categoria === 'alojamiento') {
+            imagenFinal = 'alojamiento/alojamiento1.jpeg';
+        } else if (categoria === 'comida') {
+            imagenFinal = 'comidas/Café.jpeg';
+        } else {
+            imagenFinal = 'lugares/Chairo1.jpeg';
+        }
+    }
+
+    const nuevoServicio = {
+        id: Date.now(),
+        tipoServicio: categoria,
+        comunidad: comunidad,
+        nombre: nombre,
+        descripcion: descripcion,
+        precios: precio.includes('Bs') ? precio : `${precio} Bs`,
+        precio: precio.includes('Bs') ? precio : `${precio} Bs`,
+        imagen: imagenFinal,
+        ubicacionReferencial: `Sector comunitario de ${comunidad}`,
+        horarioAtencion: 'Atención directa por residente anfitrión',
+        iconoCategoria: categoria === 'alojamiento' ? '🏡' : (categoria === 'comida' ? '🍲' : '📍'),
+        nombreCategoria: categoria === 'alojamiento' ? 'Alojamiento' : (categoria === 'comida' ? 'Gastronomía' : 'Lugar'),
+        autor: AuthState.usuarioActual ? AuthState.usuarioActual.username : 'Residente',
+        fechaPublicacion: new Date().toISOString()
+    };
+
+    // Agregar al dataset en memoria
+    DATASET_SERVICIOS_DEFAULT.unshift(nuevoServicio);
+    AppState.servicios = DATASET_SERVICIOS_DEFAULT;
+
+    // Guardar en localStorage para persistencia
+    try {
+        const custom = JSON.parse(localStorage.getItem('cotapata_custom_servicios') || '[]');
+        custom.unshift(nuevoServicio);
+        localStorage.setItem('cotapata_custom_servicios', JSON.stringify(custom));
+    } catch(err) {
+        console.warn('Error guardando publicación personalizada:', err);
+    }
+
+    // Re-renderizar catálogo
+    renderizarServicios();
+
+    if (succEl) {
+        succEl.innerText = '✓ ¡Servicio publicado con éxito en el catálogo comunitario!';
+        succEl.style.display = 'block';
+    }
+
+    setTimeout(() => {
+        cerrarModalPublicarServicio();
+        // Limpiar formulario
+        if (nombreInp) nombreInp.value = '';
+        if (precioInp) precioInp.value = '';
+        if (descInp) descInp.value = '';
+        const fileInp = document.getElementById('pub-imagen-file');
+        if (fileInp) fileInp.value = '';
+        previewImagenPublicacionData = '';
+
+        // Navegar a la sección de servicios y activar el filtro de la categoría publicada
+        navegarA('servicios');
+        setFiltroServicio(categoria === 'alojamiento' ? 'alojamientos' : (categoria === 'comida' ? 'comidas' : 'lugares'));
+        mostrarNotificacion(`Tu servicio "${nombre}" ha sido publicado con éxito en la sección de Servicios.`);
+    }, 700);
+}
+
+// Toast de notificación emergente amigable
+function mostrarNotificacion(mensaje) {
+    let toast = document.getElementById('cotapata-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'cotapata-toast';
+        toast.style.cssText = 'position:fixed; bottom:25px; right:25px; background:#1b3824; color:#ffffff; padding:14px 22px; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.3); border-left:4px solid #f39c12; z-index:99999; font-size:0.88rem; max-width:360px; font-family:"Poppins",sans-serif; transition:all 0.3s ease; opacity:0; transform:translateY(20px); pointer-events:none;';
+        document.body.appendChild(toast);
+    }
+    toast.innerText = mensaje;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+    }, 3800);
+}
+
+// ==============================================================================
 // INICIALIZACIÓN AL CARGAR LA PÁGINA
 // ==============================================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -1037,6 +1654,18 @@ async function initApp() {
     setupNavigation();
     setupEventListeners();
 
+    // Cargar servicios publicados previamente por residentes desde LocalStorage
+    try {
+        const customServicios = JSON.parse(localStorage.getItem('cotapata_custom_servicios') || '[]');
+        if (Array.isArray(customServicios) && customServicios.length > 0) {
+            customServicios.forEach(cs => {
+                if (!DATASET_SERVICIOS_DEFAULT.some(ds => ds.id === cs.id)) {
+                    DATASET_SERVICIOS_DEFAULT.unshift(cs);
+                }
+            });
+        }
+    } catch(e) {}
+
     // Inicializar de inmediato con dataset de respaldo de alta fidelidad
     AppState.especies = JSON.parse(JSON.stringify(DATASET_ESPECIES_DEFAULT));
     AppState.servicios = JSON.parse(JSON.stringify(DATASET_SERVICIOS_DEFAULT));
@@ -1046,6 +1675,9 @@ async function initApp() {
 
     renderizarTodo();
     actualizarTextosInterfaz();
+
+    // Inicializar módulo de autenticación y roles
+    initAuth();
 
     // Auto-cargador del mapa para que nunca aparezca en blanco al hacer scroll
     setupMapAutoLoader();
@@ -1773,7 +2405,8 @@ function abrirModalAlojamientoPorId(id) {
     const specsBox = document.getElementById('modal-specs');
 
     if (imgEl) {
-        imgEl.src = `assets/img/${encodeURI(item.imagen)}`;
+        const isCustom = item.imagen && (item.imagen.startsWith('data:') || item.imagen.startsWith('http'));
+        imgEl.src = isCustom ? item.imagen : `assets/img/${encodeURI(item.imagen)}`;
         imgEl.alt = item.nombre;
     }
     if (titleEl) titleEl.innerText = item.nombre;
@@ -1821,7 +2454,8 @@ function abrirModalLugarPorId(id) {
     const specsBox = document.getElementById('modal-specs');
 
     if (imgEl) {
-        imgEl.src = `assets/img/${encodeURI(item.imagen)}`;
+        const isCustom = item.imagen && (item.imagen.startsWith('data:') || item.imagen.startsWith('http'));
+        imgEl.src = isCustom ? item.imagen : `assets/img/${encodeURI(item.imagen)}`;
         imgEl.alt = item.nombre;
     }
     if (titleEl) titleEl.innerText = item.nombre;
@@ -1867,7 +2501,8 @@ function abrirModalComidaPorId(id) {
     const specsBox = document.getElementById('modal-specs');
 
     if (imgEl) {
-        imgEl.src = `assets/img/${encodeURI(item.imagen)}`;
+        const isCustom = item.imagen && (item.imagen.startsWith('data:') || item.imagen.startsWith('http'));
+        imgEl.src = isCustom ? item.imagen : `assets/img/${encodeURI(item.imagen)}`;
         imgEl.alt = item.nombre;
     }
     if (titleEl) titleEl.innerText = item.nombre;
@@ -1956,15 +2591,16 @@ function setFiltroServicio(filtro, btnEl) {
 }
 
 function crearCardAlojamientoHtml(item) {
-    const imgEnc = encodeURI(`assets/img/${item.imagen}`);
-    const imgFallback = encodeURI(`imagen alojamiento/${item.imagen.replace('alojamiento/', '')}`);
+    const isCustom = item.imagen && (item.imagen.startsWith('data:') || item.imagen.startsWith('http'));
+    const imgEnc = isCustom ? item.imagen : encodeURI(`assets/img/${item.imagen}`);
+    const imgFallback = isCustom ? item.imagen : encodeURI(`imagen alojamiento/${item.imagen.replace('alojamiento/', '')}`);
     return `
         <div class="card-item alojamiento-card" onclick="manejarClickCard(this, () => abrirModalAlojamientoPorId(${item.id}))" tabindex="0">
             <div class="card-media">
                 <span class="card-badge">🏡 ${item.comunidad}</span>
                 <span class="card-zoom-badge">🔍 Ver detalle</span>
                 <img src="${imgEnc}" alt="${item.nombre}" loading="lazy"
-                     onerror="this.onerror=null; this.src='${imgFallback}';">
+                     onerror="this.onerror=null; ${isCustom ? '' : `this.src='${imgFallback}';`}">
             </div>
             <div class="card-content">
                 <h3 class="card-title">${item.nombre}</h3>
@@ -1984,15 +2620,16 @@ function crearCardAlojamientoHtml(item) {
 }
 
 function crearCardLugarHtml(item) {
-    const imgEnc = encodeURI(`assets/img/${item.imagen}`);
-    const imgFallback = encodeURI(`imagen lugares/${item.imagen.replace('lugares/', '')}`);
+    const isCustom = item.imagen && (item.imagen.startsWith('data:') || item.imagen.startsWith('http'));
+    const imgEnc = isCustom ? item.imagen : encodeURI(`assets/img/${item.imagen}`);
+    const imgFallback = isCustom ? item.imagen : encodeURI(`imagen lugares/${item.imagen.replace('lugares/', '')}`);
     return `
         <div class="card-item lugar-card" onclick="manejarClickCard(this, () => abrirModalLugarPorId(${item.id}))" tabindex="0">
             <div class="card-media">
                 <span class="card-badge">📍 ${item.comunidad}</span>
                 <span class="card-zoom-badge">🔍 Ver detalle</span>
                 <img src="${imgEnc}" alt="${item.nombre}" loading="lazy"
-                     onerror="this.onerror=null; this.src='${imgFallback}';">
+                     onerror="this.onerror=null; ${isCustom ? '' : `this.src='${imgFallback}';`}">
             </div>
             <div class="card-content">
                 <h3 class="card-title">${item.nombre}</h3>
@@ -2008,15 +2645,16 @@ function crearCardLugarHtml(item) {
 }
 
 function crearCardComidaHtml(item) {
-    const imgEnc = encodeURI(`assets/img/${item.imagen}`);
-    const imgFallback = encodeURI(`imagen comidas/${item.imagen.replace('comidas/', '')}`);
+    const isCustom = item.imagen && (item.imagen.startsWith('data:') || item.imagen.startsWith('http'));
+    const imgEnc = isCustom ? item.imagen : encodeURI(`assets/img/${item.imagen}`);
+    const imgFallback = isCustom ? item.imagen : encodeURI(`imagen comidas/${item.imagen.replace('comidas/', '')}`);
     return `
         <div class="card-item comida-card" onclick="manejarClickCard(this, () => abrirModalComidaPorId(${item.id}))" tabindex="0">
             <div class="card-media">
                 <span class="card-badge">🍲 Sabores de Cotapata</span>
                 <span class="card-zoom-badge">🔍 Ver detalle</span>
                 <img src="${imgEnc}" alt="${item.nombre}" loading="lazy"
-                     onerror="this.onerror=null; this.src='${imgFallback}';">
+                     onerror="this.onerror=null; ${isCustom ? '' : `this.src='${imgFallback}';`}">
             </div>
             <div class="card-content">
                 <h3 class="card-title">${item.nombre}</h3>

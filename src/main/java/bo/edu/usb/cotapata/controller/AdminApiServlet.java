@@ -116,6 +116,9 @@ public class AdminApiServlet extends HttpServlet {
                 case "/especies/estado":
                     cambiarEstadoEspecie(body, response);
                     break;
+                case "/especies/eliminar":
+                    eliminarEspecie(body, response);
+                    break;
 
                 case "/servicios":
                     guardarServicio(body, response);
@@ -191,6 +194,20 @@ public class AdminApiServlet extends HttpServlet {
             JsonUtil.sendSuccessResponse(response, "Estado de la especie actualizado a: " + estado);
         } else {
             JsonUtil.sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "No se pudo actualizar el estado de la especie.");
+        }
+    }
+
+    private void eliminarEspecie(JSONObject body, HttpServletResponse response) throws IOException {
+        int id = body.optInt("id", 0);
+        if (id <= 0) {
+            JsonUtil.sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "ID de especie inválido para eliminación.");
+            return;
+        }
+        boolean ok = especieService.eliminarEspecie(id);
+        if (ok) {
+            JsonUtil.sendSuccessResponse(response, "Especie eliminada satisfactoriamente del sistema.");
+        } else {
+            JsonUtil.sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No se pudo eliminar la especie de la base de datos.");
         }
     }
 

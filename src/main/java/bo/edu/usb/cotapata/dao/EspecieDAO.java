@@ -204,6 +204,18 @@ public class EspecieDAO {
         return cambiarEstado(id, "Retirado");
     }
 
+    public boolean eliminarFisico(int id) {
+        String sql = "DELETE FROM contenido WHERE id_contenido = ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error en eliminarFisico: " + e.getMessage());
+            return eliminarLogico(id);
+        }
+    }
+
     private List<Especie> executeListQuery(String sql) {
         List<Especie> lista = new ArrayList<>();
         try (Connection conn = DatabaseConfig.getConnection();

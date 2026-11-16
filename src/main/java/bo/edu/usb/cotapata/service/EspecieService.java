@@ -53,4 +53,9 @@ public class EspecieService {
     public boolean retirarEspecie(int id) {
         return especieDAO.eliminarLogico(id);
     }
+
+    public boolean eliminarEspecie(int id) {
+        if (id <= 0) return false;
+        return especieDAO.eliminarFisico(id);
+    }
 }
