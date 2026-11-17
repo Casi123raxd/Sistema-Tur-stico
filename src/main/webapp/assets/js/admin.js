@@ -214,7 +214,7 @@ function cargarDatosPestaña(tabId) {
 // Cliente Supabase unificado y Storage Helper
 const SUPABASE_CONFIG = {
     url: (typeof window !== 'undefined' && (window.SUPABASE_URL || (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || (window.process && window.process.env && window.process.env.SUPABASE_URL)))
-        || 'https://bsyhayoglxcsnfhqgidg.supabase.co/rest/v1/',
+        || 'https://bsyhayoglxcsnfhqgidg.supabase.co',
     anonKey: (typeof window !== 'undefined' && (window.SUPABASE_ANON_KEY || (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || (window.process && window.process.env && window.process.env.SUPABASE_ANON_KEY)))
         || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzeWhheW9nbHhjc25maHFnaWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2MzEyMTYsImV4cCI6MjEwOTIwNzIxNn0.T7uYK9XWsBPRsTVfU84uz8Qk-Bxx5-NQghZyJ-ipm9Y'
 };
