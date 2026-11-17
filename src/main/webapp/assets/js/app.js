@@ -1642,8 +1642,8 @@ function previsualizarImagenPublicacion(e) {
     reader.readAsDataURL(file);
 }
 
-// 2. CONEXIÓN REAL CON SUPABASE (INSERT ASÍNCRONO SIN LOCALSTORAGE)
-async function guardarPublicacionServicio(e) {
+// 2. PUBLICACIÓN DE SERVICIOS (MODO LOCALSTORAGE / MOCK DATA)
+function guardarPublicacionServicio(e) {
     if (e) e.preventDefault();
     const nombreInp = document.getElementById('pub-nombre');
     const catInp = document.getElementById('pub-categoria');
@@ -1672,7 +1672,7 @@ async function guardarPublicacionServicio(e) {
         return;
     }
 
-    // Imagen: usar la DataURL optimizada de previsualización o una imagen de respaldo según comunidad/categoría
+    // Imagen: usar la DataURL de previsualización o una imagen de respaldo según categoría
     let imagenFinal = previewImagenPublicacionData;
     if (!imagenFinal) {
         if (categoria === 'alojamiento') {
@@ -1690,221 +1690,93 @@ async function guardarPublicacionServicio(e) {
     const vendedorRol = user.rol || (user.tipo === 'residente' ? 'Residente del lugar' : 'Residente');
     const autor = user.username || 'Residente';
 
-    // Deshabilitar botón durante el proceso de guardado
-    if (btnSubmit) {
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '⏳ Subiendo a la nube (Supabase)...';
-    }
-
-    // Obtener cliente Supabase oficial
-    const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
-    if (!client) {
-        console.error('[Publicar Servicio Error]: Cliente Supabase no inicializado o no disponible.');
-        if (errEl) {
-            errEl.innerHTML = '❌ <strong>Error de conexión:</strong> No se pudo conectar con el cliente de Supabase.';
-            errEl.style.display = 'block';
-        }
-        if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = '🚀 Publicar en Catálogo';
-        }
-        alert('❌ Error: No se pudo conectar con la base de datos de Supabase. La publicación fue cancelada.');
-        return;
-    }
-
-    const payloadInsert = {
+    // Generar objeto de servicio con identificador único basado en timestamp
+    const nuevoId = Date.now();
+    const nuevoServicio = {
+        id: nuevoId,
+        tipoServicio: categoria,
+        categoria: categoria,
+        comunidad: comunidad,
         nombre: nombre,
         titulo: nombre,
-        categoria: categoria,
-        tipo_servicio: categoria,
         descripcion: descripcion,
         precio: precioTexto,
         precios: precioTexto,
-        comunidad: comunidad,
+        rangoPrecios: precioTexto,
         imagen: imagenFinal,
+        ubicacionReferencial: `Sector comunitario de ${comunidad}`,
+        horarioAtencion: 'Atención directa por comunario anfitrión',
+        iconoCategoria: categoria === 'alojamiento' ? '🏡' : (categoria === 'comida' ? '🍲' : '📍'),
+        nombreCategoria: categoria === 'alojamiento' ? 'Alojamiento' : (categoria === 'comida' ? 'Gastronomía' : 'Lugar'),
+        autor: autor,
         vendedor_id: vendedorId,
         vendedor_rol: vendedorRol,
-        autor: autor,
-        ubicacion_referencial: `Sector comunitario de ${comunidad}`,
-        horario_atencion: 'Atención directa por comunario anfitrión',
-        icono_categoria: categoria === 'alojamiento' ? '🏡' : (categoria === 'comida' ? '🍲' : '📍'),
-        fecha_registro: new Date().toISOString()
+        fechaPublicacion: new Date().toISOString()
     };
 
-    console.log('[Publicar Servicio] Enviando INSERT asíncrono a Supabase...', payloadInsert);
+    console.log('[Publicar Servicio Local] Guardando nuevo servicio:', nuevoServicio);
 
-    let insertExitoso = false;
-    let errorSupabase = null;
-
+    // 1. Guardar en localStorage bajo la clave 'cotapata_servicios_locales' insertando al inicio (unshift)
     try {
-        const resInsert = await client
-            .from('servicios')
-            .insert([payloadInsert])
-            .select();
-
-        if (resInsert.error) {
-            errorSupabase = resInsert.error;
-            console.warn('[Publicar Servicio] Reintentando INSERT con payload estructurado:', errorSupabase.message);
-            // Reintento en caso de diferencias de esquema estricto
-            if (errorSupabase.message && (errorSupabase.message.includes('column') || errorSupabase.message.includes('schema') || errorSupabase.code === 'PGRST204')) {
-                const payloadMinimo = {
-                    nombre: nombre,
-                    categoria: categoria,
-                    descripcion: descripcion,
-                    precio: precioTexto,
-                    comunidad: comunidad,
-                    imagen: imagenFinal,
-                    vendedor_id: vendedorId,
-                    vendedor_rol: vendedorRol,
-                    autor: autor
-                };
-                const retryRes = await client.from('servicios').insert([payloadMinimo]).select();
-                if (!retryRes.error) {
-                    insertExitoso = true;
-                    errorSupabase = null;
-                } else {
-                    errorSupabase = retryRes.error;
-                }
-            }
-        } else {
-            insertExitoso = true;
+        let serviciosLocales = [];
+        const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) serviciosLocales = parsed;
         }
-    } catch (errEx) {
-        errorSupabase = errEx;
+        serviciosLocales.unshift(nuevoServicio);
+        localStorage.setItem('cotapata_servicios_locales', JSON.stringify(serviciosLocales));
+    } catch (e) {
+        console.warn('[Publicar Servicio] Advertencia guardando en localStorage:', e);
     }
 
-    // 4. MANEJO DE ERRORES: Si la inserción a Supabase falla, BLOQUEAR publicación y alertar
-    if (!insertExitoso || errorSupabase) {
-        console.error('[Supabase INSERT Error]: Fallo al publicar el servicio en la base de datos:', errorSupabase);
-        const detalleError = errorSupabase && errorSupabase.message 
-            ? errorSupabase.message 
-            : (errorSupabase ? JSON.stringify(errorSupabase) : 'Fallo de red o políticas RLS en Supabase');
-        
-        if (errEl) {
-            errEl.innerHTML = `⚠️ <strong>Error al publicar en Supabase:</strong><br>${detalleError}<br><small>Asegúrate de ejecutar el script <code>database/supabase_servicios.sql</code> en el SQL Editor de Supabase.</small>`;
-            errEl.style.display = 'block';
-        }
-        if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = '🚀 Publicar en Catálogo';
-        }
-        alert(`⚠️ No se pudo subir la publicación a Supabase.\n\nDetalle del fallo: ${detalleError}\n\nLa publicación ha sido bloqueada y no se guardó localmente.`);
-        return; // BLOQUEO TOTAL: NUNCA SE SIMULA NI SE GUARDA EN LOCALSTORAGE
+    // 2. Actualizar inmediatamente el estado en memoria (AppState.servicios y DATASET_SERVICIOS_DEFAULT)
+    if (!Array.isArray(AppState.servicios)) {
+        AppState.servicios = JSON.parse(JSON.stringify(DATASET_SERVICIOS_DEFAULT));
+    }
+    AppState.servicios.unshift(nuevoServicio);
+
+    if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined' && Array.isArray(DATASET_SERVICIOS_DEFAULT)) {
+        DATASET_SERVICIOS_DEFAULT.unshift(nuevoServicio);
     }
 
-    // 3. REFRESCO GLOBAL DEL CATÁLOGO (SELECT DIRECTO A SUPABASE)
-    console.log('✓ [Publicar Servicio] INSERT exitoso en Supabase. Ejecutando refresco global (SELECT)...');
-    await cargarServiciosDesdeSupabase();
+    // 3. Renderizar inmediatamente en pantalla sin tiempos de espera ni red
+    renderizarServicios();
+
+    // 4. Limpieza del formulario
+    if (nombreInp) nombreInp.value = '';
+    if (precioInp) precioInp.value = '';
+    if (descInp) descInp.value = '';
+    const fileInp = document.getElementById('pub-imagen-file');
+    if (fileInp) fileInp.value = '';
+    const prevWrap = document.getElementById('pub-imagen-preview-container');
+    if (prevWrap) prevWrap.style.display = 'none';
+    previewImagenPublicacionData = '';
+
+    if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '🚀 Publicar en Catálogo';
+    }
 
     if (succEl) {
-        succEl.innerText = '✓ ¡Servicio publicado y sincronizado con éxito en la nube de Supabase!';
+        succEl.innerText = '✓ ¡Servicio publicado con éxito!';
         succEl.style.display = 'block';
     }
 
-    setTimeout(() => {
-        cerrarModalPublicarServicio();
-        // Limpiar formulario
-        if (nombreInp) nombreInp.value = '';
-        if (precioInp) precioInp.value = '';
-        if (descInp) descInp.value = '';
-        const fileInp = document.getElementById('pub-imagen-file');
-        if (fileInp) fileInp.value = '';
-        previewImagenPublicacionData = '';
-        if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = '🚀 Publicar en Catálogo';
-        }
+    // Cerrar modal de inmediato y posicionarse en la sección del catálogo
+    cerrarModalPublicarServicio();
+    navegarA('servicios');
+    setFiltroServicio(categoria === 'alojamiento' ? 'alojamientos' : (categoria === 'comida' ? 'comidas' : 'lugares'));
 
-        // Navegar a la sección de servicios y activar el filtro de la categoría publicada
-        navegarA('servicios');
-        setFiltroServicio(categoria === 'alojamiento' ? 'alojamientos' : (categoria === 'comida' ? 'comidas' : 'lugares'));
-        mostrarNotificacion(`✓ Tu servicio "${nombre}" ha sido publicado en Supabase y ya es visible para todos los usuarios.`);
-    }, 600);
+    // Notificación emergente toast inmediata
+    mostrarNotificacion(`✓ ¡Servicio "${nombre}" publicado con éxito! Ya está visible en el catálogo.`);
 }
-
-// 3. FUNCIÓN ASÍNCRONA PARA DESCARGAR DATOS REALES DE SUPABASE (SELECT GLOBAL)
-async function cargarServiciosDesdeSupabase() {
-    console.log('[Supabase Servicios] Consultando catálogo en la nube...');
-    const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
-    if (!client) {
-        console.warn('[Supabase Servicios] Cliente no inicializado.');
-        return false;
-    }
-
-    try {
-        let { data, error } = await client
-            .from('servicios')
-            .select('*')
-            .order('id', { ascending: false });
-
-        if (error && error.message && error.message.includes('does not exist')) {
-            const resSingular = await client
-                .from('servicio')
-                .select('*')
-                .order('id', { ascending: false });
-            if (!resSingular.error) {
-                data = resSingular.data;
-                error = null;
-            }
-        }
-
-        if (error) {
-            console.error('[Supabase SELECT Error]:', error);
-            return false;
-        }
-
-        if (Array.isArray(data)) {
-            const cloudServicios = data.map(s => {
-                const tipoRaw = (s.categoria || s.tipo_servicio || s.tipoServicio || 'alojamiento').toLowerCase();
-                const tipo = tipoRaw === 'alimentacion' ? 'comida' : tipoRaw;
-                const com = s.comunidad || 'Cotapata';
-                const pVal = s.precio || s.precios || s.rango_precios || 'Tarifa comunitaria referencial';
-                const pTxt = (typeof pVal === 'string' && pVal.includes('Bs')) ? pVal : `${pVal} Bs`;
-                
-                return {
-                    id: s.id || s.id_servicio,
-                    tipoServicio: tipo,
-                    categoria: tipo,
-                    comunidad: com,
-                    nombre: s.nombre || s.titulo || s.nombre_servicio || 'Servicio Comunitario',
-                    descripcion: s.descripcion || s.descripcion_es || '',
-                    precio: pTxt,
-                    precios: pTxt,
-                    rangoPrecios: pTxt,
-                    imagen: s.imagen || s.archivo_imagen || (tipo === 'alojamiento' ? 'alojamiento/alojamiento1.jpeg' : (tipo === 'comida' ? 'comidas/Café.jpeg' : 'lugares/Chairo1.jpeg')),
-                    ubicacionReferencial: s.ubicacion_referencial || `Sector comunitario de ${com}`,
-                    horarioAtencion: s.horario_atencion || 'Atención directa por comunario anfitrión',
-                    iconoCategoria: s.icono_categoria || (tipo === 'alojamiento' ? '🏡' : (tipo === 'comida' ? '🍲' : '📍')),
-                    nombreCategoria: tipo === 'alojamiento' ? 'Alojamiento' : (tipo === 'comida' ? 'Gastronomía' : 'Lugar'),
-                    autor: s.autor || s.vendedor_id || 'Residente',
-                    vendedor_id: s.vendedor_id || s.autor || '',
-                    vendedor_rol: s.vendedor_rol || 'Residente del lugar',
-                    fechaPublicacion: s.fecha_registro || s.created_at || new Date().toISOString()
-                };
-            });
-
-            // Combinar los servicios de Supabase con los predeterminados de alta fidelidad,
-            // asegurando que las publicaciones de la nube tengan prioridad visible
-            const idsCloud = new Set(cloudServicios.map(s => String(s.id)));
-            const defaultsSinColision = DATASET_SERVICIOS_DEFAULT.filter(d => !idsCloud.has(String(d.id)));
-            
-            AppState.servicios = [...cloudServicios, ...defaultsSinColision];
-            console.log(`✓ [Supabase Servicios] ${cloudServicios.length} publicaciones descargadas de la nube. Total en catálogo: ${AppState.servicios.length}`);
-            renderizarServicios();
-            return true;
-        }
-    } catch (errEx) {
-        console.error('[Supabase SELECT Excepción]:', errEx);
-    }
-    return false;
-}
-window.cargarServiciosDesdeSupabase = cargarServiciosDesdeSupabase;
 
 // ==============================================================================
 // GESTIÓN DE PUBLICACIONES DEL VENDEDOR (MIS SERVICIOS)
 // ==============================================================================
 
-async function abrirModalMisServicios() {
+function abrirModalMisServicios() {
     const user = AuthState.usuarioActual;
     if (!user || user.tipo !== 'residente') {
         mostrarNotificacion('Debes iniciar sesión como "Residente del lugar" para gestionar tus servicios.');
@@ -1918,8 +1790,6 @@ async function abrirModalMisServicios() {
         subTitle.innerText = `Anfitrión: ${user.username} · Comunidad: ${user.comunidad || 'Cotapata'}`;
     }
 
-    // Refrescar directamente desde Supabase antes de renderizar
-    await cargarServiciosDesdeSupabase();
     cargarListaServiciosVendedor();
 
     if (modal) modal.classList.add('active');
@@ -2037,8 +1907,8 @@ function cargarListaServiciosVendedor() {
     `;
 }
 
-// Eliminación segura y estricta por autor
-async function eliminarServicioVendedor(id, nombre) {
+// Eliminación local de servicio del vendedor
+function eliminarServicioVendedor(id, nombre) {
     const user = AuthState.usuarioActual;
     if (!user || user.tipo !== 'residente') {
         alert('Acceso denegado: solo el residente titular puede eliminar sus publicaciones.');
@@ -2050,32 +1920,33 @@ async function eliminarServicioVendedor(id, nombre) {
 
     console.log(`[Vendedor] Eliminando servicio propio #${id} (${nombre}) por usuario ${user.username}...`);
 
-    // 1. Supabase directo con filtro estricto por autor/comunario (Seguridad Backend)
+    // 1. Eliminar de localStorage ('cotapata_servicios_locales' y 'cotapata_custom_servicios')
     try {
-        if (typeof obtenerClienteSupabase === 'function') {
-            const client = obtenerClienteSupabase();
-            if (client) {
-                const { error } = await client
-                    .from('servicios')
-                    .delete()
-                    .eq('id', id)
-                    .eq('autor', user.username); // Filtro estricto por autor
-                if (error) console.warn('[Supabase Vendedor] Advertencia de eliminación:', error);
+        let serviciosLocales = [];
+        const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
+        if (raw) {
+            serviciosLocales = JSON.parse(raw);
+            if (Array.isArray(serviciosLocales)) {
+                serviciosLocales = serviciosLocales.filter(s => String(s.id) !== String(id));
+                localStorage.setItem('cotapata_servicios_locales', JSON.stringify(serviciosLocales));
             }
         }
-    } catch(err) {
-        console.warn('[Supabase Vendedor] Excepción:', err);
+    } catch (e) {
+        console.warn('Error eliminando de localStorage:', e);
     }
 
-    // 2. Intentar backend servlet con validación de autor
-    try {
-        fetch(`api/servicios/eliminar?id=${id}&autor=${encodeURIComponent(user.username)}`, {
-            method: 'DELETE'
-        }).catch(() => {});
-    } catch(e) {}
+    // 2. Eliminar de AppState.servicios
+    if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
+        AppState.servicios = AppState.servicios.filter(s => String(s.id) !== String(id));
+    }
+    // También de DATASET_SERVICIOS_DEFAULT si estuviera ahí
+    if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined' && Array.isArray(DATASET_SERVICIOS_DEFAULT)) {
+        const idx = DATASET_SERVICIOS_DEFAULT.findIndex(s => String(s.id) === String(id));
+        if (idx !== -1) DATASET_SERVICIOS_DEFAULT.splice(idx, 1);
+    }
 
-    // 3. Sincronizar catálogo global directamente desde Supabase
-    await cargarServiciosDesdeSupabase();
+    // 3. Re-renderizar catálogo y lista de publicaciones del vendedor de inmediato
+    renderizarServicios();
     cargarListaServiciosVendedor();
 
     mostrarNotificacion(`✓ Tu servicio "${nombre}" ha sido retirado y eliminado con éxito.`);
@@ -2112,10 +1983,26 @@ async function initApp() {
 
     // Inicializar de inmediato con dataset de respaldo de alta fidelidad
     AppState.especies = JSON.parse(JSON.stringify(DATASET_ESPECIES_DEFAULT));
-    AppState.servicios = JSON.parse(JSON.stringify(DATASET_SERVICIOS_DEFAULT));
     AppState.atractivos = JSON.parse(JSON.stringify(DATASET_ATRACTIVOS_DEFAULT));
     AppState.rutas = JSON.parse(JSON.stringify(DATASET_RUTAS_DEFAULT));
     AppState.recomendaciones = JSON.parse(JSON.stringify(DATASET_RECOMENDACIONES_DEFAULT));
+
+    // Cargar servicios guardados previamente en localStorage y fusionarlos con el catálogo por defecto
+    let serviciosLocales = [];
+    try {
+        const rawLocales = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
+        if (rawLocales) {
+            const parsed = JSON.parse(rawLocales);
+            if (Array.isArray(parsed)) serviciosLocales = parsed;
+        }
+    } catch (e) {
+        console.warn('Error cargando servicios locales de localStorage:', e);
+    }
+
+    const defaultServicios = JSON.parse(JSON.stringify(DATASET_SERVICIOS_DEFAULT));
+    const idsLocales = new Set(serviciosLocales.map(s => String(s.id)));
+    const defaultsFiltrados = defaultServicios.filter(d => !idsLocales.has(String(d.id)));
+    AppState.servicios = [...serviciosLocales, ...defaultsFiltrados];
 
     renderizarTodo();
     actualizarTextosInterfaz();
@@ -2324,9 +2211,6 @@ function navegarA(seccionId) {
     if (seccionId === 'mapa') {
         setTimeout(iniciarMapaSiEsNecesario, 250);
     }
-    if (seccionId === 'servicios') {
-        cargarServiciosDesdeSupabase();
-    }
 }
 
 function cerrarMenuMovil() {
@@ -2375,9 +2259,6 @@ function actualizarTextosInterfaz() {
 // ==============================================================================
 async function cargarDatos() {
     try {
-        // Cargar catálogo de servicios comunitarios directamente desde Supabase
-        await cargarServiciosDesdeSupabase();
-
         const [resEsp] = await Promise.all([
             fetch(`api/publico/especies?lang=${AppState.idioma}`).catch(() => null)
         ]);
@@ -3096,11 +2977,6 @@ function setFiltroServicio(filtro, btnEl) {
         if (btn) btn.classList.add('active');
     }
     renderizarServicios();
-
-    // 3. REFRESCO GLOBAL DEL CATÁLOGO (SELECT DIRECTO A SUPABASE AL CAMBIAR DE PESTAÑA)
-    if (filtro === 'alojamientos' || filtro === 'comidas' || filtro === 'todas') {
-        cargarServiciosDesdeSupabase();
-    }
 
     if (typeof setupScrollReveal === 'function') setTimeout(setupScrollReveal, 40);
 }

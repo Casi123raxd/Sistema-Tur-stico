@@ -738,28 +738,22 @@ async function cargarAdmServicios() {
 
     try {
         let list = [];
-        try {
-            const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
-            if (client) {
-                const { data, error } = await client.from('servicios').select('*').order('id', { ascending: false });
-                if (!error && Array.isArray(data) && data.length > 0) {
-                    list = data;
-                }
-            }
-        } catch (e) {}
-
-        if (!Array.isArray(list) || list.length === 0) {
+        if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios) && AppState.servicios.length > 0) {
+            list = AppState.servicios;
+        } else {
+            // Cargar desde localStorage
             try {
-                const res = await fetch('api/admin/servicios');
-                if (res.ok) list = await res.json();
+                const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) list = parsed;
+                }
             } catch (e) {}
-        }
 
-        if (!Array.isArray(list) || list.length === 0) {
-            if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios) && AppState.servicios.length > 0) {
-                list = AppState.servicios;
-            } else if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined') {
-                list = DATASET_SERVICIOS_DEFAULT;
+            if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined') {
+                const idsLocales = new Set(list.map(s => String(s.id)));
+                const defaults = DATASET_SERVICIOS_DEFAULT.filter(d => !idsLocales.has(String(d.id)));
+                list = [...list, ...defaults];
             }
         }
 
@@ -806,41 +800,33 @@ async function cargarAdmServicios() {
 
 async function eliminarServicioAdmin(id, nombre) {
     if (!id) return;
-    const confirmacion = confirm(`¿Estás seguro de que deseas eliminar permanentemente el servicio "${nombre || '#' + id}" (#${id})?\n\nEsta acción quitará el registro del catálogo y de la base de datos.`);
+    const confirmacion = confirm(`¿Estás seguro de que deseas eliminar permanentemente el servicio "${nombre || '#' + id}" (#${id})?\n\nEsta acción quitará el registro del catálogo.`);
     if (!confirmacion) return;
 
-    console.log(`[DEBUG Admin] Solicitando eliminación de servicio #${id} (${nombre})...`);
+    console.log(`[Admin] Eliminando servicio #${id} (${nombre})...`);
 
-    // 1. Intentar eliminar en Supabase si está disponible
+    // 1. Eliminar de localStorage ('cotapata_servicios_locales' y 'cotapata_custom_servicios')
     try {
-        const client = obtenerClienteSupabase();
-        if (client) {
-            await client.from('servicios').delete().eq('id', id);
+        let serviciosLocales = [];
+        const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
+        if (raw) {
+            serviciosLocales = JSON.parse(raw);
+            if (Array.isArray(serviciosLocales)) {
+                serviciosLocales = serviciosLocales.filter(s => String(s.id) !== String(id));
+                localStorage.setItem('cotapata_servicios_locales', JSON.stringify(serviciosLocales));
+            }
         }
-    } catch(e) {}
+    } catch (e) {
+        console.warn('Error eliminando de localStorage:', e);
+    }
 
-    // 2. Intentar eliminar en backend API
-    try {
-        await fetch(`api/admin/servicios/eliminar`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': AdminState.csrfToken
-            },
-            body: JSON.stringify({ id: id })
-        });
-    } catch (err) {}
-
-    // 3. Eliminar del dataset en memoria
+    // 2. Eliminar del dataset en memoria
     if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
-        AppState.servicios = AppState.servicios.filter(s => s.id != id);
+        AppState.servicios = AppState.servicios.filter(s => String(s.id) !== String(id));
     }
     if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined' && Array.isArray(DATASET_SERVICIOS_DEFAULT)) {
-        const idx = DATASET_SERVICIOS_DEFAULT.findIndex(s => s.id == id);
+        const idx = DATASET_SERVICIOS_DEFAULT.findIndex(s => String(s.id) === String(id));
         if (idx !== -1) DATASET_SERVICIOS_DEFAULT.splice(idx, 1);
-    }
-    if (typeof cargarServiciosDesdeSupabase === 'function') {
-        await cargarServiciosDesdeSupabase();
     }
 
     cargarAdmServicios();
@@ -854,10 +840,10 @@ async function eliminarServicioAdmin(id, nombre) {
 async function editarServicioAdminModal(id) {
     let s = null;
     if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
-        s = AppState.servicios.find(item => item.id == id);
+        s = AppState.servicios.find(item => String(item.id) === String(id));
     }
     if (!s && typeof DATASET_SERVICIOS_DEFAULT !== 'undefined') {
-        s = DATASET_SERVICIOS_DEFAULT.find(item => item.id == id);
+        s = DATASET_SERVICIOS_DEFAULT.find(item => String(item.id) === String(id));
     }
     if (!s) {
         alert('No se encontró la información del servicio seleccionado.');
@@ -870,27 +856,26 @@ async function editarServicioAdminModal(id) {
     if (nuevoPrecio === null) return;
 
     s.nombre = nuevoNombre.trim() || s.nombre;
+    s.titulo = s.nombre;
     s.precios = nuevoPrecio.trim() || s.precios;
     s.precio = s.precios;
+    s.rangoPrecios = s.precios;
 
-    // Actualizar directamente en Supabase
+    // Actualizar en localStorage si existe allí
     try {
-        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
-        if (client) {
-            await client.from('servicios').update({
-                nombre: s.nombre,
-                titulo: s.nombre,
-                precio: s.precio,
-                precios: s.precios
-            }).eq('id', id);
+        const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
+        if (raw) {
+            let serviciosLocales = JSON.parse(raw);
+            if (Array.isArray(serviciosLocales)) {
+                const idx = serviciosLocales.findIndex(item => String(item.id) === String(id));
+                if (idx !== -1) {
+                    serviciosLocales[idx] = { ...serviciosLocales[idx], ...s };
+                    localStorage.setItem('cotapata_servicios_locales', JSON.stringify(serviciosLocales));
+                }
+            }
         }
-    } catch(e) {
-        console.warn('[Admin Editar] Advertencia actualizando en Supabase:', e);
-    }
+    } catch (e) {}
 
-    if (typeof cargarServiciosDesdeSupabase === 'function') {
-        await cargarServiciosDesdeSupabase();
-    }
     cargarAdmServicios();
     if (typeof renderizarServicios === 'function') {
         renderizarServicios();
