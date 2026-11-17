@@ -1034,16 +1034,25 @@ const I18N = {
 // ==============================================================================
 
 const SUPABASE_APP_CONFIG = {
-    url: 'https://bsyhayoglxcsnfhqgidg.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzeWhheW9nbHhjc25maHFnaWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDQ5ODMsImV4cCI6MjA1NzYyMDk4M30.default_anon'
+    url: (typeof window !== 'undefined' && (window.SUPABASE_URL || (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || (window.process && window.process.env && window.process.env.SUPABASE_URL)))
+        || 'https://bsyhayoglxcsnfhqgidg.supabase.co',
+    anonKey: (typeof window !== 'undefined' && (window.SUPABASE_ANON_KEY || (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || (window.process && window.process.env && window.process.env.SUPABASE_ANON_KEY)))
+        || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzeWhheW9nbHhjc25maHFnaWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDQ5ODMsImV4cCI6MjA1NzYyMDk4M30.default_anon'
 };
 
 let _supabaseAppInstancia = null;
 function obtenerClienteSupabase() {
     if (_supabaseAppInstancia) return _supabaseAppInstancia;
+    if (window.supabaseClient) {
+        _supabaseAppInstancia = window.supabaseClient;
+        return _supabaseAppInstancia;
+    }
+    const targetUrl = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || SUPABASE_APP_CONFIG.url;
+    const targetKey = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || SUPABASE_APP_CONFIG.anonKey;
     if (window.supabase && typeof window.supabase.createClient === 'function') {
         try {
-            _supabaseAppInstancia = window.supabase.createClient(SUPABASE_APP_CONFIG.url, SUPABASE_APP_CONFIG.anonKey);
+            _supabaseAppInstancia = window.supabase.createClient(targetUrl, targetKey);
+            window.supabaseClient = _supabaseAppInstancia;
             return _supabaseAppInstancia;
         } catch (e) {
             console.warn('[Supabase App] Error inicializando cliente JS:', e);
@@ -1642,8 +1651,8 @@ function previsualizarImagenPublicacion(e) {
     reader.readAsDataURL(file);
 }
 
-// 2. PUBLICACIÓN DE SERVICIOS (MODO LOCALSTORAGE / MOCK DATA)
-function guardarPublicacionServicio(e) {
+// 2. PUBLICACIÓN DE SERVICIOS — CONEXIÓN DIRECTA CON SUPABASE CLOUD (INSERT)
+async function guardarPublicacionServicio(e) {
     if (e) e.preventDefault();
     const nombreInp = document.getElementById('pub-nombre');
     const catInp = document.getElementById('pub-categoria');
@@ -1690,93 +1699,196 @@ function guardarPublicacionServicio(e) {
     const vendedorRol = user.rol || (user.tipo === 'residente' ? 'Residente del lugar' : 'Residente');
     const autor = user.username || 'Residente';
 
-    // Generar objeto de servicio con identificador único basado en timestamp
-    const nuevoId = Date.now();
-    const nuevoServicio = {
-        id: nuevoId,
-        tipoServicio: categoria,
-        categoria: categoria,
-        comunidad: comunidad,
+    // Deshabilitar botón durante el proceso de guardado
+    if (btnSubmit) {
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '⏳ Guardando en la nube (Supabase)...';
+    }
+
+    // Obtener cliente oficial de Supabase
+    const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+    if (!client) {
+        console.error('[Publicar Servicio Error]: Cliente Supabase no inicializado o no disponible.');
+        if (errEl) {
+            errEl.innerHTML = '❌ <strong>Error de conexión:</strong> No se pudo conectar con el cliente de Supabase.';
+            errEl.style.display = 'block';
+        }
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '🚀 Publicar en Catálogo';
+        }
+        alert('❌ Error: No se pudo conectar con la base de datos de Supabase. La publicación fue cancelada.');
+        return;
+    }
+
+    const payloadInsert = {
         nombre: nombre,
         titulo: nombre,
+        categoria: categoria,
+        tipo_servicio: categoria,
         descripcion: descripcion,
         precio: precioTexto,
         precios: precioTexto,
-        rangoPrecios: precioTexto,
+        comunidad: comunidad,
         imagen: imagenFinal,
-        ubicacionReferencial: `Sector comunitario de ${comunidad}`,
-        horarioAtencion: 'Atención directa por comunario anfitrión',
-        iconoCategoria: categoria === 'alojamiento' ? '🏡' : (categoria === 'comida' ? '🍲' : '📍'),
-        nombreCategoria: categoria === 'alojamiento' ? 'Alojamiento' : (categoria === 'comida' ? 'Gastronomía' : 'Lugar'),
-        autor: autor,
         vendedor_id: vendedorId,
         vendedor_rol: vendedorRol,
-        fechaPublicacion: new Date().toISOString()
+        autor: autor,
+        ubicacion_referencial: `Sector comunitario de ${comunidad}`,
+        horario_atencion: 'Atención directa por comunario anfitrión',
+        icono_categoria: categoria === 'alojamiento' ? '🏡' : (categoria === 'comida' ? '🍲' : '📍'),
+        fecha_registro: new Date().toISOString()
     };
 
-    console.log('[Publicar Servicio Local] Guardando nuevo servicio:', nuevoServicio);
+    console.log('[Publicar Servicio] Enviando INSERT directo a Supabase...', payloadInsert);
 
-    // 1. Guardar en localStorage bajo la clave 'cotapata_servicios_locales' insertando al inicio (unshift)
     try {
-        let serviciosLocales = [];
-        const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed)) serviciosLocales = parsed;
+        const { data, error } = await client
+            .from('servicios')
+            .insert([payloadInsert])
+            .select();
+
+        if (error) {
+            console.error('[Supabase INSERT Error]:', error);
+            if (errEl) {
+                errEl.innerHTML = `⚠️ <strong>Error al publicar en Supabase:</strong><br>${error.message || JSON.stringify(error)}`;
+                errEl.style.display = 'block';
+            }
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '🚀 Publicar en Catálogo';
+            }
+            alert(`⚠️ No se pudo guardar la publicación en Supabase.\nDetalle: ${error.message || 'Verifica las políticas RLS o la conexión'}`);
+            return;
         }
-        serviciosLocales.unshift(nuevoServicio);
-        localStorage.setItem('cotapata_servicios_locales', JSON.stringify(serviciosLocales));
-    } catch (e) {
-        console.warn('[Publicar Servicio] Advertencia guardando en localStorage:', e);
+
+        console.log('✓ [Publicar Servicio] Inserción exitosa en Supabase:', data);
+
+        if (succEl) {
+            succEl.innerText = '✓ ¡Servicio publicado con éxito en la nube de Supabase!';
+            succEl.style.display = 'block';
+        }
+
+        // 3. Refrescar catálogo desde la nube
+        await cargarServiciosDesdeSupabase();
+
+        // 4. Limpieza del formulario
+        if (nombreInp) nombreInp.value = '';
+        if (precioInp) precioInp.value = '';
+        if (descInp) descInp.value = '';
+        const fileInp = document.getElementById('pub-imagen-file');
+        if (fileInp) fileInp.value = '';
+        const prevWrap = document.getElementById('pub-imagen-preview-container');
+        if (prevWrap) prevWrap.style.display = 'none';
+        previewImagenPublicacionData = '';
+
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '🚀 Publicar en Catálogo';
+        }
+
+        // Cerrar modal y navegar a la sección de servicios
+        cerrarModalPublicarServicio();
+        navegarA('servicios');
+        setFiltroServicio(categoria === 'alojamiento' ? 'alojamientos' : (categoria === 'comida' ? 'comidas' : 'lugares'));
+
+        mostrarNotificacion(`✓ Tu servicio "${nombre}" ha sido publicado en la nube de Supabase.`);
+    } catch (errEx) {
+        console.error('[Supabase INSERT Excepción]:', errEx);
+        if (errEl) {
+            errEl.innerHTML = `⚠️ <strong>Excepción de conexión:</strong> ${errEx.message || errEx}`;
+            errEl.style.display = 'block';
+        }
+        if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '🚀 Publicar en Catálogo';
+        }
+        alert('⚠️ Ocurrió un error inesperado al conectar con Supabase. Revisa tu conexión a internet.');
     }
-
-    // 2. Actualizar inmediatamente el estado en memoria (AppState.servicios y DATASET_SERVICIOS_DEFAULT)
-    if (!Array.isArray(AppState.servicios)) {
-        AppState.servicios = JSON.parse(JSON.stringify(DATASET_SERVICIOS_DEFAULT));
-    }
-    AppState.servicios.unshift(nuevoServicio);
-
-    if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined' && Array.isArray(DATASET_SERVICIOS_DEFAULT)) {
-        DATASET_SERVICIOS_DEFAULT.unshift(nuevoServicio);
-    }
-
-    // 3. Renderizar inmediatamente en pantalla sin tiempos de espera ni red
-    renderizarServicios();
-
-    // 4. Limpieza del formulario
-    if (nombreInp) nombreInp.value = '';
-    if (precioInp) precioInp.value = '';
-    if (descInp) descInp.value = '';
-    const fileInp = document.getElementById('pub-imagen-file');
-    if (fileInp) fileInp.value = '';
-    const prevWrap = document.getElementById('pub-imagen-preview-container');
-    if (prevWrap) prevWrap.style.display = 'none';
-    previewImagenPublicacionData = '';
-
-    if (btnSubmit) {
-        btnSubmit.disabled = false;
-        btnSubmit.innerHTML = '🚀 Publicar en Catálogo';
-    }
-
-    if (succEl) {
-        succEl.innerText = '✓ ¡Servicio publicado con éxito!';
-        succEl.style.display = 'block';
-    }
-
-    // Cerrar modal de inmediato y posicionarse en la sección del catálogo
-    cerrarModalPublicarServicio();
-    navegarA('servicios');
-    setFiltroServicio(categoria === 'alojamiento' ? 'alojamientos' : (categoria === 'comida' ? 'comidas' : 'lugares'));
-
-    // Notificación emergente toast inmediata
-    mostrarNotificacion(`✓ ¡Servicio "${nombre}" publicado con éxito! Ya está visible en el catálogo.`);
 }
+
+// ==============================================================================
+// 3. CONSULTA GLOBAL DESDE SUPABASE CLOUD (SELECT GLOBAL)
+// ==============================================================================
+async function cargarServiciosDesdeSupabase() {
+    console.log('[Supabase Servicios] Consultando catálogo en la nube...');
+    const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+    if (!client) {
+        console.warn('[Supabase Servicios] Cliente Supabase no inicializado.');
+        return false;
+    }
+
+    try {
+        let { data, error } = await client
+            .from('servicios')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) {
+            console.error('[Supabase SELECT Error]:', error);
+            return false;
+        }
+
+        if (Array.isArray(data)) {
+            const cloudServicios = data.map(s => {
+                const tipoRaw = (s.categoria || s.tipo_servicio || s.tipoServicio || 'alojamiento').toLowerCase();
+                const tipo = tipoRaw === 'alimentacion' ? 'comida' : tipoRaw;
+                const com = s.comunidad || 'Cotapata';
+                const pVal = s.precio || s.precios || s.rango_precios || 'Tarifa comunitaria referencial';
+                const pTxt = (typeof pVal === 'string' && pVal.includes('Bs')) ? pVal : `${pVal} Bs`;
+
+                return {
+                    id: s.id || s.id_servicio,
+                    tipoServicio: tipo,
+                    categoria: tipo,
+                    comunidad: com,
+                    nombre: s.nombre || s.titulo || s.nombre_servicio || 'Servicio Comunitario',
+                    descripcion: s.descripcion || s.descripcion_es || '',
+                    precio: pTxt,
+                    precios: pTxt,
+                    rangoPrecios: pTxt,
+                    imagen: s.imagen || s.archivo_imagen || (tipo === 'alojamiento' ? 'alojamiento/alojamiento1.jpeg' : (tipo === 'comida' ? 'comidas/Café.jpeg' : 'lugares/Chairo1.jpeg')),
+                    ubicacionReferencial: s.ubicacion_referencial || `Sector comunitario de ${com}`,
+                    horarioAtencion: s.horario_atencion || 'Atención directa por comunario anfitrión',
+                    iconoCategoria: s.icono_categoria || (tipo === 'alojamiento' ? '🏡' : (tipo === 'comida' ? '🍲' : '📍')),
+                    nombreCategoria: tipo === 'alojamiento' ? 'Alojamiento' : (tipo === 'comida' ? 'Gastronomía' : 'Lugar'),
+                    autor: s.autor || s.vendedor_id || 'Residente',
+                    vendedor_id: s.vendedor_id || s.autor || '',
+                    vendedor_rol: s.vendedor_rol || 'Residente del lugar',
+                    fechaPublicacion: s.fecha_registro || s.created_at || new Date().toISOString()
+                };
+            });
+
+            // Las tarjetas se alimentan directamente de los datos que vienen de la nube
+            if (cloudServicios.length > 0) {
+                // Combinar publicaciones de la nube con el catálogo base para IDs no duplicados
+                const idsCloud = new Set(cloudServicios.map(s => String(s.id)));
+                const defaultsSinColision = (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined')
+                    ? DATASET_SERVICIOS_DEFAULT.filter(d => !idsCloud.has(String(d.id)))
+                    : [];
+                AppState.servicios = [...cloudServicios, ...defaultsSinColision];
+            } else if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined') {
+                AppState.servicios = JSON.parse(JSON.stringify(DATASET_SERVICIOS_DEFAULT));
+            } else {
+                AppState.servicios = [];
+            }
+
+            console.log(`✓ [Supabase Servicios] ${cloudServicios.length} publicaciones descargadas desde Supabase. Total en catálogo: ${AppState.servicios.length}`);
+            renderizarServicios();
+            return true;
+        }
+    } catch (errEx) {
+        console.error('[Supabase SELECT Excepción]:', errEx);
+    }
+    return false;
+}
+window.cargarServiciosDesdeSupabase = cargarServiciosDesdeSupabase;
 
 // ==============================================================================
 // GESTIÓN DE PUBLICACIONES DEL VENDEDOR (MIS SERVICIOS)
 // ==============================================================================
 
-function abrirModalMisServicios() {
+async function abrirModalMisServicios() {
     const user = AuthState.usuarioActual;
     if (!user || user.tipo !== 'residente') {
         mostrarNotificacion('Debes iniciar sesión como "Residente del lugar" para gestionar tus servicios.');
@@ -1790,6 +1902,8 @@ function abrirModalMisServicios() {
         subTitle.innerText = `Anfitrión: ${user.username} · Comunidad: ${user.comunidad || 'Cotapata'}`;
     }
 
+    // Refrescar directamente desde Supabase antes de renderizar
+    await cargarServiciosDesdeSupabase();
     cargarListaServiciosVendedor();
 
     if (modal) modal.classList.add('active');
@@ -1907,49 +2021,47 @@ function cargarListaServiciosVendedor() {
     `;
 }
 
-// Eliminación local de servicio del vendedor
-function eliminarServicioVendedor(id, nombre) {
+// Eliminación de servicio del vendedor con sincronización en la nube (Supabase)
+async function eliminarServicioVendedor(id, nombre) {
     const user = AuthState.usuarioActual;
     if (!user || user.tipo !== 'residente') {
         alert('Acceso denegado: solo el residente titular puede eliminar sus publicaciones.');
         return;
     }
 
-    const confirmacion = confirm(`¿Estás seguro de que deseas retirar y eliminar tu publicación "${nombre}"?\n\nEsta acción quitará el servicio del catálogo público.`);
+    const confirmacion = confirm(`¿Estás seguro de que deseas retirar y eliminar tu publicación "${nombre}"?\n\nEsta acción quitará el servicio del catálogo en la nube.`);
     if (!confirmacion) return;
 
     console.log(`[Vendedor] Eliminando servicio propio #${id} (${nombre}) por usuario ${user.username}...`);
 
-    // 1. Eliminar de localStorage ('cotapata_servicios_locales' y 'cotapata_custom_servicios')
+    // 1. Eliminar directamente en Supabase
     try {
-        let serviciosLocales = [];
-        const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
-        if (raw) {
-            serviciosLocales = JSON.parse(raw);
-            if (Array.isArray(serviciosLocales)) {
-                serviciosLocales = serviciosLocales.filter(s => String(s.id) !== String(id));
-                localStorage.setItem('cotapata_servicios_locales', JSON.stringify(serviciosLocales));
-            }
+        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+        if (client) {
+            const { error } = await client
+                .from('servicios')
+                .delete()
+                .eq('id', id);
+            if (error) console.warn('[Supabase Vendedor] Advertencia de eliminación:', error);
         }
-    } catch (e) {
-        console.warn('Error eliminando de localStorage:', e);
+    } catch(err) {
+        console.warn('[Supabase Vendedor] Excepción eliminando en la nube:', err);
     }
 
-    // 2. Eliminar de AppState.servicios
+    // 2. Limpieza en memoria
     if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
         AppState.servicios = AppState.servicios.filter(s => String(s.id) !== String(id));
     }
-    // También de DATASET_SERVICIOS_DEFAULT si estuviera ahí
     if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined' && Array.isArray(DATASET_SERVICIOS_DEFAULT)) {
         const idx = DATASET_SERVICIOS_DEFAULT.findIndex(s => String(s.id) === String(id));
         if (idx !== -1) DATASET_SERVICIOS_DEFAULT.splice(idx, 1);
     }
 
-    // 3. Re-renderizar catálogo y lista de publicaciones del vendedor de inmediato
-    renderizarServicios();
+    // 3. Sincronizar catálogo global directamente desde Supabase
+    await cargarServiciosDesdeSupabase();
     cargarListaServiciosVendedor();
 
-    mostrarNotificacion(`✓ Tu servicio "${nombre}" ha sido retirado y eliminado con éxito.`);
+    mostrarNotificacion(`✓ Tu servicio "${nombre}" ha sido retirado y eliminado de la nube con éxito.`);
 }
 
 // Toast de notificación emergente amigable
@@ -1983,32 +2095,19 @@ async function initApp() {
 
     // Inicializar de inmediato con dataset de respaldo de alta fidelidad
     AppState.especies = JSON.parse(JSON.stringify(DATASET_ESPECIES_DEFAULT));
+    AppState.servicios = JSON.parse(JSON.stringify(DATASET_SERVICIOS_DEFAULT));
     AppState.atractivos = JSON.parse(JSON.stringify(DATASET_ATRACTIVOS_DEFAULT));
     AppState.rutas = JSON.parse(JSON.stringify(DATASET_RUTAS_DEFAULT));
     AppState.recomendaciones = JSON.parse(JSON.stringify(DATASET_RECOMENDACIONES_DEFAULT));
-
-    // Cargar servicios guardados previamente en localStorage y fusionarlos con el catálogo por defecto
-    let serviciosLocales = [];
-    try {
-        const rawLocales = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
-        if (rawLocales) {
-            const parsed = JSON.parse(rawLocales);
-            if (Array.isArray(parsed)) serviciosLocales = parsed;
-        }
-    } catch (e) {
-        console.warn('Error cargando servicios locales de localStorage:', e);
-    }
-
-    const defaultServicios = JSON.parse(JSON.stringify(DATASET_SERVICIOS_DEFAULT));
-    const idsLocales = new Set(serviciosLocales.map(s => String(s.id)));
-    const defaultsFiltrados = defaultServicios.filter(d => !idsLocales.has(String(d.id)));
-    AppState.servicios = [...serviciosLocales, ...defaultsFiltrados];
 
     renderizarTodo();
     actualizarTextosInterfaz();
 
     // Inicializar módulo de autenticación y roles
     initAuth();
+
+    // Conectar y descargar catálogo de servicios comunitarios directamente desde Supabase
+    cargarServiciosDesdeSupabase();
 
     // Auto-cargador del mapa para que nunca aparezca en blanco al hacer scroll
     setupMapAutoLoader();
@@ -2211,6 +2310,9 @@ function navegarA(seccionId) {
     if (seccionId === 'mapa') {
         setTimeout(iniciarMapaSiEsNecesario, 250);
     }
+    if (seccionId === 'servicios') {
+        cargarServiciosDesdeSupabase();
+    }
 }
 
 function cerrarMenuMovil() {
@@ -2259,6 +2361,9 @@ function actualizarTextosInterfaz() {
 // ==============================================================================
 async function cargarDatos() {
     try {
+        // Cargar catálogo de servicios comunitarios directamente desde Supabase
+        await cargarServiciosDesdeSupabase();
+
         const [resEsp] = await Promise.all([
             fetch(`api/publico/especies?lang=${AppState.idioma}`).catch(() => null)
         ]);
@@ -2977,6 +3082,11 @@ function setFiltroServicio(filtro, btnEl) {
         if (btn) btn.classList.add('active');
     }
     renderizarServicios();
+
+    // Refresco global del catálogo (SELECT directo a Supabase al cambiar de pestaña)
+    if (filtro === 'alojamientos' || filtro === 'comidas' || filtro === 'todas') {
+        cargarServiciosDesdeSupabase();
+    }
 
     if (typeof setupScrollReveal === 'function') setTimeout(setupScrollReveal, 40);
 }

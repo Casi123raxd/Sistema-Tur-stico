@@ -213,16 +213,25 @@ function cargarDatosPestaña(tabId) {
 
 // Cliente Supabase unificado y Storage Helper
 const SUPABASE_CONFIG = {
-    url: 'https://bsyhayoglxcsnfhqgidg.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzeWhheW9nbHhjc25maHFnaWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDQ5ODMsImV4cCI6MjA1NzYyMDk4M30.default_anon'
+    url: (typeof window !== 'undefined' && (window.SUPABASE_URL || (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || (window.process && window.process.env && window.process.env.SUPABASE_URL)))
+        || 'https://bsyhayoglxcsnfhqgidg.supabase.co',
+    anonKey: (typeof window !== 'undefined' && (window.SUPABASE_ANON_KEY || (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || (window.process && window.process.env && window.process.env.SUPABASE_ANON_KEY)))
+        || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJzeWhheW9nbHhjc25maHFnaWRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwNDQ5ODMsImV4cCI6MjA1NzYyMDk4M30.default_anon'
 };
 
 let _supabaseInstancia = null;
 function obtenerClienteSupabase() {
     if (_supabaseInstancia) return _supabaseInstancia;
+    if (window.supabaseClient) {
+        _supabaseInstancia = window.supabaseClient;
+        return _supabaseInstancia;
+    }
+    const targetUrl = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || SUPABASE_CONFIG.url;
+    const targetKey = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || SUPABASE_CONFIG.anonKey;
     if (window.supabase && typeof window.supabase.createClient === 'function') {
         try {
-            _supabaseInstancia = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+            _supabaseInstancia = window.supabase.createClient(targetUrl, targetKey);
+            window.supabaseClient = _supabaseInstancia;
             return _supabaseInstancia;
         } catch (e) {
             console.warn('[Supabase Admin] Error inicializando cliente JS:', e);
@@ -734,26 +743,27 @@ async function eliminarEspecieAdmin(id, nombre) {
 async function cargarAdmServicios() {
     const tbody = document.getElementById('tbody-adm-servicios');
     if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:var(--text-muted);">Cargando servicios comunitarios...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:var(--text-muted);">Cargando servicios comunitarios desde la nube...</td></tr>';
 
     try {
         let list = [];
-        if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios) && AppState.servicios.length > 0) {
-            list = AppState.servicios;
-        } else {
-            // Cargar desde localStorage
+        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+        if (client) {
             try {
-                const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (Array.isArray(parsed)) list = parsed;
+                const { data, error } = await client.from('servicios').select('*').order('id', { ascending: false });
+                if (!error && Array.isArray(data) && data.length > 0) {
+                    list = data;
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.warn('[Admin Servicios] Error consultando Supabase:', e);
+            }
+        }
 
-            if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined') {
-                const idsLocales = new Set(list.map(s => String(s.id)));
-                const defaults = DATASET_SERVICIOS_DEFAULT.filter(d => !idsLocales.has(String(d.id)));
-                list = [...list, ...defaults];
+        if (list.length === 0) {
+            if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios) && AppState.servicios.length > 0) {
+                list = AppState.servicios;
+            } else if (typeof DATASET_SERVICIOS_DEFAULT !== 'undefined') {
+                list = DATASET_SERVICIOS_DEFAULT;
             }
         }
 
@@ -800,24 +810,20 @@ async function cargarAdmServicios() {
 
 async function eliminarServicioAdmin(id, nombre) {
     if (!id) return;
-    const confirmacion = confirm(`¿Estás seguro de que deseas eliminar permanentemente el servicio "${nombre || '#' + id}" (#${id})?\n\nEsta acción quitará el registro del catálogo.`);
+    const confirmacion = confirm(`¿Estás seguro de que deseas eliminar permanentemente el servicio "${nombre || '#' + id}" (#${id})?\n\nEsta acción quitará el registro del catálogo y de la base de datos en Supabase.`);
     if (!confirmacion) return;
 
     console.log(`[Admin] Eliminando servicio #${id} (${nombre})...`);
 
-    // 1. Eliminar de localStorage ('cotapata_servicios_locales' y 'cotapata_custom_servicios')
+    // 1. Eliminar directamente en Supabase
     try {
-        let serviciosLocales = [];
-        const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
-        if (raw) {
-            serviciosLocales = JSON.parse(raw);
-            if (Array.isArray(serviciosLocales)) {
-                serviciosLocales = serviciosLocales.filter(s => String(s.id) !== String(id));
-                localStorage.setItem('cotapata_servicios_locales', JSON.stringify(serviciosLocales));
-            }
+        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+        if (client) {
+            const { error } = await client.from('servicios').delete().eq('id', id);
+            if (error) console.warn('[Admin Eliminar] Advertencia Supabase:', error);
         }
     } catch (e) {
-        console.warn('Error eliminando de localStorage:', e);
+        console.warn('Error eliminando en Supabase:', e);
     }
 
     // 2. Eliminar del dataset en memoria
@@ -829,12 +835,16 @@ async function eliminarServicioAdmin(id, nombre) {
         if (idx !== -1) DATASET_SERVICIOS_DEFAULT.splice(idx, 1);
     }
 
+    if (typeof cargarServiciosDesdeSupabase === 'function') {
+        await cargarServiciosDesdeSupabase();
+    }
+
     cargarAdmServicios();
     if (typeof renderizarServicios === 'function') {
         renderizarServicios();
     }
 
-    alert(`✓ El servicio "${nombre}" (#${id}) ha sido eliminado del catálogo.`);
+    alert(`✓ El servicio "${nombre}" (#${id}) ha sido eliminado del catálogo y de la nube.`);
 }
 
 async function editarServicioAdminModal(id) {
@@ -861,26 +871,30 @@ async function editarServicioAdminModal(id) {
     s.precio = s.precios;
     s.rangoPrecios = s.precios;
 
-    // Actualizar en localStorage si existe allí
+    // Actualizar directamente en Supabase
     try {
-        const raw = localStorage.getItem('cotapata_servicios_locales') || localStorage.getItem('cotapata_custom_servicios');
-        if (raw) {
-            let serviciosLocales = JSON.parse(raw);
-            if (Array.isArray(serviciosLocales)) {
-                const idx = serviciosLocales.findIndex(item => String(item.id) === String(id));
-                if (idx !== -1) {
-                    serviciosLocales[idx] = { ...serviciosLocales[idx], ...s };
-                    localStorage.setItem('cotapata_servicios_locales', JSON.stringify(serviciosLocales));
-                }
-            }
+        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+        if (client) {
+            await client.from('servicios').update({
+                nombre: s.nombre,
+                titulo: s.nombre,
+                precio: s.precio,
+                precios: s.precios
+            }).eq('id', id);
         }
-    } catch (e) {}
+    } catch(e) {
+        console.warn('[Admin Editar] Advertencia actualizando en Supabase:', e);
+    }
+
+    if (typeof cargarServiciosDesdeSupabase === 'function') {
+        await cargarServiciosDesdeSupabase();
+    }
 
     cargarAdmServicios();
     if (typeof renderizarServicios === 'function') {
         renderizarServicios();
     }
-    alert('✓ Servicio actualizado correctamente.');
+    alert('✓ Servicio actualizado correctamente en Supabase.');
 }
 
 // ==============================================================================
