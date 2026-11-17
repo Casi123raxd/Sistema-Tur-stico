@@ -739,9 +739,21 @@ async function cargarAdmServicios() {
     try {
         let list = [];
         try {
-            const res = await fetch('api/admin/servicios');
-            if (res.ok) list = await res.json();
+            const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+            if (client) {
+                const { data, error } = await client.from('servicios').select('*').order('id', { ascending: false });
+                if (!error && Array.isArray(data) && data.length > 0) {
+                    list = data;
+                }
+            }
         } catch (e) {}
+
+        if (!Array.isArray(list) || list.length === 0) {
+            try {
+                const res = await fetch('api/admin/servicios');
+                if (res.ok) list = await res.json();
+            } catch (e) {}
+        }
 
         if (!Array.isArray(list) || list.length === 0) {
             if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios) && AppState.servicios.length > 0) {
@@ -819,7 +831,7 @@ async function eliminarServicioAdmin(id, nombre) {
         });
     } catch (err) {}
 
-    // 3. Eliminar del dataset en memoria y local
+    // 3. Eliminar del dataset en memoria
     if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
         AppState.servicios = AppState.servicios.filter(s => s.id != id);
     }
@@ -827,11 +839,9 @@ async function eliminarServicioAdmin(id, nombre) {
         const idx = DATASET_SERVICIOS_DEFAULT.findIndex(s => s.id == id);
         if (idx !== -1) DATASET_SERVICIOS_DEFAULT.splice(idx, 1);
     }
-    try {
-        let custom = JSON.parse(localStorage.getItem('cotapata_custom_servicios') || '[]');
-        custom = custom.filter(s => s.id != id);
-        localStorage.setItem('cotapata_custom_servicios', JSON.stringify(custom));
-    } catch(e) {}
+    if (typeof cargarServiciosDesdeSupabase === 'function') {
+        await cargarServiciosDesdeSupabase();
+    }
 
     cargarAdmServicios();
     if (typeof renderizarServicios === 'function') {
@@ -841,7 +851,7 @@ async function eliminarServicioAdmin(id, nombre) {
     alert(`✓ El servicio "${nombre}" (#${id}) ha sido eliminado del catálogo.`);
 }
 
-function editarServicioAdminModal(id) {
+async function editarServicioAdminModal(id) {
     let s = null;
     if (typeof AppState !== 'undefined' && Array.isArray(AppState.servicios)) {
         s = AppState.servicios.find(item => item.id == id);
@@ -863,16 +873,24 @@ function editarServicioAdminModal(id) {
     s.precios = nuevoPrecio.trim() || s.precios;
     s.precio = s.precios;
 
-    // Actualizar en localStorage
+    // Actualizar directamente en Supabase
     try {
-        let custom = JSON.parse(localStorage.getItem('cotapata_custom_servicios') || '[]');
-        const idx = custom.findIndex(item => item.id == id);
-        if (idx !== -1) {
-            custom[idx] = Object.assign({}, custom[idx], s);
-            localStorage.setItem('cotapata_custom_servicios', JSON.stringify(custom));
+        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+        if (client) {
+            await client.from('servicios').update({
+                nombre: s.nombre,
+                titulo: s.nombre,
+                precio: s.precio,
+                precios: s.precios
+            }).eq('id', id);
         }
-    } catch(e) {}
+    } catch(e) {
+        console.warn('[Admin Editar] Advertencia actualizando en Supabase:', e);
+    }
 
+    if (typeof cargarServiciosDesdeSupabase === 'function') {
+        await cargarServiciosDesdeSupabase();
+    }
     cargarAdmServicios();
     if (typeof renderizarServicios === 'function') {
         renderizarServicios();
