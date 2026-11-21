@@ -2808,3 +2808,605 @@ button, input, select, textarea {
     max-width: 680px;
     margin: 0.5rem auto 0;
 }
+
+/* ==============================================================================
+   PUNTO 3: CORRECCIÓN RESPONSIVA DEL BOTÓN DE GOOGLE MAPS EN MÓVIL (360px - 430px)
+   ============================================================================== */
+@media (max-width: 768px) {
+    .gmaps-featured-banner {
+        padding: 1.2rem 1rem !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 1.2rem !important;
+    }
+
+    .gmaps-banner-left {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+
+    .gmaps-banner-right {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 1 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        margin: 0 auto !important;
+    }
+
+    .btn-gmaps-link {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 auto !important;
+        padding: 0.85rem 1rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.75rem !important;
+    }
+
+    .btn-gmaps-icon-wrap {
+        width: 38px !important;
+        height: 38px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .btn-gmaps-label {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        text-align: left !important;
+    }
+
+    .btn-gmaps-label strong {
+        font-size: 0.95rem !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+
+    .btn-gmaps-label small {
+        font-size: 0.72rem !important;
+        white-space: normal !important;
+    }
+
+    .btn-gmaps-arrow {
+        flex-shrink: 0 !important;
+        font-size: 1.25rem !important;
+        margin-left: auto !important;
+    }
+}
+
+/* ==============================================================================
+   PUNTOS 1 Y 2: ESTILOS DE DISPONIBILIDAD, RESERVAS Y CALENDARIO (CERO EMOJIS)
+   ============================================================================== */
+/* Badges de Disponibilidad */
+.badge-disponibilidad {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.badge-disponible {
+    background: #e8f5e9;
+    color: #1b5e20;
+    border: 1px solid #a5d6a7;
+}
+
+.badge-disponible::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #2e7d32;
+}
+
+.badge-lleno {
+    background: #FCA5A5 !important;
+    color: #7F1D1D !important;
+    border: 1px solid #F87171 !important;
+}
+
+.badge-lleno::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #991b1b;
+}
+
+/* Bloque compacto de fechas ocupadas en tarjeta */
+.bloque-fechas-ocupadas {
+    background: #fbfbfb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.5rem 0.65rem;
+    margin: 0.6rem 0;
+    font-size: 0.76rem;
+}
+
+.fechas-ocupadas-label {
+    display: block;
+    color: #4b5563;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.fechas-ocupadas-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.tag-fecha-ocupada {
+    background: #FCA5A5;
+    color: #7F1D1D;
+    border: 1px solid #F87171;
+    border-radius: 4px;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.fechas-ocupadas-ninguna {
+    color: #059669;
+    font-style: italic;
+    font-size: 0.73rem;
+}
+
+/* Botón Reservar en Tarjeta y Modal */
+.btn-reservar-alojamiento {
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.62rem 1rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(30, 70, 32, 0.2);
+    margin-top: 0.5rem;
+    box-sizing: border-box;
+}
+
+.btn-reservar-alojamiento:hover:not(:disabled) {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(30, 70, 32, 0.25);
+}
+
+.btn-reservar-alojamiento:disabled,
+.btn-reservar-disabled {
+    background: #FCA5A5 !important;
+    color: #7F1D1D !important;
+    border: 1px solid #F87171 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+    opacity: 0.95;
+}
+
+/* Botón Gestionar Disponibilidad */
+.btn-gestionar-disp-card {
+    background: #f3f4f6;
+    color: #1f2937;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.52rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    margin-top: 0.4rem;
+    transition: background 0.2s, border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.btn-gestionar-disp-card:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+/* Estructura responsiva de los Modales de Reserva y Disponibilidad */
+.booking-modal-sheet {
+    max-width: 540px;
+    padding: 1.4rem;
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    .booking-modal-sheet {
+        padding: 1.1rem 0.85rem !important;
+        border-radius: 14px !important;
+    }
+}
+
+.booking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1.5px solid #e5e7eb;
+    padding-bottom: 0.85rem;
+    margin-bottom: 1rem;
+    gap: 0.5rem;
+}
+
+.booking-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+    line-height: 1.25;
+}
+
+.booking-subtitle {
+    font-size: 0.8rem;
+    color: #4b5563;
+    margin-top: 0.2rem;
+}
+
+.booking-summary-box {
+    background: #f8faf9;
+    border: 1px solid #dbe7df;
+    border-radius: 8px;
+    padding: 0.75rem 0.9rem;
+    margin-bottom: 1.1rem;
+    font-size: 0.82rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.booking-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Calendario interactivo */
+.reserva-calendar-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.85rem;
+    margin-bottom: 1.1rem;
+}
+
+.calendar-nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.calendar-month-label {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1f2937;
+    text-transform: capitalize;
+}
+
+.calendar-btn-nav {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 0.32rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.calendar-btn-nav:hover {
+    background: #e5e7eb;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.calendar-day-header {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    padding: 0.25rem 0;
+}
+
+.calendar-day-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    min-width: 0;
+}
+
+.calendar-day-cell.empty {
+    cursor: default;
+}
+
+.calendar-day-cell.available:hover {
+    background: #e8f5e9;
+    border-color: #81c784;
+}
+
+.calendar-day-cell.past {
+    color: #9ca3af;
+    background: #f9fafb;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Ocupado / Bloqueado según requerimiento estricto */
+.calendar-day-cell.occupied {
+    background: #FCA5A5 !important;
+    border-color: #F87171 !important;
+    color: #7F1D1D !important;
+    font-weight: 700 !important;
+    cursor: not-allowed !important;
+}
+
+.calendar-day-cell.selected-start,
+.calendar-day-cell.selected-end {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border-color: var(--primary) !important;
+}
+
+.calendar-day-cell.selected-range {
+    background: #d4e7d7 !important;
+    color: #1e4620 !important;
+    border-color: #b7d7bc !important;
+}
+
+.calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid #f0f0f0;
+    font-size: 0.72rem;
+    color: #4b5563;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legend-box {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.legend-occupied {
+    background: #FCA5A5;
+    border: 1px solid #F87171;
+}
+
+.legend-available {
+    background: #ffffff;
+    border: 1px solid #9ca3af;
+}
+
+.legend-selected {
+    background: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+/* Pasarela de pago simulada */
+.payment-methods-tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin: 0.6rem 0 0.9rem;
+}
+
+.payment-tab-btn {
+    flex: 1;
+    background: #f9fafb;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.55rem 0.4rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.payment-tab-btn.active {
+    background: #f0f7f2;
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.payment-pane {
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.9rem;
+    margin-bottom: 1.1rem;
+}
+
+.form-group-booking {
+    margin-bottom: 0.75rem;
+}
+
+.form-group-booking label {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.25rem;
+}
+
+.form-input-booking {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55rem 0.75rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.83rem;
+    color: #1f2937;
+    background: #ffffff;
+    transition: border-color 0.2s;
+}
+
+.form-input-booking:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.booking-dates-summary {
+    display: flex;
+    gap: 0.5rem;
+    background: #eef5f0;
+    border: 1px solid #cfe2d4;
+    border-radius: 6px;
+    padding: 0.6rem;
+    margin: 0.75rem 0;
+    font-size: 0.78rem;
+    color: #1e4620;
+    justify-content: space-between;
+}
+
+/* Comprobante de Reserva Sobrio */
+.receipt-container {
+    background: #fdfefe;
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    padding: 1.2rem;
+    margin-top: 0.5rem;
+    font-size: 0.83rem;
+    color: #1f2937;
+}
+
+.receipt-header {
+    text-align: center;
+    border-bottom: 1.5px dashed #cbd5e1;
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+}
+
+.receipt-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.32rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.receipt-row:last-child {
+    border-bottom: none;
+}
+
+.receipt-status-confirmed {
+    display: inline-block;
+    background: #dcfce7;
+    color: #15803d;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+}
+
+/* Gestión de Disponibilidad para Vendedor */
+.switcher-disponibilidad-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1.2rem;
+    gap: 0.6rem;
+}
+
+@media (max-width: 480px) {
+    .switcher-disponibilidad-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+}
+
+.gestionar-disp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    margin-top: 0.5rem;
+}
+
+.gestionar-disp-table th {
+    background: #f3f4f6;
+    padding: 0.55rem 0.5rem;
+    text-align: left;
+    color: #4b5563;
+    font-weight: 700;
+    border-bottom: 1.5px solid #e5e7eb;
+}
+
+.gestionar-disp-table td {
+    padding: 0.55rem 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #1f2937;
+}
+
+.btn-liberar-fechas {
+    background: #ffffff;
+    color: #b91c1c;
+    border: 1px solid #f87171;
+    border-radius: 5px;
+    padding: 0.25rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-liberar-fechas:hover {
+    background: #fee2e2;
+}

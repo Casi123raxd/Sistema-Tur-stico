@@ -1855,9 +1855,15 @@ async function cargarServiciosDesdeSupabase() {
                     autor: s.autor || s.vendedor_id || 'Residente',
                     vendedor_id: s.vendedor_id || s.autor || '',
                     vendedor_rol: s.vendedor_rol || 'Residente del lugar',
+                    estado_disponibilidad: s.estado_disponibilidad || s.disponibilidad || 'Disponible',
                     fechaPublicacion: s.fecha_registro || s.created_at || new Date().toISOString()
                 };
             });
+
+            // Sincronizar reservas confirmadas y fechas ocupadas desde Supabase
+            if (typeof cargarReservasDesdeSupabase === 'function') {
+                await cargarReservasDesdeSupabase();
+            }
 
             // Las tarjetas se alimentan directamente de los datos que vienen de la nube
             if (cloudServicios.length > 0) {
@@ -1986,7 +1992,16 @@ function cargarListaServiciosVendedor() {
                 <td style="padding:0.75rem 0.6rem; font-size:0.75rem; color:var(--text-muted);">
                     ${s.fechaPublicacion ? new Date(s.fechaPublicacion).toLocaleDateString('es-BO') : 'Activo'}
                 </td>
-                <td style="padding:0.75rem 0.6rem; text-align:right;">
+                <td style="padding:0.75rem 0.6rem; text-align:right; white-space:nowrap;">
+                    ${(s.tipoServicio === 'alojamiento' || s.categoria === 'alojamiento') ? `
+                        <button type="button" 
+                                class="btn-gestionar-disp-card" 
+                                style="width:auto; display:inline-flex; align-items:center; margin:0 0.35rem 0 0; padding:0.38rem 0.75rem; font-size:0.74rem;" 
+                                onclick="cerrarModalMisServicios(); abrirModalGestionDisponibilidad('${sId}')" 
+                                title="Gestionar disponibilidad y ocupación">
+                            Disponibilidad
+                        </button>
+                    ` : ''}
                     <button class="btn-admin-act-del" 
                             style="background:#c0392b; color:#ffffff; border:none; padding:0.38rem 0.8rem; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:0.35rem; transition:background 0.2s;"
                             onclick="eliminarServicioVendedor(${sId}, '${sNombre}')"
@@ -2081,6 +2096,939 @@ function mostrarNotificacion(mensaje) {
         toast.style.transform = 'translateY(20px)';
     }, 3800);
 }
+
+// ==============================================================================
+// PUNTOS 1 Y 2: GESTIÓN DE DISPONIBILIDAD, RESERVAS Y PASARELA SIMULADA (SIN EMOJIS)
+// ==============================================================================
+
+/**
+ * Consulta todas las reservas confirmadas en Supabase para calcular ocupación en tiempo real.
+ */
+async function cargarReservasDesdeSupabase() {
+    const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+    if (!client) {
+        if (!AppState.reservasOcupadasPorServicio) AppState.reservasOcupadasPorServicio = {};
+        return [];
+    }
+
+    try {
+        const { data, error } = await client
+            .from('reservas')
+            .select('*')
+            .eq('estado', 'confirmada')
+            .order('fecha_inicio', { ascending: true });
+
+        if (error) {
+            console.error('[Supabase Reservas Error]:', error);
+            if (!AppState.reservasOcupadasPorServicio) AppState.reservasOcupadasPorServicio = {};
+            return [];
+        }
+
+        const agrupadas = {};
+        if (Array.isArray(data)) {
+            data.forEach(r => {
+                const sId = String(r.servicio_id);
+                if (!agrupadas[sId]) agrupadas[sId] = [];
+                agrupadas[sId].push(r);
+            });
+        }
+        AppState.reservasOcupadasPorServicio = agrupadas;
+        return data || [];
+    } catch (e) {
+        console.error('[Supabase Reservas Excepcion]:', e);
+        if (!AppState.reservasOcupadasPorServicio) AppState.reservasOcupadasPorServicio = {};
+        return [];
+    }
+}
+window.cargarReservasDesdeSupabase = cargarReservasDesdeSupabase;
+
+/**
+ * Formatea una fecha YYYY-MM-DD a DD/MM
+ */
+function formatearFechaCorta(fechaStr) {
+    if (!fechaStr) return '';
+    const partes = String(fechaStr).split('-');
+    if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}`;
+    }
+    return fechaStr;
+}
+
+/**
+ * Genera el bloque compacto de fechas ocupadas para la tarjeta pública del alojamiento.
+ */
+function obtenerHtmlFechasOcupadasCompacto(servicioId) {
+    const sId = String(servicioId);
+    const reservas = (AppState.reservasOcupadasPorServicio && AppState.reservasOcupadasPorServicio[sId])
+        ? AppState.reservasOcupadasPorServicio[sId]
+        : [];
+
+    const hoyStr = new Date().toISOString().split('T')[0];
+    const vigentes = reservas.filter(r => (r.fecha_fin || r.fecha_inicio) >= hoyStr);
+
+    if (vigentes.length === 0) {
+        return `
+            <div class="bloque-fechas-ocupadas">
+                <span class="fechas-ocupadas-label">Fechas reservadas / ocupadas:</span>
+                <span class="fechas-ocupadas-ninguna">Sin fechas ocupadas registradas</span>
+            </div>
+        `;
+    }
+
+    const tagsHtml = vigentes.slice(0, 3).map(r => {
+        const fIni = formatearFechaCorta(r.fecha_inicio);
+        const fFin = formatearFechaCorta(r.fecha_fin);
+        return `<span class="tag-fecha-ocupada">${fIni} al ${fFin}</span>`;
+    }).join('');
+
+    const masTexto = vigentes.length > 3 ? `<span style="font-size:0.7rem; color:#6b7280; align-self:center;">+${vigentes.length - 3} mas</span>` : '';
+
+    return `
+        <div class="bloque-fechas-ocupadas">
+            <span class="fechas-ocupadas-label">Fechas reservadas / ocupadas:</span>
+            <div class="fechas-ocupadas-tags">
+                ${tagsHtml}
+                ${masTexto}
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Verifica si el usuario actual autenticado es el propietario del servicio (Rol Residente).
+ */
+function esPropietarioDelServicio(item) {
+    if (!item) return false;
+    const user = (typeof AuthState !== 'undefined') ? AuthState.usuarioActual : null;
+    if (!user || user.tipo !== 'residente') return false;
+    const usernameActual = (user.username || '').toLowerCase();
+    const nombreCompletoActual = (user.nombreCompleto || '').toLowerCase();
+    const userIdActual = user.id ? String(user.id).toLowerCase() : '';
+    const aut = (item.autor || '').toLowerCase();
+    const vend = String(item.vendedor_id || '').toLowerCase();
+    return (aut && (aut === usernameActual || aut === nombreCompletoActual)) ||
+           (vend && (vend === usernameActual || vend === userIdActual));
+}
+
+/**
+ * Módulo interactivo de reserva, calendario y pasarela simulada para visitantes.
+ */
+const BookingModule = {
+    servicioActual: null,
+    anio: new Date().getFullYear(),
+    mes: new Date().getMonth(),
+    fechaInicio: null,
+    fechaFin: null,
+    fechasOcupadasSet: new Set(),
+    metodoPago: 'visa',
+    tipoVisa: 'debito',
+
+    async abrirModal(servicioId) {
+        const list = (AppState.servicios && AppState.servicios.length > 0) ? AppState.servicios : DATASET_SERVICIOS_DEFAULT;
+        const item = list.find(s => String(s.id) === String(servicioId)) || DATASET_SERVICIOS_DEFAULT.find(s => String(s.id) === String(servicioId));
+        if (!item) return;
+
+        const disp = (item.estado_disponibilidad || 'Disponible').trim();
+        if (disp.toLowerCase().includes('lleno')) {
+            alert('Este alojamiento se encuentra actualmente marcado como Lleno / No disponible.');
+            return;
+        }
+
+        this.servicioActual = item;
+        this.anio = new Date().getFullYear();
+        this.mes = new Date().getMonth();
+        this.fechaInicio = null;
+        this.fechaFin = null;
+        this.metodoPago = 'visa';
+        this.tipoVisa = 'debito';
+        this.fechasOcupadasSet = new Set();
+
+        // Consultar fechas ocupadas directamente de Supabase
+        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+        if (client) {
+            try {
+                const { data } = await client
+                    .from('reservas')
+                    .select('*')
+                    .eq('servicio_id', String(servicioId))
+                    .eq('estado', 'confirmada');
+
+                if (Array.isArray(data)) {
+                    data.forEach(r => {
+                        if (r.fecha_inicio && r.fecha_fin) {
+                            let cur = new Date(r.fecha_inicio);
+                            const fin = new Date(r.fecha_fin);
+                            while (cur <= fin) {
+                                const y = cur.getFullYear();
+                                const m = String(cur.getMonth() + 1).padStart(2, '0');
+                                const d = String(cur.getDate()).padStart(2, '0');
+                                this.fechasOcupadasSet.add(`${y}-${m}-${d}`);
+                                cur.setDate(cur.getDate() + 1);
+                            }
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('[BookingModule] Error al consultar disponibilidad:', err);
+            }
+        }
+
+        // Configurar títulos del modal
+        const tituloEl = document.getElementById('reserva-modal-titulo');
+        const subtituloEl = document.getElementById('reserva-modal-subtitulo');
+        if (tituloEl) tituloEl.innerText = `Reserva: ${item.nombre}`;
+        if (subtituloEl) subtituloEl.innerText = `Comunidad ${item.comunidad} · Cotapata`;
+
+        this.renderizarContenido();
+
+        const modal = document.getElementById('modal-reserva-alojamiento');
+        if (modal) {
+            modal.classList.remove('active');
+            void modal.offsetWidth;
+            modal.classList.add('active');
+        }
+    },
+
+    cerrarModal() {
+        const modal = document.getElementById('modal-reserva-alojamiento');
+        if (modal) modal.classList.remove('active');
+    },
+
+    renderizarContenido() {
+        const container = document.getElementById('reserva-form-body');
+        if (!container || !this.servicioActual) return;
+        const item = this.servicioActual;
+
+        container.innerHTML = `
+            <div class="booking-summary-box">
+                <div class="booking-summary-row">
+                    <span style="font-weight:600; color:#374151;">Alojamiento seleccionado:</span>
+                    <strong style="color:var(--primary);">${item.nombre}</strong>
+                </div>
+                <div class="booking-summary-row">
+                    <span style="font-weight:600; color:#374151;">Ubicacion:</span>
+                    <span>Comunidad ${item.comunidad}</span>
+                </div>
+                <div class="booking-summary-row">
+                    <span style="font-weight:600; color:#374151;">Tarifa referencial:</span>
+                    <span style="color:#d35400; font-weight:700;">${item.precios || item.precio}</span>
+                </div>
+            </div>
+
+            <div class="reserva-calendar-container">
+                <div class="calendar-nav-bar">
+                    <button type="button" class="calendar-btn-nav" onclick="BookingModule.cambiarMes(-1)">&lt; Mes anterior</button>
+                    <span class="calendar-month-label" id="reserva-calendar-title"></span>
+                    <button type="button" class="calendar-btn-nav" onclick="BookingModule.cambiarMes(1)">Siguiente mes &gt;</button>
+                </div>
+                <div class="calendar-grid" id="reserva-calendar-grid">
+                    <!-- Inyectado dinámicamente -->
+                </div>
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <span class="legend-box legend-occupied"></span>
+                        <span>Ocupado / No disponible</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-box legend-available"></span>
+                        <span>Disponible</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-box legend-selected"></span>
+                        <span>Seleccionado</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="booking-dates-summary" id="reserva-dates-summary">
+                <div id="reserva-fechas-txt">Seleccione las fechas de llegada y salida en el calendario superior.</div>
+                <div id="reserva-monto-txt" style="font-weight:700;"></div>
+            </div>
+
+            <div style="margin-top:1rem; border-top:1px solid #e5e7eb; padding-top:0.85rem;">
+                <h4 style="font-size:0.88rem; font-weight:700; color:#1f2937; margin:0 0 0.6rem 0;">Datos del Visitante</h4>
+                <div class="form-group-booking">
+                    <label for="reserva-vis-nombre">Nombre Completo</label>
+                    <input type="text" id="reserva-vis-nombre" class="form-input-booking" placeholder="Ejemplo: Juan Carlos Pérez">
+                </div>
+                <div class="form-group-booking">
+                    <label for="reserva-vis-contacto">Correo o Telefono de Contacto</label>
+                    <input type="text" id="reserva-vis-contacto" class="form-input-booking" placeholder="ejemplo@correo.com o +591 70000000">
+                </div>
+                <div class="form-group-booking">
+                    <label for="reserva-vis-personas">Cantidad de Personas</label>
+                    <input type="number" id="reserva-vis-personas" class="form-input-booking" value="1" min="1" max="20" onchange="BookingModule.actualizarResumenFechas()">
+                </div>
+            </div>
+
+            <div style="margin-top:1rem; border-top:1px solid #e5e7eb; padding-top:0.85rem;">
+                <h4 style="font-size:0.88rem; font-weight:700; color:#1f2937; margin:0 0 0.4rem 0;">Pasarela de Pago</h4>
+                <div class="payment-methods-tabs">
+                    <button type="button" class="payment-tab-btn active" id="tab-pay-visa" onclick="BookingModule.cambiarMetodoPago('visa')">Tarjeta Visa</button>
+                    <button type="button" class="payment-tab-btn" id="tab-pay-paypal" onclick="BookingModule.cambiarMetodoPago('paypal')">PayPal</button>
+                    <button type="button" class="payment-tab-btn" id="tab-pay-qr" onclick="BookingModule.cambiarMetodoPago('qr')">Pago QR</button>
+                </div>
+
+                <div id="pane-pay-visa" class="payment-pane">
+                    <div class="form-group-booking">
+                        <label>Tipo de Tarjeta</label>
+                        <select id="reserva-card-type" class="form-input-booking" onchange="BookingModule.tipoVisa = this.value">
+                            <option value="debito" selected>Tarjeta de Debito</option>
+                            <option value="credito">Tarjeta de Credito</option>
+                        </select>
+                    </div>
+                    <div class="form-group-booking">
+                        <label for="reserva-card-number">Numero de Tarjeta Visa</label>
+                        <input type="text" id="reserva-card-number" class="form-input-booking" placeholder="4000 1234 5678 9010" maxlength="19">
+                    </div>
+                    <div class="form-group-booking">
+                        <label for="reserva-card-name">Titular de la Tarjeta</label>
+                        <input type="text" id="reserva-card-name" class="form-input-booking" placeholder="Nombre como figura en el plastico">
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">
+                        <div class="form-group-booking">
+                            <label for="reserva-card-exp">Vencimiento (MM/AA)</label>
+                            <input type="text" id="reserva-card-exp" class="form-input-booking" placeholder="12/28" maxlength="5">
+                        </div>
+                        <div class="form-group-booking">
+                            <label for="reserva-card-cvv">Codigo de Seguridad (CVV)</label>
+                            <input type="password" id="reserva-card-cvv" class="form-input-booking" placeholder="123" maxlength="3">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pane-pay-paypal" class="payment-pane" style="display:none;">
+                    <p style="font-size:0.78rem; color:#4b5563; margin-bottom:0.6rem;">
+                        Ingrese su cuenta de PayPal para vincular la transaccion simulada de confirmacion.
+                    </p>
+                    <div class="form-group-booking">
+                        <label for="reserva-paypal-email">Correo Electronico de PayPal</label>
+                        <input type="email" id="reserva-paypal-email" class="form-input-booking" placeholder="usuario@ejemplo.com">
+                    </div>
+                    <div class="form-group-booking">
+                        <label for="reserva-paypal-confirm">Confirmar Correo Electronico</label>
+                        <input type="email" id="reserva-paypal-confirm" class="form-input-booking" placeholder="usuario@ejemplo.com">
+                    </div>
+                </div>
+
+                <div id="pane-pay-qr" class="payment-pane" style="display:none; text-align:center;">
+                    <p style="font-size:0.8rem; color:#374151; margin-bottom:0.5rem; line-height:1.4;">
+                        Escanee el codigo QR desde su aplicacion bancaria o billetera movil para transferir el monto referencial:
+                    </p>
+                    <img src="./imagenes%20modificado/QR%20pago.jpeg" 
+                         alt="Codigo QR de Pago" 
+                         class="qr-pago-img"
+                         style="max-width:240px; width:100%; height:auto; display:block; margin:0.6rem auto; border-radius:8px; border:1px solid #d1d5db;"
+                         onerror="this.onerror=null; this.src='imagenes%20modificado/QR%20pago.jpeg';">
+                    <p style="font-size:0.75rem; color:#6b7280; margin-top:0.5rem;">
+                        Al presionar Confirmar Reserva, sus fechas quedaran reservadas y registradas en el sistema.
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top:1.2rem;">
+                <button type="button" class="btn-primary" style="width:100%; padding:0.75rem; font-size:0.88rem; font-weight:700;" onclick="BookingModule.confirmarReserva()">
+                    Confirmar Reserva
+                </button>
+            </div>
+        `;
+
+        this.configurarMascaraTarjeta();
+        this.renderizarCalendario();
+        this.actualizarResumenFechas();
+    },
+
+    configurarMascaraTarjeta() {
+        const numInput = document.getElementById('reserva-card-number');
+        if (numInput) {
+            numInput.addEventListener('input', (e) => {
+                let v = e.target.value.replace(/\D/g, '').slice(0, 16);
+                let partes = v.match(/.{1,4}/g);
+                e.target.value = partes ? partes.join(' ') : v;
+            });
+        }
+        const expInput = document.getElementById('reserva-card-exp');
+        if (expInput) {
+            expInput.addEventListener('input', (e) => {
+                let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+                if (v.length >= 3) {
+                    e.target.value = `${v.slice(0, 2)}/${v.slice(2)}`;
+                } else {
+                    e.target.value = v;
+                }
+            });
+        }
+    },
+
+    cambiarMes(delta) {
+        this.mes += delta;
+        if (this.mes < 0) {
+            this.mes = 11;
+            this.anio--;
+        } else if (this.mes > 11) {
+            this.mes = 0;
+            this.anio++;
+        }
+        this.renderizarCalendario();
+    },
+
+    renderizarCalendario() {
+        const titleEl = document.getElementById('reserva-calendar-title');
+        const gridEl = document.getElementById('reserva-calendar-grid');
+        if (!gridEl) return;
+
+        const mesesNombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        if (titleEl) {
+            titleEl.innerText = `${mesesNombres[this.mes]} ${this.anio}`;
+        }
+
+        const diasSemana = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
+        let html = diasSemana.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+
+        const totalDiasMes = new Date(this.anio, this.mes + 1, 0).getDate();
+        const primerDiaSemana = new Date(this.anio, this.mes, 1).getDay();
+
+        for (let i = 0; i < primerDiaSemana; i++) {
+            html += `<div class="calendar-day-cell empty"></div>`;
+        }
+
+        const hoy = new Date();
+        const hoyY = hoy.getFullYear();
+        const hoyM = String(hoy.getMonth() + 1).padStart(2, '0');
+        const hoyD = String(hoy.getDate()).padStart(2, '0');
+        const hoyStr = `${hoyY}-${hoyM}-${hoyD}`;
+
+        for (let d = 1; d <= totalDiasMes; d++) {
+            const mStr = String(this.mes + 1).padStart(2, '0');
+            const dStr = String(d).padStart(2, '0');
+            const fechaStr = `${this.anio}-${mStr}-${dStr}`;
+
+            const esPasada = fechaStr < hoyStr;
+            const esOcupada = this.fechasOcupadasSet.has(fechaStr);
+            const esInicio = this.fechaInicio === fechaStr;
+            const esFin = this.fechaFin === fechaStr;
+            const enRango = this.fechaInicio && this.fechaFin && fechaStr > this.fechaInicio && fechaStr < this.fechaFin;
+
+            let clases = 'calendar-day-cell';
+            let onclick = '';
+
+            if (esPasada) {
+                clases += ' past';
+            } else if (esOcupada) {
+                clases += ' occupied';
+            } else {
+                clases += ' available';
+                if (esInicio) clases += ' selected-start';
+                if (esFin) clases += ' selected-end';
+                if (enRango) clases += ' selected-range';
+                onclick = `onclick="BookingModule.seleccionarFecha('${fechaStr}')"`;
+            }
+
+            html += `<div class="${clases}" ${onclick} title="${esOcupada ? 'Ocupado / No disponible' : (esPasada ? 'Fecha Pasada' : fechaStr)}">${d}</div>`;
+        }
+
+        gridEl.innerHTML = html;
+    },
+
+    seleccionarFecha(fechaStr) {
+        if (!this.fechaInicio || (this.fechaInicio && this.fechaFin)) {
+            this.fechaInicio = fechaStr;
+            this.fechaFin = null;
+        } else {
+            if (fechaStr < this.fechaInicio) {
+                this.fechaInicio = fechaStr;
+            } else if (fechaStr === this.fechaInicio) {
+                this.fechaFin = fechaStr;
+            } else {
+                // Validar que en todo el rango [fechaInicio, fechaStr] no exista ninguna fecha ocupada
+                let actual = new Date(this.fechaInicio);
+                const fin = new Date(fechaStr);
+                let hayConflicto = false;
+
+                while (actual <= fin) {
+                    const y = actual.getFullYear();
+                    const m = String(actual.getMonth() + 1).padStart(2, '0');
+                    const d = String(actual.getDate()).padStart(2, '0');
+                    const str = `${y}-${m}-${d}`;
+                    if (this.fechasOcupadasSet.has(str)) {
+                        hayConflicto = true;
+                        break;
+                    }
+                    actual.setDate(actual.getDate() + 1);
+                }
+
+                if (hayConflicto) {
+                    alert('El rango elegido contiene fechas ocupadas. Por favor seleccione un rango continuo de fechas disponibles.');
+                    return;
+                }
+                this.fechaFin = fechaStr;
+            }
+        }
+
+        this.renderizarCalendario();
+        this.actualizarResumenFechas();
+    },
+
+    actualizarResumenFechas() {
+        const fechasEl = document.getElementById('reserva-fechas-txt');
+        const montoEl = document.getElementById('reserva-monto-txt');
+        if (!fechasEl || !montoEl) return;
+
+        const personas = parseInt(document.getElementById('reserva-vis-personas')?.value) || 1;
+
+        if (this.fechaInicio && this.fechaFin) {
+            const dt1 = new Date(this.fechaInicio);
+            const dt2 = new Date(this.fechaFin);
+            const diffTime = dt2.getTime() - dt1.getTime();
+            const noches = Math.max(1, Math.round(diffTime / (1000 * 3600 * 24)));
+
+            const match = (this.servicioActual.precios || this.servicioActual.precio || '').match(/(\d+)\s*Bs/);
+            const precioBase = match ? parseInt(match[1]) : 80;
+            const total = precioBase * noches;
+
+            fechasEl.innerHTML = `<strong>Llegada:</strong> ${this.fechaInicio} · <strong>Salida:</strong> ${this.fechaFin} (${noches} noche(s))`;
+            montoEl.innerHTML = `Monto total: <span style="color:#d35400;">${total} Bs</span>`;
+        } else if (this.fechaInicio) {
+            fechasEl.innerHTML = `<strong>Llegada seleccionada:</strong> ${this.fechaInicio}. Haga clic en el calendario para elegir la fecha de salida.`;
+            montoEl.innerHTML = '';
+        } else {
+            fechasEl.innerHTML = 'Seleccione las fechas de llegada y salida en el calendario superior.';
+            montoEl.innerHTML = '';
+        }
+    },
+
+    cambiarMetodoPago(metodo) {
+        this.metodoPago = metodo;
+        ['visa', 'paypal', 'qr'].forEach(m => {
+            const tab = document.getElementById(`tab-pay-${m}`);
+            const pane = document.getElementById(`pane-pay-${m}`);
+            if (tab) tab.classList.toggle('active', m === metodo);
+            if (pane) pane.style.display = (m === metodo) ? 'block' : 'none';
+        });
+    },
+
+    async confirmarReserva() {
+        if (!this.fechaInicio || !this.fechaFin) {
+            alert('Por favor seleccione las fechas de llegada y salida en el calendario.');
+            return;
+        }
+
+        const nombre = document.getElementById('reserva-vis-nombre')?.value.trim();
+        if (!nombre) {
+            alert('Por favor ingrese su nombre completo.');
+            return;
+        }
+
+        const contacto = document.getElementById('reserva-vis-contacto')?.value.trim();
+        if (!contacto) {
+            alert('Por favor ingrese un correo o telefono de contacto.');
+            return;
+        }
+
+        const personas = parseInt(document.getElementById('reserva-vis-personas')?.value) || 1;
+
+        // Validaciones según el método de pago
+        if (this.metodoPago === 'visa') {
+            const cardNum = document.getElementById('reserva-card-number')?.value.replace(/\s/g, '');
+            const cardName = document.getElementById('reserva-card-name')?.value.trim();
+            const cardExp = document.getElementById('reserva-card-exp')?.value.trim();
+            const cardCvv = document.getElementById('reserva-card-cvv')?.value.trim();
+
+            if (!cardNum || cardNum.length < 15) {
+                alert('Por favor ingrese un numero de tarjeta valido.');
+                return;
+            }
+            if (!cardName) {
+                alert('Por favor ingrese el nombre del titular de la tarjeta.');
+                return;
+            }
+            if (!cardExp || cardExp.length < 5) {
+                alert('Por favor ingrese la fecha de vencimiento (MM/AA).');
+                return;
+            }
+            if (!cardCvv || cardCvv.length < 3) {
+                alert('Por favor ingrese el codigo de seguridad (CVV).');
+                return;
+            }
+        } else if (this.metodoPago === 'paypal') {
+            const ppEmail = document.getElementById('reserva-paypal-email')?.value.trim();
+            const ppConf = document.getElementById('reserva-paypal-confirm')?.value.trim();
+            if (!ppEmail || !ppConf || ppEmail !== ppConf || !ppEmail.includes('@')) {
+                alert('Por favor ingrese y confirme un correo electronico valido de PayPal.');
+                return;
+            }
+        }
+
+        // Calcular noches y monto final
+        const dt1 = new Date(this.fechaInicio);
+        const dt2 = new Date(this.fechaFin);
+        const noches = Math.max(1, Math.round((dt2.getTime() - dt1.getTime()) / (1000 * 3600 * 24)));
+        const match = (this.servicioActual.precios || this.servicioActual.precio || '').match(/(\d+)\s*Bs/);
+        const precioBase = match ? parseInt(match[1]) : 80;
+        const totalBs = `${precioBase * noches} Bs`;
+
+        let metodoDesc = '';
+        if (this.metodoPago === 'visa') {
+            metodoDesc = `Tarjeta Visa (${this.tipoVisa === 'credito' ? 'Credito' : 'Debito'})`;
+        } else if (this.metodoPago === 'paypal') {
+            metodoDesc = 'PayPal';
+        } else {
+            metodoDesc = 'Pago QR';
+        }
+
+        const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+        if (!client) {
+            alert('No se pudo establecer conexion con la base de datos en Supabase.');
+            return;
+        }
+
+        const payload = {
+            servicio_id: String(this.servicioActual.id),
+            servicio_titulo: this.servicioActual.nombre,
+            cliente_nombre: nombre,
+            cliente_contacto: contacto,
+            cantidad_personas: personas,
+            fecha_inicio: this.fechaInicio,
+            fecha_fin: this.fechaFin,
+            metodo_pago: metodoDesc,
+            monto_total: totalBs,
+            tipo_registro: 'reserva',
+            estado: 'confirmada'
+        };
+
+        try {
+            const { data, error } = await client.from('reservas').insert([payload]).select();
+            if (error) {
+                console.error('[Supabase INSERT Reservas Error]:', error);
+                alert(`Error al registrar la reserva en Supabase: ${error.message}`);
+                return;
+            }
+
+            const reservaId = (data && data[0] && data[0].id) ? data[0].id : Math.floor(1000 + Math.random() * 9000);
+
+            // Recargar disponibilidad en la aplicación
+            await cargarReservasDesdeSupabase();
+            renderizarServicios();
+
+            this.mostrarComprobante({
+                reservaId: reservaId,
+                servicioNombre: this.servicioActual.nombre,
+                comunidad: this.servicioActual.comunidad,
+                clienteNombre: nombre,
+                clienteContacto: contacto,
+                personas: personas,
+                fechaInicio: this.fechaInicio,
+                fechaFin: this.fechaFin,
+                noches: noches,
+                metodoPago: metodoDesc,
+                montoTotal: totalBs
+            });
+        } catch (ex) {
+            console.error('[Supabase INSERT Reservas Excepcion]:', ex);
+            alert('Ocurrio un error inesperado al procesar la reserva.');
+        }
+    },
+
+    mostrarComprobante(c) {
+        const container = document.getElementById('reserva-form-body');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="receipt-container">
+                <div class="receipt-header">
+                    <h4 class="receipt-title">Comprobante de Reserva</h4>
+                    <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Parque Nacional y ANMI Cotapata · Sistema Oficial de Ecoturismo</div>
+                </div>
+                <div class="receipt-row">
+                    <span>Codigo de Registro:</span>
+                    <strong>#REC-${c.reservaId}</strong>
+                </div>
+                <div class="receipt-row">
+                    <span>Alojamiento:</span>
+                    <strong>${c.servicioNombre}</strong>
+                </div>
+                <div class="receipt-row">
+                    <span>Comunidad Anfitriona:</span>
+                    <span>${c.comunidad}</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Titular de la Reserva:</span>
+                    <strong>${c.clienteNombre}</strong>
+                </div>
+                <div class="receipt-row">
+                    <span>Contacto:</span>
+                    <span>${c.clienteContacto}</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Huespedes:</span>
+                    <span>${c.personas} persona(s)</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Fechas Reservadas:</span>
+                    <span>${c.fechaInicio} al ${c.fechaFin} (${c.noches} noche(s))</span>
+                </div>
+                <div class="receipt-row">
+                    <span>Metodo de Pago:</span>
+                    <span>${c.metodoPago}</span>
+                </div>
+                <div class="receipt-row" style="margin-top:0.4rem; padding-top:0.4rem; border-top:1.5px solid #e2e8f0; font-size:0.92rem;">
+                    <span>Monto Total:</span>
+                    <strong style="color:var(--primary); font-size:1rem;">${c.montoTotal}</strong>
+                </div>
+                <div class="receipt-row" style="margin-top:0.2rem;">
+                    <span>Estado del Registro:</span>
+                    <span class="receipt-status-confirmed">Confirmada</span>
+                </div>
+                <div style="margin-top:1.3rem;">
+                    <button type="button" class="btn-primary" style="width:100%; padding:0.7rem; font-weight:700;" onclick="cerrarModalReservaAlojamiento()">
+                        Cerrar y Volver al Catalogo
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+};
+
+window.BookingModule = BookingModule;
+window.abrirModalReservaAlojamiento = (id) => BookingModule.abrirModal(id);
+window.cerrarModalReservaAlojamiento = () => BookingModule.cerrarModal();
+
+/**
+ * Gestión de disponibilidad para el anfitrión (Rol Residente / Vendedor).
+ */
+window.abrirModalGestionDisponibilidad = async function(servicioId) {
+    const list = (AppState.servicios && AppState.servicios.length > 0) ? AppState.servicios : DATASET_SERVICIOS_DEFAULT;
+    const item = list.find(s => String(s.id) === String(servicioId)) || DATASET_SERVICIOS_DEFAULT.find(s => String(s.id) === String(servicioId));
+    if (!item) return;
+
+    const modal = document.getElementById('modal-gestionar-disponibilidad');
+    const titleEl = document.getElementById('disp-modal-titulo');
+    const subEl = document.getElementById('disp-modal-subtitulo');
+    const bodyEl = document.getElementById('disp-modal-body');
+
+    if (titleEl) titleEl.innerText = `Gestion de Disponibilidad: ${item.nombre}`;
+    if (subEl) subEl.innerText = `Comunidad ${item.comunidad} · Panel de Control del Anfitrion`;
+
+    const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+    let reservas = [];
+    if (client) {
+        try {
+            const { data } = await client
+                .from('reservas')
+                .select('*')
+                .eq('servicio_id', String(servicioId))
+                .eq('estado', 'confirmada')
+                .order('fecha_inicio', { ascending: true });
+            reservas = data || [];
+        } catch (e) {
+            console.error('[Gestion Disponibilidad] Error al obtener reservas:', e);
+        }
+    }
+
+    const dispActual = (item.estado_disponibilidad || 'Disponible').trim();
+    const esLleno = dispActual.toLowerCase().includes('lleno');
+
+    let filasReservas = '';
+    if (reservas.length === 0) {
+        filasReservas = `
+            <tr>
+                <td colspan="4" style="text-align:center; padding:1.2rem; color:#6b7280; font-style:italic;">
+                    No existen reservas ni bloqueos activos para este alojamiento.
+                </td>
+            </tr>
+        `;
+    } else {
+        reservas.forEach(r => {
+            const esBloqueo = r.tipo_registro === 'bloqueo_vendedor';
+            const tipoBadge = esBloqueo
+                ? '<span style="background:#fee2e2; color:#991b1b; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700; font-size:0.7rem;">Bloqueo Manual</span>'
+                : '<span style="background:#dcfce7; color:#166534; padding:0.15rem 0.45rem; border-radius:4px; font-weight:700; font-size:0.7rem;">Reserva Turista</span>';
+
+            const detalle = esBloqueo ? 'Bloqueo establecido por anfitrión' : `${r.cliente_nombre || 'Visitante'} (${r.cliente_contacto || 'Sin contacto'})`;
+
+            filasReservas += `
+                <tr>
+                    <td>${tipoBadge}</td>
+                    <td><strong>${r.fecha_inicio}</strong> al <strong>${r.fecha_fin}</strong></td>
+                    <td>${detalle}</td>
+                    <td style="text-align:right;">
+                        <button type="button" class="btn-liberar-fechas" onclick="liberarReservaOcupada(${r.id}, '${servicioId}')">
+                            Liberar fechas
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    if (bodyEl) {
+        bodyEl.innerHTML = `
+            <div class="switcher-disponibilidad-box">
+                <div>
+                    <div style="font-size:0.75rem; color:#6b7280; text-transform:uppercase; font-weight:700;">Estado General del Alojamiento</div>
+                    <div style="margin-top:0.35rem;">
+                        ${esLleno 
+                            ? '<span class="badge-disponibilidad badge-lleno">Lleno / No disponible</span>' 
+                            : '<span class="badge-disponibilidad badge-disponible">Disponible</span>'}
+                    </div>
+                </div>
+                <button type="button" 
+                        class="btn-primary" 
+                        style="font-size:0.82rem; padding:0.45rem 1rem;" 
+                        onclick="conmutarEstadoDisponibilidadServicio('${servicioId}')">
+                    ${esLleno ? 'Marcar como Disponible' : 'Marcar como Lleno'}
+                </button>
+            </div>
+
+            <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:0.9rem; margin-bottom:1.2rem;">
+                <h4 style="font-size:0.88rem; font-weight:700; color:#1f2937; margin:0 0 0.5rem 0;">Bloqueo Manual de Fechas</h4>
+                <p style="font-size:0.76rem; color:#4b5563; margin-bottom:0.6rem;">
+                    Seleccione un rango de fechas en el que su alojamiento no estara disponible (mantenimiento o uso propio).
+                </p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">
+                    <div>
+                        <label style="font-size:0.73rem; color:#4b5563; display:block; margin-bottom:0.2rem;">Fecha Inicio</label>
+                        <input type="date" id="disp-bloqueo-inicio" class="form-input-booking">
+                    </div>
+                    <div>
+                        <label style="font-size:0.73rem; color:#4b5563; display:block; margin-bottom:0.2rem;">Fecha Fin</label>
+                        <input type="date" id="disp-bloqueo-fin" class="form-input-booking">
+                    </div>
+                </div>
+                <button type="button" class="btn-primary" style="margin-top:0.75rem; font-size:0.8rem; padding:0.48rem 1rem; width:100%;" onclick="guardarBloqueoManualFechas('${servicioId}')">
+                    Aplicar Bloqueo de Fechas
+                </button>
+            </div>
+
+            <div>
+                <h4 style="font-size:0.88rem; font-weight:700; color:#1f2937; margin:0 0 0.4rem 0;">Fechas Reservadas y Bloqueos Activos</h4>
+                <div style="max-height:220px; overflow-y:auto; border:1px solid #e5e7eb; border-radius:6px;">
+                    <table class="gestionar-disp-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Fechas</th>
+                                <th>Detalle</th>
+                                <th style="text-align:right;">Accion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filasReservas}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    if (modal) {
+        modal.classList.remove('active');
+        void modal.offsetWidth;
+        modal.classList.add('active');
+    }
+};
+
+window.cerrarModalGestionDisponibilidad = function() {
+    const modal = document.getElementById('modal-gestionar-disponibilidad');
+    if (modal) modal.classList.remove('active');
+};
+
+window.conmutarEstadoDisponibilidadServicio = async function(servicioId) {
+    const list = (AppState.servicios && AppState.servicios.length > 0) ? AppState.servicios : DATASET_SERVICIOS_DEFAULT;
+    const item = list.find(s => String(s.id) === String(servicioId));
+    if (!item) return;
+
+    const actual = (item.estado_disponibilidad || 'Disponible').trim();
+    const nuevoEstado = actual === 'Lleno' ? 'Disponible' : 'Lleno';
+
+    const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+    if (client) {
+        try {
+            await client.from('servicios').update({ estado_disponibilidad: nuevoEstado }).eq('id', servicioId);
+        } catch (e) {
+            console.error('[Conmutar Disponibilidad Error]:', e);
+        }
+    }
+
+    item.estado_disponibilidad = nuevoEstado;
+    await cargarServiciosDesdeSupabase();
+    abrirModalGestionDisponibilidad(servicioId);
+};
+
+window.guardarBloqueoManualFechas = async function(servicioId) {
+    const fIni = document.getElementById('disp-bloqueo-inicio')?.value;
+    const fFin = document.getElementById('disp-bloqueo-fin')?.value;
+
+    if (!fIni || !fFin) {
+        alert('Por favor ingrese la fecha de inicio y la fecha de fin para el bloqueo.');
+        return;
+    }
+    if (fFin < fIni) {
+        alert('La fecha de fin no puede ser anterior a la fecha de inicio.');
+        return;
+    }
+
+    const list = (AppState.servicios && AppState.servicios.length > 0) ? AppState.servicios : DATASET_SERVICIOS_DEFAULT;
+    const item = list.find(s => String(s.id) === String(servicioId));
+
+    const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+    if (!client) {
+        alert('No se pudo conectar con Supabase.');
+        return;
+    }
+
+    const payload = {
+        servicio_id: String(servicioId),
+        servicio_titulo: item ? item.nombre : 'Alojamiento',
+        cliente_nombre: 'Bloqueo manual por propietario',
+        cliente_contacto: 'N/A',
+        cantidad_personas: 0,
+        fecha_inicio: fIni,
+        fecha_fin: fFin,
+        metodo_pago: 'Bloqueo manual',
+        monto_total: '0 Bs',
+        tipo_registro: 'bloqueo_vendedor',
+        estado: 'confirmada'
+    };
+
+    try {
+        const { error } = await client.from('reservas').insert([payload]);
+        if (error) {
+            alert(`Error al registrar el bloqueo en Supabase: ${error.message}`);
+            return;
+        }
+
+        await cargarReservasDesdeSupabase();
+        renderizarServicios();
+        abrirModalGestionDisponibilidad(servicioId);
+    } catch (e) {
+        console.error('[Guardar Bloqueo Error]:', e);
+        alert('Ocurrio un error al registrar el bloqueo manual.');
+    }
+};
+
+window.liberarReservaOcupada = async function(reservaId, servicioId) {
+    if (!confirm('Desea liberar y desbloquear este rango de fechas?')) return;
+
+    const client = typeof obtenerClienteSupabase === 'function' ? obtenerClienteSupabase() : null;
+    if (client) {
+        try {
+            const { error } = await client.from('reservas').update({ estado: 'cancelada' }).eq('id', reservaId);
+            if (error) {
+                alert(`Error al liberar fechas: ${error.message}`);
+                return;
+            }
+        } catch (e) {
+            console.error('[Liberar Fechas Error]:', e);
+            alert('Ocurrio un error al liberar las fechas en la base de datos.');
+            return;
+        }
+    }
+
+    await cargarReservasDesdeSupabase();
+    renderizarServicios();
+    abrirModalGestionDisponibilidad(servicioId);
+};
 
 // ==============================================================================
 // INICIALIZACIÓN AL CARGAR LA PÁGINA
@@ -2908,12 +3856,32 @@ function abrirModalAlojamientoPorId(id) {
         badgeEl.className = 'meta-chip flora';
     }
     if (specsBox) {
+        const disp = (item.estado_disponibilidad || 'Disponible').trim();
+        const isLleno = disp.toLowerCase().includes('lleno');
+        const badgeDisp = isLleno
+            ? `<span class="badge-disponibilidad badge-lleno">Lleno / No disponible</span>`
+            : `<span class="badge-disponibilidad badge-disponible">Disponible</span>`;
+        const bloqueFechas = typeof obtenerHtmlFechasOcupadasCompacto === 'function' ? obtenerHtmlFechasOcupadasCompacto(item.id) : '';
+        const btnReservar = isLleno
+            ? `<button type="button" class="btn-reservar-alojamiento btn-reservar-disabled" disabled style="margin-top:0.75rem;">Lleno / No disponible</button>`
+            : `<button type="button" class="btn-reservar-alojamiento" onclick="cerrarModal(); abrirModalReservaAlojamiento('${item.id}')" style="margin-top:0.75rem;">Reservar</button>`;
+        const esPropietario = typeof esPropietarioDelServicio === 'function' && esPropietarioDelServicio(item);
+        const btnGestionar = esPropietario
+            ? `<button type="button" class="btn-gestionar-disp-card" onclick="cerrarModal(); abrirModalGestionDisponibilidad('${item.id}')" style="margin-top:0.4rem;">Gestionar disponibilidad</button>`
+            : '';
+
         specsBox.style.display = 'block';
         specsBox.innerHTML = `
             <div style="background:#f4f8f5; border-left:3.5px solid var(--accent); padding:0.6rem 0.8rem; border-radius:0 8px 8px 0; font-size:0.84rem; display:flex; flex-direction:column; gap:0.4rem; color:#223628;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    ${badgeDisp}
+                </div>
                 <div style="color:var(--primary); font-weight:700;">💳 <strong>Tarifas por fechas/noches (Bolivianos):</strong><br><span style="color:#d35400; font-size:0.95rem;">${item.precios}</span></div>
                 <div>⏰ <strong>Horario de atención:</strong> ${item.horarioAtencion}</div>
                 <div>🤝 <strong>Turismo Comunitario:</strong> Administrado por comunarios locales</div>
+                ${bloqueFechas}
+                ${btnReservar}
+                ${btnGestionar}
             </div>
         `;
     }
@@ -3095,6 +4063,21 @@ function crearCardAlojamientoHtml(item) {
     const isCustom = item.imagen && (item.imagen.startsWith('data:') || item.imagen.startsWith('http'));
     const imgEnc = isCustom ? item.imagen : encodeURI(`assets/img/${item.imagen}`);
     const imgFallback = isCustom ? item.imagen : encodeURI(`imagen alojamiento/${item.imagen.replace('alojamiento/', '')}`);
+    const disp = (item.estado_disponibilidad || 'Disponible').trim();
+    const isLleno = disp.toLowerCase().includes('lleno');
+    const badgeDisp = isLleno
+        ? `<span class="badge-disponibilidad badge-lleno">Lleno / No disponible</span>`
+        : `<span class="badge-disponibilidad badge-disponible">Disponible</span>`;
+    const bloqueFechas = typeof obtenerHtmlFechasOcupadasCompacto === 'function' ? obtenerHtmlFechasOcupadasCompacto(item.id) : '';
+    const btnReservar = isLleno
+        ? `<button type="button" class="btn-reservar-alojamiento btn-reservar-disabled" disabled>Lleno / No disponible</button>`
+        : `<button type="button" class="btn-reservar-alojamiento" onclick="event.stopPropagation(); abrirModalReservaAlojamiento('${item.id}')">Reservar</button>`;
+    
+    const esPropietario = typeof esPropietarioDelServicio === 'function' && esPropietarioDelServicio(item);
+    const btnGestionar = esPropietario
+        ? `<button type="button" class="btn-gestionar-disp-card" onclick="event.stopPropagation(); abrirModalGestionDisponibilidad('${item.id}')">Gestionar disponibilidad</button>`
+        : '';
+
     return `
         <div class="card-item alojamiento-card" onclick="manejarClickCard(this, () => abrirModalAlojamientoPorId(${item.id}))" tabindex="0">
             <div class="card-media">
@@ -3104,6 +4087,9 @@ function crearCardAlojamientoHtml(item) {
                      onerror="this.onerror=null; ${isCustom ? '' : `this.src='${imgFallback}';`}">
             </div>
             <div class="card-content">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.45rem;">
+                    ${badgeDisp}
+                </div>
                 <h3 class="card-title">${item.nombre}</h3>
                 <p class="card-subtitle">📍 ${item.comunidad} · ${item.ubicacionReferencial}</p>
                 <p class="card-text">${item.descripcion}</p>
@@ -3111,9 +4097,14 @@ function crearCardAlojamientoHtml(item) {
                     <span class="servicio-precios-label">💳 Tarifas de Alojamiento por fechas / noches:</span>
                     <div class="servicio-precios-val"><strong>${item.precios}</strong></div>
                 </div>
+                ${bloqueFechas}
                 <div class="card-meta">
                     <span class="meta-chip">⏰ ${item.horarioAtencion}</span>
                     <span class="meta-chip">✓ Turismo Comunitario</span>
+                </div>
+                <div style="margin-top:0.6rem;">
+                    ${btnReservar}
+                    ${btnGestionar}
                 </div>
             </div>
         </div>
@@ -3534,7 +4525,8 @@ function iniciarMapaSiEsNecesario() {
     const mapContainer = document.getElementById('leaflet-map');
     if (!mapContainer) return;
 
-    const cotapataCenter = [-16.20, -67.85];
+    // Punto 4: Ajuste de encuadre y desplazamiento de pines hacia arriba para evitar zona gris inferior
+    const cotapataCenter = [-16.175, -67.830];
     const map = L.map('leaflet-map', {
         center: cotapataCenter,
         zoom: 13,
@@ -3567,46 +4559,46 @@ function iniciarMapaSiEsNecesario() {
     };
     gmapsControl.addTo(map);
 
-    // Marcadores con puntos clave, incluyendo Pacollo y Sandillani claramente identificados
+    // Marcadores con puntos clave desplazados hacia el norte cartográfico para óptimo centrado en el mapa
     const puntos = [
         {
-            lat: -16.20,
-            lng: -67.85,
+            lat: -16.180,
+            lng: -67.845,
             titulo: 'Camino Precolombino El Choro',
             tipo: 'atractivo',
             desc: 'Histórica calzada prehispánica incaica y preincaica de trekking.'
         },
         {
-            lat: -16.185,
-            lng: -67.83,
+            lat: -16.170,
+            lng: -67.828,
             titulo: 'Bosque Nublado de los Yungas',
             tipo: 'atractivo',
             desc: 'Ecosistema de condensación permanente con gran biodiversidad de flora y fauna nativa.'
         },
         {
-            lat: -16.162,
+            lat: -16.145,
             lng: -67.802,
             titulo: 'Chairo (Final de Senda)',
             tipo: 'comunidad',
             desc: 'Comunidad anfitriona al final de la ruta El Choro. Alojamientos, comedor y guías locales.'
         },
         {
-            lat: -16.182,
-            lng: -67.842,
+            lat: -16.165,
+            lng: -67.838,
             titulo: 'Sandillani',
             tipo: 'comunidad',
             desc: 'Comunidad anfitriona en el bosque nublado. Albergues ecológicos, zonas de camping y jardines de orquídeas.'
         },
         {
-            lat: -16.172,
+            lat: -16.155,
             lng: -67.818,
             titulo: 'Pacollo',
             tipo: 'comunidad',
             desc: 'Comunidad productora de café orgánico y cítricos. Alojamientos comunitarios y vistas al cañón de Huarinilla.'
         },
         {
-            lat: -16.225,
-            lng: -67.865,
+            lat: -16.195,
+            lng: -67.855,
             titulo: 'Puesto Guardaparques SERNAP',
             tipo: 'control',
             desc: 'Registro obligatorio de ingreso y control de visitantes del Área Protegida.'

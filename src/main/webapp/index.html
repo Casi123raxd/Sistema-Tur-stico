@@ -786,6 +786,46 @@
     </div>
 
     <!-- ==============================================================================
+         MODAL DE RESERVA Y PASARELA SIMULADA PARA ALOJAMIENTOS (PUNTO 1 - CERO EMOJIS)
+         ============================================================================== -->
+    <div class="modal-backdrop" id="modal-reserva-alojamiento">
+        <div class="modal-sheet booking-modal-sheet">
+            <div class="booking-header">
+                <div>
+                    <h3 class="booking-title" id="reserva-modal-titulo">Reserva de Alojamiento</h3>
+                    <div class="booking-subtitle" id="reserva-modal-subtitulo">Comunidad Cotapata</div>
+                </div>
+                <button class="modal-close-btn" style="position:static;" onclick="cerrarModalReservaAlojamiento()" aria-label="Cerrar">×</button>
+            </div>
+
+            <!-- Contenedor dinámico del formulario y calendario de reserva -->
+            <div id="reserva-form-body">
+                <!-- Inyectado por BookingModule.abrirModal() -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================================
+         MODAL DE GESTIÓN DE DISPONIBILIDAD PARA EL VENDEDOR (PUNTO 2 - CERO EMOJIS)
+         ============================================================================== -->
+    <div class="modal-backdrop" id="modal-gestionar-disponibilidad">
+        <div class="modal-sheet booking-modal-sheet" style="max-width:640px;">
+            <div class="booking-header">
+                <div>
+                    <h3 class="booking-title" id="disp-modal-titulo">Gestión de Disponibilidad</h3>
+                    <div class="booking-subtitle" id="disp-modal-subtitulo">Control de ocupación y bloqueos de fechas</div>
+                </div>
+                <button class="modal-close-btn" style="position:static;" onclick="cerrarModalGestionDisponibilidad()" aria-label="Cerrar">×</button>
+            </div>
+
+            <!-- Contenido dinámico de disponibilidad y bloqueos -->
+            <div id="disp-modal-body">
+                <!-- Inyectado por abrirModalGestionDisponibilidad() -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================================
          FOOTER INSTITUCIONAL Y ACADÉMICO
          ============================================================================== -->
     <footer class="main-footer">
